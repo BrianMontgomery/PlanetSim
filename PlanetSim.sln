@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PlanetSim", "PlanetSim.vcxproj", "{12DA9237-7E44-47AE-C782-F853332C2503}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencies", "{53E47842-3FC8-3998-A828-34EB942B241A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glfw", "vendor\GLFW\glfw.vcxproj", "{9563977C-819A-980D-2A87-7E10169D140F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Dist|x64 = Dist|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{12DA9237-7E44-47AE-C782-F853332C2503}.Debug|x64.ActiveCfg = Debug|x64
+		{12DA9237-7E44-47AE-C782-F853332C2503}.Debug|x64.Build.0 = Debug|x64
+		{12DA9237-7E44-47AE-C782-F853332C2503}.Dist|x64.ActiveCfg = Dist|x64
+		{12DA9237-7E44-47AE-C782-F853332C2503}.Dist|x64.Build.0 = Dist|x64
+		{12DA9237-7E44-47AE-C782-F853332C2503}.Release|x64.ActiveCfg = Release|x64
+		{12DA9237-7E44-47AE-C782-F853332C2503}.Release|x64.Build.0 = Release|x64
+		{9563977C-819A-980D-2A87-7E10169D140F}.Debug|x64.ActiveCfg = Debug|x64
+		{9563977C-819A-980D-2A87-7E10169D140F}.Debug|x64.Build.0 = Debug|x64
+		{9563977C-819A-980D-2A87-7E10169D140F}.Dist|x64.ActiveCfg = Dist|x64
+		{9563977C-819A-980D-2A87-7E10169D140F}.Dist|x64.Build.0 = Dist|x64
+		{9563977C-819A-980D-2A87-7E10169D140F}.Release|x64.ActiveCfg = Release|x64
+		{9563977C-819A-980D-2A87-7E10169D140F}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9563977C-819A-980D-2A87-7E10169D140F} = {53E47842-3FC8-3998-A828-34EB942B241A}
+	EndGlobalSection
+EndGlobal
