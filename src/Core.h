@@ -7,6 +7,9 @@
 
 #ifdef PSIM_DEBUG
 	#define PSIM_ENABLE_ASSERTS
+	const bool enableValidationLayers = true;
+#else
+	const bool enableValidationLayers = false;
 #endif
 
 #ifdef PSIM_ENABLE_ASSERTS

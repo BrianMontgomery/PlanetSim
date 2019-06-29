@@ -140,6 +140,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Layers\Layer.h" />
     <ClInclude Include="src\Application\Application.h" />
     <ClInclude Include="src\Core.h" />
     <ClInclude Include="src\Logging\Log.h" />
@@ -508,14 +509,17 @@
     <ClInclude Include="vendor\glm\glm\vec3.hpp" />
     <ClInclude Include="vendor\glm\glm\vec4.hpp" />
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp" />
+    <ClInclude Include="src\Vk\Vk.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Layers\Layer.cpp" />
     <ClCompile Include="src\Application\Application.cpp" />
     <ClCompile Include="src\Logging\Log.cpp" />
     <ClCompile Include="src\PSIMPCH.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Vk\Vk.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="vendor\GLFW\glfw.vcxproj">

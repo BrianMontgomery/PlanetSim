@@ -1,8 +1,6 @@
 #include "PSIMPCH.h"
 
-#include <functional>
 #include "Application/Application.h"
-#include "Logging/Log.h"
 
 
 int main() {
