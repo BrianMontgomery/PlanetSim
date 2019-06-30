@@ -12,7 +12,7 @@ void Application::run()
 
 	//init funcs
 	initWindow();
-	initVulkan();
+	vk.initVulkan();
 	mainLoop();
 	cleanUp();
 }
@@ -27,12 +27,6 @@ void Application::initWindow()
 
 	window = glfwCreateWindow(WIDTH, HEIGHT, "Planet Sim", nullptr, nullptr);
 	PSIM_ASSERT(window, "Window failed to create!\n");
-}
-
-void Application::initVulkan()
-{
-	vk.createInstance();
-	vk.setupDebugMessenger();
 }
 
 void Application::mainLoop()

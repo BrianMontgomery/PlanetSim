@@ -14,7 +14,6 @@ public:
 
 private:
 	void initWindow();
-	void initVulkan();
 	void mainLoop();
 	void cleanUp();
 

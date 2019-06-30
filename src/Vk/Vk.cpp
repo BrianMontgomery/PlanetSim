@@ -76,6 +76,13 @@ void Vk::setupDebugMessenger() {
 	}
 }
 
+void Vk::initVulkan()
+{
+	createInstance();
+	setupDebugMessenger();
+	pickPhysicalDevice();
+}
+
 void Vk::createInstance()
 {
 	//enable validation layers in debug
@@ -123,6 +130,35 @@ void Vk::createInstance()
 	if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
 		PSIM_ERROR("Failed to create vk instance!");
 	}
+}
+
+void Vk::pickPhysicalDevice() {
+	uint32_t deviceCount = 0;
+	vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+
+	if (deviceCount == 0) {
+		PSIM_CORE_ERROR("Failed to find GPUs with Vulkan support!");
+	}
+
+	std::vector<VkPhysicalDevice> devices(deviceCount);
+	vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+
+	for (const auto& device : devices) {
+		if (isDeviceSuitable(device)) {
+			physicalDevice = device;
+			break;
+		}
+	}
+
+	if (physicalDevice == VK_NULL_HANDLE) {
+		PSIM_CORE_ERROR("failed to find a suitable GPU!");
+	}
+}
+
+bool Vk::isDeviceSuitable(VkPhysicalDevice device) {
+	QueueFamilyIndices indices = findQueueFamilies(device);
+
+    return indices.isComplete();
 }
 
 std::vector<const char*> Vk::getRequiredExtensions() {
@@ -186,4 +222,29 @@ void Vk::compareExtensions(int reqExtensionCount, const char** reqExtensions, st
 	//success message
 	PSIM_INFO("All required GLFW extensions found!");
 
+}
+
+	Vk::QueueFamilyIndices Vk::findQueueFamilies(VkPhysicalDevice device) {
+	QueueFamilyIndices indices;
+
+	uint32_t queueFamilyCount = 0;
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+	std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+	int i = 0;
+	for (const auto& queueFamily : queueFamilies) {
+		if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+			indices.graphicsFamily = i;
+		}
+
+		if (indices.isComplete()) {
+			break;
+		}
+
+		i++;
+	}
+
+	return indices;
 }
