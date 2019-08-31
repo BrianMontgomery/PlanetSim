@@ -12,7 +12,7 @@ void Application::run()
 
 	//init funcs
 	initWindow();
-	vk.initVulkan();
+	initVulkan();
 	mainLoop();
 	cleanUp();
 }
@@ -29,6 +29,11 @@ void Application::initWindow()
 	PSIM_ASSERT(window, "Window failed to create!\n");
 }
 
+void Application::initVulkan() 
+{
+
+}
+
 void Application::mainLoop()
 {
 	while (!glfwWindowShouldClose(window)) {
@@ -38,8 +43,6 @@ void Application::mainLoop()
 
 void Application::cleanUp() 
 {
-	vk.vkCleanUp();
-
 	glfwDestroyWindow(window);
 
 	glfwTerminate();
