@@ -1,5 +1,6 @@
 #pragma once
 #define GLFW_INCLUDE_VULKAN
+#include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
 
 const int WIDTH = 800;
@@ -16,6 +17,10 @@ private:
 	void mainLoop();
 	void cleanUp();
 
+	void createInstance();
+	std::vector<const char*> getInstanceExtensions();
+
 	GLFWwindow* window;
+	VkInstance instance;
 };
 
