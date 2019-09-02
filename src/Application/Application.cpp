@@ -23,14 +23,14 @@ void Application::run()
 //--------------------------------------------------------------------------------------------------------------------------------
 void Application::initWindow()
 {
-	PSIM_CORE_INFO("Initializing GLFW and Window!");
+	PSIM_CORE_INFO("Initializing GLFW and Window");
 	glfwInit();
 
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 	window = glfwCreateWindow(WIDTH, HEIGHT, "Planet Sim", nullptr, nullptr);
-	PSIM_ASSERT(window, "Window failed to create!");
+	PSIM_ASSERT(window, "Window failed to create");
 }
 
 void Application::initVulkan() 
@@ -47,23 +47,26 @@ void Application::mainLoop()
 		glfwPollEvents();
 	}
 
-	PSIM_CORE_WARN("Shutdown Initiated!");
+	PSIM_CORE_WARN("Shutdown Initiated");
 }
 
 void Application::cleanUp() 
 {
+	vkDestroyDevice(device, nullptr);
+	PSIM_CORE_INFO("Device deleted");
+
 	if (enableValidationLayers) {
 		DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
-		PSIM_CORE_INFO("Debug Messenger deleted!");
+		PSIM_CORE_INFO("Debug Messenger deleted");
 	}
 
 	vkDestroyInstance(instance, nullptr);
-	PSIM_CORE_INFO("Vulkan instance deleted!");
+	PSIM_CORE_INFO("Vulkan instance deleted");
 
 	glfwDestroyWindow(window);
 
 	glfwTerminate();
-	PSIM_CORE_INFO("Glfw terminated!");
+	PSIM_CORE_INFO("Glfw terminated");
 
 	Log::shutdown();
 }
@@ -72,7 +75,7 @@ void Application::cleanUp()
 //--------------------------------------------------------------------------------------------------------------------------------
 void Application::createInstance() 
 {
-	PSIM_CORE_INFO("Initializing Vulkan instance and extensions!");
+	PSIM_CORE_INFO("Initializing Vulkan instance and extensions");
 	//creating info for vk instances
 	VkApplicationInfo appInfo = {};
 	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -111,8 +114,8 @@ void Application::createInstance()
 	}
 
 	//creating the instance
-	PSIM_ASSERT((vkCreateInstance(&createInfo, nullptr, &instance) == VK_SUCCESS), "Failed to create Vulkan instance!");
-	PSIM_CORE_INFO("Vulkan Instance Created!");
+	PSIM_ASSERT((vkCreateInstance(&createInfo, nullptr, &instance) == VK_SUCCESS), "Failed to create Vulkan instance");
+	PSIM_CORE_INFO("Vulkan Instance Created");
 }
 
 std::vector<const char*> Application::getInstanceExtensions()
@@ -149,27 +152,17 @@ std::vector<const char*> Application::getInstanceExtensions()
 		}
 
 		//error message
-		if (!found) {
-			PSIM_CORE_ERROR("Extension: {0} not found!", reqExtensions[i]);
-			allFound = 0;
-		}
+		PSIM_ASSERT(allFound, "Extension: {0} not found", reqExtensions[i]);
 	}
 
 	//success message
-	if (allFound) {
-		PSIM_CORE_INFO("All required extensions found!");
-	}
+	PSIM_CORE_INFO("All required extensions found");
 
 	return reqExtensions;
 }
 
 std::vector<const char*> Application::getInstanceLayers() 
 {
-	//the list of layers 
-	const std::vector<const char*> validationLayers = {
-	"VK_LAYER_KHRONOS_validation"
-	};
-
 	//available layers
 	uint32_t layerCount = 0;
 	vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -191,16 +184,11 @@ std::vector<const char*> Application::getInstanceLayers()
 		}
 
 		//error message
-		if (!layerFound) {
-			PSIM_CORE_ERROR("Required Layer: {0} not available!", layerName);
-			allFound = 0;
-		}
+		PSIM_ASSERT(layerFound, "Required Layer: {0} not available", layerName);
 	}
 
 	//success message
-	if (allFound) {
-		PSIM_CORE_INFO("All required layers available!");
-	}
+	PSIM_CORE_INFO("All required layers available");
 
 	return validationLayers;
 }
@@ -233,9 +221,7 @@ void Application::setupDebugMessenger()
 	VkDebugUtilsMessengerCreateInfoEXT createInfo;
 	populateDebugMessengerCreateInfo(createInfo);
 
-	if (CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS) {
-		PSIM_CORE_ERROR("Failed to set up debug messenger!");
-	}
+	PSIM_ASSERT((CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) == VK_SUCCESS), "Failed to set up debug messenger")
 }
 
 void Application::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo)
@@ -251,11 +237,11 @@ VkResult Application::CreateDebugUtilsMessengerEXT(VkInstance instance, const Vk
 {
 	auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
 	if (func != nullptr) {
-		PSIM_CORE_INFO("Created debug messenger!");
+		PSIM_CORE_INFO("Created debug messenger");
 		return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
 	}
 	else {
-		PSIM_CORE_ERROR("Debug messenger could not be created!");
+		PSIM_CORE_ERROR("Debug messenger could not be created");
 		return VK_ERROR_EXTENSION_NOT_PRESENT;
 	}
 }
@@ -273,14 +259,12 @@ void Application::DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtil
 
 void Application::pickPhysicalDevice()
 {
-	PSIM_CORE_INFO("Picking GPU!");
+	PSIM_CORE_INFO("Picking GPU");
 	//get devices
 	uint32_t deviceCount = 0;
 	vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
 
-	if (deviceCount == 0) {
-		PSIM_CORE_FATAL("Failed to find GPU's with Vulkan support!");
-	}
+	PSIM_ASSERT(deviceCount != 0, "Failed to find GPU's with Vulkan support");
 
 	std::vector<VkPhysicalDevice> devices(deviceCount);
 	vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
@@ -296,13 +280,9 @@ void Application::pickPhysicalDevice()
 	}
 
 	// Check if the best candidate is suitable at all
-	if (candidates.begin()->first > 0) {
-		physicalDevice = candidates.begin()->second;
-		PSIM_CORE_INFO("GPU selected!");
-	}
-	else {
-		PSIM_CORE_FATAL("Failed to find a suitable GPU!");
-	}
+	PSIM_ASSERT(candidates.begin()->first > 0, "Failed to find a suitable GPU");
+	physicalDevice = candidates.begin()->second;
+	PSIM_CORE_INFO("GPU selected");
 }
 
 bool Application::isDeviceSuitable(VkPhysicalDevice device)
@@ -374,5 +354,34 @@ int Application::rateDevice(VkPhysicalDevice device)
 
 void Application::createLogicalDevice() 
 {
+	QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
+	VkDeviceQueueCreateInfo queueCreateInfo = {};
+	queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+	queueCreateInfo.queueCount = 1;
+	float queuePriority = 1.0f;
+	queueCreateInfo.pQueuePriorities = &queuePriority;
+
+	VkPhysicalDeviceFeatures deviceFeatures = {};
+
+	VkDeviceCreateInfo createInfo = {};
+	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	createInfo.pQueueCreateInfos = &queueCreateInfo;
+	createInfo.queueCreateInfoCount = 1;
+	createInfo.pEnabledFeatures = &deviceFeatures;
+	createInfo.enabledExtensionCount = 0;
+
+	if (enableValidationLayers) {
+		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+		createInfo.ppEnabledLayerNames = validationLayers.data();
+	}
+	else {
+		createInfo.enabledLayerCount = 0;
+	}
+
+	PSIM_ASSERT(vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) == VK_SUCCESS, "Failed to create logical device!")
+	PSIM_CORE_INFO("Created Logical Device");
+
+	vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
 }
