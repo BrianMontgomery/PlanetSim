@@ -5,6 +5,8 @@
 
 #include "Logging/Log.h"
 
+//vulkan entry point
+//--------------------------------------------------------------------------------------------------------------------------------
 void Application::run()
 {
 	//initialize logging (the three day bug...)
@@ -17,6 +19,8 @@ void Application::run()
 	cleanUp();
 }
 
+//Main Logic Funcs
+//--------------------------------------------------------------------------------------------------------------------------------
 void Application::initWindow()
 {
 	PSIM_CORE_INFO("Initializing GLFW and Window!");
@@ -32,6 +36,9 @@ void Application::initWindow()
 void Application::initVulkan() 
 {
 	createInstance();
+	setupDebugMessenger();
+	pickPhysicalDevice();
+	createLogicalDevice();
 }
 
 void Application::mainLoop()
@@ -39,19 +46,30 @@ void Application::mainLoop()
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 	}
+
+	PSIM_CORE_WARN("Shutdown Initiated!");
 }
 
 void Application::cleanUp() 
 {
+	if (enableValidationLayers) {
+		DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
+		PSIM_CORE_INFO("Debug Messenger deleted!");
+	}
+
 	vkDestroyInstance(instance, nullptr);
+	PSIM_CORE_INFO("Vulkan instance deleted!");
 
 	glfwDestroyWindow(window);
 
 	glfwTerminate();
+	PSIM_CORE_INFO("Glfw terminated!");
 
 	Log::shutdown();
 }
 
+//Instance Creation
+//--------------------------------------------------------------------------------------------------------------------------------
 void Application::createInstance() 
 {
 	PSIM_CORE_INFO("Initializing Vulkan instance and extensions!");
@@ -68,18 +86,33 @@ void Application::createInstance()
 	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	createInfo.pApplicationInfo = &appInfo;
 
-	//getting extensions
+	//getting extensions/layers
 	std::vector<const char*> extensions = getInstanceExtensions();
+	std::vector<const char*> vLayers = {};
+	if (enableValidationLayers) {
+		vLayers = getInstanceLayers();
+	}
 
-	//setting extensions
-	createInfo.enabledExtensionCount = extensions.size();
+	//setting extensions/ debugging instance creation/destruction
+	VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
+	createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
 	createInfo.ppEnabledExtensionNames = extensions.data();
+	if (enableValidationLayers) {
+		createInfo.enabledLayerCount = static_cast<uint32_t>(vLayers.size());
+		createInfo.ppEnabledLayerNames = vLayers.data();
 
-	createInfo.enabledLayerCount = 0;
+		populateDebugMessengerCreateInfo(debugCreateInfo);
+		createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
+	}
+	else {
+		createInfo.enabledLayerCount = 0;
+
+		createInfo.pNext = nullptr;
+	}
 
 	//creating the instance
-	PSIM_CORE_INFO("Creating Vulkan Instance!");
 	PSIM_ASSERT((vkCreateInstance(&createInfo, nullptr, &instance) == VK_SUCCESS), "Failed to create Vulkan instance!");
+	PSIM_CORE_INFO("Vulkan Instance Created!");
 }
 
 std::vector<const char*> Application::getInstanceExtensions()
@@ -91,7 +124,9 @@ std::vector<const char*> Application::getInstanceExtensions()
 	std::vector<const char*> reqExtensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
 	//add extra reqs here
-
+	if (enableValidationLayers) {
+		reqExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+	}
 
 	//all supported extensions
 	uint32_t availableExtensionCount = 0;
@@ -101,23 +136,243 @@ std::vector<const char*> Application::getInstanceExtensions()
 	vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount, availExtensions.data());
 
 	//check for all required extensions
+	bool allFound = 1;
 	for (auto i = 0; i < reqExtensions.size(); i++) {
 		bool found = false;
 
 		for (const auto& extension : availExtensions) {
 			if (strcmp(reqExtensions[i], extension.extensionName)) {
+				PSIM_CORE_INFO("Added extension: {0}", reqExtensions[i]);
 				found = true;
+				break;
 			}
 		}
 
 		//error message
 		if (!found) {
-			PSIM_ERROR("Certain required GLFW extensions not found");
+			PSIM_CORE_ERROR("Extension: {0} not found!", reqExtensions[i]);
+			allFound = 0;
 		}
 	}
 
 	//success message
-	PSIM_CORE_INFO("All required extensions found!");
+	if (allFound) {
+		PSIM_CORE_INFO("All required extensions found!");
+	}
 
 	return reqExtensions;
+}
+
+std::vector<const char*> Application::getInstanceLayers() 
+{
+	//the list of layers 
+	const std::vector<const char*> validationLayers = {
+	"VK_LAYER_KHRONOS_validation"
+	};
+
+	//available layers
+	uint32_t layerCount = 0;
+	vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+	std::vector<VkLayerProperties> availableLayers(layerCount);
+	vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+	//checking if layers are available
+	bool allFound = 1;
+	for (const char* layerName : validationLayers) {
+		bool layerFound = false;
+
+		for (const auto& layerProperties : availableLayers) {
+			if (strcmp(layerName, layerProperties.layerName) == 0) {
+				PSIM_CORE_INFO("Added layer: {0}", layerName);
+				layerFound = true;
+				break;
+			}
+		}
+
+		//error message
+		if (!layerFound) {
+			PSIM_CORE_ERROR("Required Layer: {0} not available!", layerName);
+			allFound = 0;
+		}
+	}
+
+	//success message
+	if (allFound) {
+		PSIM_CORE_INFO("All required layers available!");
+	}
+
+	return validationLayers;
+}
+
+//Debugging funcs
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) 
+{
+	if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) {
+		if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
+			if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
+				PSIM_CORE_ERROR("validation layer: {0}", pCallbackData->pMessage);
+				return VK_FALSE;
+			}
+			PSIM_CORE_WARN("validation layer: {0}", pCallbackData->pMessage);
+			return VK_FALSE;
+		}
+		PSIM_CORE_INFO("validation layer: {0}", pCallbackData->pMessage);
+		return VK_FALSE;
+	}
+
+	return VK_FALSE;
+}
+
+void Application::setupDebugMessenger() 
+{
+	if (!enableValidationLayers) { return; }
+
+	VkDebugUtilsMessengerCreateInfoEXT createInfo;
+	populateDebugMessengerCreateInfo(createInfo);
+
+	if (CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS) {
+		PSIM_CORE_ERROR("Failed to set up debug messenger!");
+	}
+}
+
+void Application::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo)
+{
+	createInfo = {};
+	createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+	createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+	createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+	createInfo.pfnUserCallback = debugCallback;
+}
+
+VkResult Application::CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) 
+{
+	auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+	if (func != nullptr) {
+		PSIM_CORE_INFO("Created debug messenger!");
+		return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+	}
+	else {
+		PSIM_CORE_ERROR("Debug messenger could not be created!");
+		return VK_ERROR_EXTENSION_NOT_PRESENT;
+	}
+}
+
+void Application::DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator) 
+{
+	auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
+	if (func != nullptr) {
+		func(instance, debugMessenger, pAllocator);
+	}
+}
+
+//Physical Device Funcs
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void Application::pickPhysicalDevice()
+{
+	PSIM_CORE_INFO("Picking GPU!");
+	//get devices
+	uint32_t deviceCount = 0;
+	vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+
+	if (deviceCount == 0) {
+		PSIM_CORE_FATAL("Failed to find GPU's with Vulkan support!");
+	}
+
+	std::vector<VkPhysicalDevice> devices(deviceCount);
+	vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+
+	//actually pick from available
+	std::unordered_map<int, VkPhysicalDevice> candidates;
+
+	for (const auto& device : devices) {
+		if (isDeviceSuitable(device)) {
+			int score = rateDevice(device);
+			candidates.insert(std::make_pair(score, device));
+		}
+	}
+
+	// Check if the best candidate is suitable at all
+	if (candidates.begin()->first > 0) {
+		physicalDevice = candidates.begin()->second;
+		PSIM_CORE_INFO("GPU selected!");
+	}
+	else {
+		PSIM_CORE_FATAL("Failed to find a suitable GPU!");
+	}
+}
+
+bool Application::isDeviceSuitable(VkPhysicalDevice device)
+{
+	QueueFamilyIndices indices = findQueueFamilies(device);
+
+	return indices.isComplete();
+}
+
+Application::QueueFamilyIndices Application::findQueueFamilies(VkPhysicalDevice device)
+{
+	//create the queue family indeces
+	QueueFamilyIndices indices;
+
+	uint32_t queueFamilyCount = 0;
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+	std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+	//check for graphics families in the queue
+	int i = 0;
+	for (const auto& queueFamily : queueFamilies) {
+		if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+			indices.graphicsFamily = i;
+		}
+
+		//if complete we are done
+		if (indices.isComplete()) {
+			break;
+		}
+
+		//if not go to the next
+		i++;
+	}
+
+	//if none found, will not return with a value
+	return indices;
+}
+
+int Application::rateDevice(VkPhysicalDevice device)
+{
+	//get features and properties
+	VkPhysicalDeviceProperties deviceProperties;
+	vkGetPhysicalDeviceProperties(device, &deviceProperties);
+	VkPhysicalDeviceFeatures deviceFeatures;
+	vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+	int score = 0;
+
+	// Discrete GPUs have a significant performance advantage
+	if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+		score += 1000;
+	}
+
+	// Maximum possible size of textures affects graphics quality
+	score += deviceProperties.limits.maxImageDimension2D;
+
+	// Application can't function without geometry shaders
+	if (!deviceFeatures.geometryShader) {
+		return 0;
+	}
+
+	return score;
+}
+
+//Logical Device Funcs
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void Application::createLogicalDevice() 
+{
+
 }

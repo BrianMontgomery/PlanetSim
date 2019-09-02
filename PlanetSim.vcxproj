@@ -144,6 +144,7 @@
     <ClInclude Include="src\Core.h" />
     <ClInclude Include="src\Logging\Log.h" />
     <ClInclude Include="src\PSIMPCH.h" />
+    <ClInclude Include="src\Vk\Vk.h" />
     <ClInclude Include="vendor\glm\glm\common.hpp" />
     <ClInclude Include="vendor\glm\glm\detail\_features.hpp" />
     <ClInclude Include="vendor\glm\glm\detail\_fixes.hpp" />
@@ -508,7 +509,6 @@
     <ClInclude Include="vendor\glm\glm\vec3.hpp" />
     <ClInclude Include="vendor\glm\glm\vec4.hpp" />
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp" />
-    <ClInclude Include="src\Vk\Vk.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Application\Application.cpp" />
@@ -516,8 +516,8 @@
     <ClCompile Include="src\PSIMPCH.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Vk\Vk.cpp" />
+    <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="vendor\GLFW\glfw.vcxproj">

@@ -8,5 +8,7 @@ int main() {
 
 	app.run();
 
+	system("PAUSE");
+
 	return EXIT_SUCCESS;
 }
