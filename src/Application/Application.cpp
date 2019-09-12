@@ -576,6 +576,7 @@ void Application::createSwapChain()
 
 	//create the swapchain
 	PSIM_ASSERT(vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain) == VK_SUCCESS, "Failed to create swap chain!");
+	PSIM_CORE_INFO("Created Swap Chain");
 
 	//retrieving images
 	vkGetSwapchainImagesKHR(device, swapChain, &imageCount, nullptr);
@@ -585,4 +586,45 @@ void Application::createSwapChain()
 	//storing vars for later
 	swapChainImageFormat = surfaceFormat.format;
 	swapChainExtent = extent;
+}
+
+
+//Image View Funcs
+//--------------------------------------------------------------------------------------------------------------------------------
+void Application::createImageViews() 
+{
+	//figure out how many image views to create
+	swapChainImageViews.resize(swapChainImages.size());
+	for (size_t i = 0; i < swapChainImages.size(); i++) {
+		//populating create info struct for each image view
+		VkImageViewCreateInfo createInfo = {};
+		createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		createInfo.image = swapChainImages[i];
+		createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		createInfo.format = swapChainImageFormat;
+
+		createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+
+		createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		createInfo.subresourceRange.baseMipLevel = 0;
+		createInfo.subresourceRange.levelCount = 1;
+		createInfo.subresourceRange.baseArrayLayer = 0;
+		createInfo.subresourceRange.layerCount = 1;
+
+		//create image views
+		PSIM_ASSERT(vkCreateImageView(device, &createInfo, nullptr, &swapChainImageViews[i]) == VK_SUCCESS, "Failed to create image views!");
+	}
+
+	PSIM_CORE_INFO("Created Image Views");
+}
+
+
+//Graphics Pipeline Funcs
+//--------------------------------------------------------------------------------------------------------------------------------
+void Application::CreateGraphicsPipeline()
+{
+
 }
