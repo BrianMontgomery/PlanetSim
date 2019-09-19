@@ -37,6 +37,7 @@ project "PlanetSim"
 	{
 		"src/**.h",
 		"src/**.cpp",
+		"src/Shaders/**.spv",
 		"vendor/glm/glm/**.hpp",
 		"vendor/glm/glm/**.inl",
 	}

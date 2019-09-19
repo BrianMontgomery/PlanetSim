@@ -520,6 +520,10 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\Shaders\TriangleShaderFrag.spv" />
+    <None Include="src\Shaders\TriangleShaderVert.spv" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="vendor\GLFW\glfw.vcxproj">
       <Project>{9563977C-819A-980D-2A87-7E10169D140F}</Project>
     </ProjectReference>

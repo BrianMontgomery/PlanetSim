@@ -5,6 +5,7 @@
 
 #include "Logging/Log.h"
 
+#include <fstream>
 #include <set>
 #include <cstdint> // Necessary for UINT32_MAX
 
@@ -45,6 +46,8 @@ void Application::initVulkan()
 	pickPhysicalDevice();
 	createLogicalDevice();
 	createSwapChain();
+	createImageViews();
+	CreateGraphicsPipeline();
 }
 
 void Application::mainLoop()
@@ -624,7 +627,29 @@ void Application::createImageViews()
 
 //Graphics Pipeline Funcs
 //--------------------------------------------------------------------------------------------------------------------------------
+static std::vector<char> readFileByteCode(const std::string& filename)
+{
+	//open file
+	std::ifstream file(filename, std::ios::ate | std::ios::binary);
+	PSIM_ASSERT(file.is_open(), "Failed to open file!");
+
+	//allocate buffer
+	size_t fileSize = (size_t)file.tellg();
+	std::vector<char> buffer(fileSize);
+
+	//read the file
+	file.seekg(0);
+	file.read(buffer.data(), fileSize);
+
+	//close the file
+	file.close();
+
+	std::cout << buffer.size() << std::endl;
+	return buffer;
+}
+
 void Application::CreateGraphicsPipeline()
 {
-
+	auto vertShaderCode = readFileByteCode("src/Shaders/TriangleShaderVert.spv");
+	auto fragShaderCode = readFileByteCode("src/Shaders/TriangleShaderFrag.spv");
 }
