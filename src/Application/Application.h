@@ -78,7 +78,9 @@ private:
 	void createImageViews();
 
 	//graphics pipeline funcs
-	void CreateGraphicsPipeline();
+	void createRenderPass();
+	void createGraphicsPipeline();
+	VkShaderModule createShaderModule(const std::vector<char>& code);
 
 	//member variables
 	//--------------------------------------------------------------------------------------------------------------------------------
@@ -100,6 +102,10 @@ private:
 	VkExtent2D swapChainExtent;
 
 	std::vector<VkImageView> swapChainImageViews;
+
+	VkRenderPass renderPass;
+	VkPipelineLayout pipelineLayout;
+	VkPipeline graphicsPipeline;
 
 	const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
 	const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
