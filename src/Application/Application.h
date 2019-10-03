@@ -36,6 +36,7 @@ private:
 	//--------------------------------------------------------------------------------------------------------------------------------
 
 	//member funcs
+	//--------------------------------------------------------------------------------------------------------------------------------
 	void initWindow();
 	void initVulkan();
 	void mainLoop();
@@ -82,9 +83,26 @@ private:
 	void createGraphicsPipeline();
 	VkShaderModule createShaderModule(const std::vector<char>& code);
 
+	//Frame buffers
+	void createFramebuffers();
+
+	//command buffers
+	void createCommandPool();
+	void createCommandBuffers();
+
+	//presentation
+	void drawFrame();
+	void createSyncObjects();
+
+	//--------------------------------------------------------------------------------------------------------------------------------
+
+
 	//member variables
 	//--------------------------------------------------------------------------------------------------------------------------------
 	GLFWwindow* window;
+
+	const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
+	const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
 	VkInstance instance;
 	VkDebugUtilsMessengerEXT debugMessenger;
@@ -107,7 +125,15 @@ private:
 	VkPipelineLayout pipelineLayout;
 	VkPipeline graphicsPipeline;
 
-	const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
-	const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+	std::vector<VkFramebuffer> swapChainFramebuffers;
+
+	VkCommandPool commandPool;
+	std::vector<VkCommandBuffer> commandBuffers;
+
+	const int MAX_FRAMES_IN_FLIGHT = 2;
+	size_t currentFrame = 0;
+	std::vector<VkSemaphore> imageAvailableSemaphores;
+	std::vector<VkSemaphore> renderFinishedSemaphores;
+	std::vector<VkFence> inFlightFences;
 };
 
