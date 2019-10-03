@@ -9,6 +9,53 @@
 #include <set>
 #include <cstdint> // Necessary for UINT32_MAX
 
+//static funcs
+//--------------------------------------------------------------------------------------------------------------------------------
+static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
+{
+	auto app = reinterpret_cast<Application*>(glfwGetWindowUserPointer(window));
+	app->framebufferResized = true;
+}
+
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
+{
+	if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) {
+		if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
+			if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
+				PSIM_CORE_ERROR("validation layer: {0}", pCallbackData->pMessage);
+				return VK_FALSE;
+			}
+			PSIM_CORE_WARN("validation layer: {0}", pCallbackData->pMessage);
+			return VK_FALSE;
+		}
+		PSIM_CORE_INFO("validation layer: {0}", pCallbackData->pMessage);
+		return VK_FALSE;
+	}
+
+	return VK_FALSE;
+}
+
+static std::vector<char> readFileByteCode(const std::string& filename)
+{
+	//open file
+	std::ifstream file(filename, std::ios::ate | std::ios::binary);
+	PSIM_ASSERT(file.is_open(), "Failed to open file!");
+
+	//allocate buffer
+	size_t fileSize = (size_t)file.tellg();
+	std::vector<char> buffer(fileSize);
+
+	//read the file
+	file.seekg(0);
+	file.read(buffer.data(), fileSize);
+
+	//close the file
+	file.close();
+
+	return buffer;
+}
+
+
 //vulkan entry point
 //--------------------------------------------------------------------------------------------------------------------------------
 void Application::run()
@@ -32,9 +79,10 @@ void Application::initWindow()
 	glfwInit();
 
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 	window = glfwCreateWindow(WIDTH, HEIGHT, "Planet Sim", nullptr, nullptr);
+	glfwSetWindowUserPointer(window, this);
+	glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 	PSIM_ASSERT(window, "Window failed to create");
 }
 
@@ -71,6 +119,8 @@ void Application::mainLoop()
 
 void Application::cleanUp() 
 {
+	cleanupSwapChain();
+
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 		vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
 		vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
@@ -81,29 +131,9 @@ void Application::cleanUp()
 	vkDestroyCommandPool(device, commandPool, nullptr);
 	PSIM_CORE_INFO("Command Pool deleted");
 
-	for (auto framebuffer : swapChainFramebuffers) {
-		vkDestroyFramebuffer(device, framebuffer, nullptr);
-	}
-	PSIM_CORE_INFO("Frame Buffers deleted");
-
-	vkDestroyPipeline(device, graphicsPipeline, nullptr);
-	PSIM_CORE_INFO("Pipeline deleted");
-	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
-	PSIM_CORE_INFO("Pipeline Layout deleted");
-	vkDestroyRenderPass(device, renderPass, nullptr);
-	PSIM_CORE_INFO("Render Pass deleted");
-
-	for (auto imageView : swapChainImageViews) {
-		vkDestroyImageView(device, imageView, nullptr);
-	}
-	PSIM_CORE_INFO("ImageViews deleted");
-
-
-	vkDestroySwapchainKHR(device, swapChain, nullptr);
-	PSIM_CORE_INFO("Swapchain deleted");
-
 	vkDestroyDevice(device, nullptr);
 	PSIM_CORE_INFO("Device deleted");
+
 	if (enableValidationLayers) {
 		DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
 		PSIM_CORE_INFO("Debug Messenger deleted");
@@ -114,7 +144,9 @@ void Application::cleanUp()
 
 	vkDestroyInstance(instance, nullptr);
 	PSIM_CORE_INFO("Vulkan instance deleted");
+
 	glfwDestroyWindow(window);
+
 	glfwTerminate();
 	PSIM_CORE_INFO("Glfw terminated");
 
@@ -247,23 +279,6 @@ std::vector<const char*> Application::getInstanceLayers()
 
 //Debugging funcs
 //--------------------------------------------------------------------------------------------------------------------------------
-static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) 
-{
-	if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) {
-		if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
-			if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
-				PSIM_CORE_ERROR("validation layer: {0}", pCallbackData->pMessage);
-				return VK_FALSE;
-			}
-			PSIM_CORE_WARN("validation layer: {0}", pCallbackData->pMessage);
-			return VK_FALSE;
-		}
-		PSIM_CORE_INFO("validation layer: {0}", pCallbackData->pMessage);
-		return VK_FALSE;
-	}
-
-	return VK_FALSE;
-}
 
 void Application::setupDebugMessenger() 
 {
@@ -557,7 +572,13 @@ VkExtent2D Application::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabil
 	}  
 	//fallback extent
 	else {
-		VkExtent2D actualExtent = { WIDTH, HEIGHT };
+		int width, height;
+		glfwGetFramebufferSize(window, &width, &height);
+
+		VkExtent2D actualExtent = {
+			static_cast<uint32_t>(width),
+			static_cast<uint32_t>(height)
+		};
 
 		actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
 		actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
@@ -624,6 +645,49 @@ void Application::createSwapChain()
 	//storing vars for later
 	swapChainImageFormat = surfaceFormat.format;
 	swapChainExtent = extent;
+}
+
+void Application::recreateSwapChain() 
+{
+	int width = 0, height = 0;
+	while (width == 0 || height == 0) {
+		glfwGetFramebufferSize(window, &width, &height);
+		glfwWaitEvents();
+	}
+
+	vkDeviceWaitIdle(device);
+
+	cleanupSwapChain();
+
+	createSwapChain();
+	createImageViews();
+	createRenderPass();
+	createGraphicsPipeline();
+	createFramebuffers();
+	createCommandBuffers();
+}
+
+void Application::cleanupSwapChain() 
+{
+	for (size_t i = 0; i < swapChainFramebuffers.size(); i++) {
+		vkDestroyFramebuffer(device, swapChainFramebuffers[i], nullptr);
+	}
+
+	vkFreeCommandBuffers(device, commandPool, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
+	PSIM_CORE_INFO("Command Buffers freed");
+
+	vkDestroyPipeline(device, graphicsPipeline, nullptr);
+	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+	vkDestroyRenderPass(device, renderPass, nullptr);
+	PSIM_CORE_INFO("Pipeline deleted");
+
+	for (size_t i = 0; i < swapChainImageViews.size(); i++) {
+		vkDestroyImageView(device, swapChainImageViews[i], nullptr);
+	}
+	PSIM_CORE_INFO("ImageViews deleted");
+
+	vkDestroySwapchainKHR(device, swapChain, nullptr);
+	PSIM_CORE_INFO("Swapchain cleaned up");
 }
 
 
@@ -701,26 +765,6 @@ void Application::createRenderPass()
 	renderPassInfo.pSubpasses = &subpass;
 
 	PSIM_ASSERT(vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) == VK_SUCCESS, "Failed to create render pass!");
-}
-
-static std::vector<char> readFileByteCode(const std::string& filename)
-{
-	//open file
-	std::ifstream file(filename, std::ios::ate | std::ios::binary);
-	PSIM_ASSERT(file.is_open(), "Failed to open file!");
-
-	//allocate buffer
-	size_t fileSize = (size_t)file.tellg();
-	std::vector<char> buffer(fileSize);
-
-	//read the file
-	file.seekg(0);
-	file.read(buffer.data(), fileSize);
-
-	//close the file
-	file.close();
-
-	return buffer;
 }
 
 void Application::createGraphicsPipeline()
@@ -989,10 +1033,17 @@ void Application::createCommandBuffers()
 void Application::drawFrame() 
 {
 	vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
-	vkResetFences(device, 1, &inFlightFences[currentFrame]);
 
 	uint32_t imageIndex; 
-	vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+	VkResult result = vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+
+	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) {
+		framebufferResized = false; 
+		recreateSwapChain();
+	}
+	else {
+		PSIM_ASSERT(result == VK_SUCCESS, "Failed to acquire swap chain image!"); 
+	}
 
 	VkSubmitInfo submitInfo = {};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1007,6 +1058,8 @@ void Application::drawFrame()
 	VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[currentFrame] };
 	submitInfo.signalSemaphoreCount = 1;
 	submitInfo.pSignalSemaphores = signalSemaphores;
+
+	vkResetFences(device, 1, &inFlightFences[currentFrame]);
 
 	PSIM_ASSERT(vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) == VK_SUCCESS, "Failed to submit draw command buffer!");
 

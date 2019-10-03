@@ -14,6 +14,8 @@ public:
 	//public funcs
 	void run();
 
+	bool framebufferResized = false;
+
 private:
 	//structs for vulkan
 	//--------------------------------------------------------------------------------------------------------------------------------
@@ -74,6 +76,8 @@ private:
 	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 	void createSwapChain();
+	void recreateSwapChain();
+	void cleanupSwapChain();
 
 	//image view funcs
 	void createImageViews();
