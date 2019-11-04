@@ -1293,15 +1293,20 @@ void Application::drawFrame()
 	uint32_t imageIndex;
 	VkResult result = vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
-	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) {
-		framebufferResized = false; 
+	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
 		recreateSwapChain();
+		return;
 	}
 	else {
-		PSIM_ASSERT(result == VK_SUCCESS, "Failed to acquire swap chain image!"); 
+		PSIM_ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR, "Failed to acquire swap chain image!");
 	}
 
 	updateUniformBuffer(imageIndex);
+
+	if (imagesInFlight[imageIndex] != VK_NULL_HANDLE) {
+		vkWaitForFences(device, 1, &imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
+	}
+	imagesInFlight[imageIndex] = inFlightFences[currentFrame];
 
 	VkSubmitInfo submitInfo = {};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1311,8 +1316,10 @@ void Application::drawFrame()
 	submitInfo.waitSemaphoreCount = 1;
 	submitInfo.pWaitSemaphores = waitSemaphores;
 	submitInfo.pWaitDstStageMask = waitStages;
+
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = &commandBuffers[imageIndex];
+
 	VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[currentFrame] };
 	submitInfo.signalSemaphoreCount = 1;
 	submitInfo.pSignalSemaphores = signalSemaphores;
@@ -1323,17 +1330,25 @@ void Application::drawFrame()
 
 	VkPresentInfoKHR presentInfo = {};
 	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
 	presentInfo.waitSemaphoreCount = 1;
 	presentInfo.pWaitSemaphores = signalSemaphores;
+
 	VkSwapchainKHR swapChains[] = { swapChain };
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = swapChains;
+
 	presentInfo.pImageIndices = &imageIndex;
-	presentInfo.pResults = nullptr; // Optional
 
-	vkQueuePresentKHR(presentQueue, &presentInfo);
+	result = vkQueuePresentKHR(presentQueue, &presentInfo);
 
-	vkQueueWaitIdle(presentQueue);
+	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) {
+		framebufferResized = false;
+		recreateSwapChain();
+	}
+	else {
+		PSIM_ASSERT(result == VK_SUCCESS, "Failed to present swap chain image!");
+	}
 
 	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
@@ -1343,6 +1358,7 @@ void Application::createSyncObjects()
 	imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
 	renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
 	inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+	imagesInFlight.resize(swapChainImages.size(), VK_NULL_HANDLE);
 
 	VkSemaphoreCreateInfo semaphoreInfo = {};
 	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
