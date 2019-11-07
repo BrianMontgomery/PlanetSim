@@ -39,6 +39,7 @@ project "glfw"
 		defines 
 		{ 
             "_GLFW_WIN32",
+			"GLM_FORCE_RADIANS",
             "_CRT_SECURE_NO_WARNINGS"
 		}
 

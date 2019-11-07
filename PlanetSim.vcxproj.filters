@@ -37,6 +37,12 @@
     <Filter Include="vendor\glm\glm\gtx">
       <UniqueIdentifier>{B3A6A76B-9F8A-68C1-08EB-6214F4ED5243}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vendor\stb">
+      <UniqueIdentifier>{8BD3C5A8-778B-07F6-E092-E051CC69A2E6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\stb\stb">
+      <UniqueIdentifier>{635F6677-4F2D-5A7D-38C1-CAA3242E36E2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Application\Application.h">
@@ -1145,6 +1151,9 @@
     </ClInclude>
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp">
       <Filter>vendor\glm\glm</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\stb\stb\stb_image.h">
+      <Filter>vendor\stb\stb</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

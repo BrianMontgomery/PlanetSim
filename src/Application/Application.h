@@ -1,5 +1,12 @@
 #pragma once
-#define GLFW_INCLUDE_VULKAN
+#ifndef GLM_FORCE_RADIANS
+	#define GLM_FORCE_RADIANS
+#endif
+
+#ifndef GLM_FORCE_DEPTH_ZERO_TO_ONE
+	#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#endif
+
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
 
@@ -38,8 +45,9 @@ private:
 	};
 
 	struct Vertex {
-		glm::vec2 pos;
+		glm::vec3 pos;
 		glm::vec3 color;
+		glm::vec2 texCoord;
 
 		static VkVertexInputBindingDescription getBindingDescription() {
 			VkVertexInputBindingDescription bindingDescription = {};
@@ -50,18 +58,23 @@ private:
 			return bindingDescription;
 		}
 
-		static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions() {
-			std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions = {};
+		static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
+			std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions = {};
 
 			attributeDescriptions[0].binding = 0;
 			attributeDescriptions[0].location = 0;
-			attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+			attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
 			attributeDescriptions[0].offset = offsetof(Vertex, pos);
 
 			attributeDescriptions[1].binding = 0;
 			attributeDescriptions[1].location = 1;
 			attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
 			attributeDescriptions[1].offset = offsetof(Vertex, color);
+
+			attributeDescriptions[2].binding = 0;
+			attributeDescriptions[2].location = 2;
+			attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+			attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
 
 			return attributeDescriptions;
 		}
@@ -117,7 +130,8 @@ private:
 	void cleanupSwapChain();
 
 	//image view funcs
-	void createImageViews();
+	void createSwapchainImageViews();
+	VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
 
 	//graphics pipeline funcs
 	void createRenderPass();
@@ -131,11 +145,27 @@ private:
 	void createCommandPool();
 	void createCommandBuffers();
 
+	//depth buffer funcs
+	void createDepthResources();
+	VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+	VkFormat findDepthFormat();
+	bool hasStencilComponent(VkFormat format);
+
+	//texture funcs
+	void createTextureImage();
+	void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+	void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+	void createTextureImageView();
+	void createTextureSampler();
+
 	//vertex buffers funcs
 	void createVertexBuffer();
 	void createIndexBuffer();
 	void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+	VkCommandBuffer beginSingleTimeCommands();
+	void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
 	//uniform buffer funcs
@@ -197,16 +227,36 @@ private:
 	VkCommandPool commandPool;
 	std::vector<VkCommandBuffer> commandBuffers;
 
+	//depth buffers
+	VkImage depthImage;
+	VkDeviceMemory depthImageMemory;
+	VkImageView depthImageView;
+
+	//textures
+	VkImage textureImage;
+	VkDeviceMemory textureImageMemory;
+	VkImageView textureImageView;
+	VkSampler textureSampler;
+
 	//vertex buffers
 	const std::vector<Vertex> vertices = {
-		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
+	{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+	{{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+	{{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+	{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
+
+	{{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+	{{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+	{{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+	{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
 	};
+
 	const std::vector<uint16_t> indices = {
-		0, 1, 2, 2, 3, 0
+		0, 1, 2, 2, 3, 0,
+		4, 5, 6, 6, 7, 4
 	};
+
+
 	VkBuffer vertexBuffer;
 	VkDeviceMemory vertexBufferMemory;
 	VkBuffer indexBuffer;

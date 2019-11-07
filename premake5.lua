@@ -15,6 +15,9 @@ outputDir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 IncludeDir = {}
 IncludeDir["GLFW"] = "vendor/GLFW/include"
 IncludeDir["glm"] = "vendor/glm"
+IncludeDir["stb"] = "vendor/stb"
+--IncludeDir["tinyObjLoader"] = "vendor/tinyObjLoader"
+--IncludeDir["resources"] = "src/resources"
 
 group "Dependencies"
 	include "vendor/GLFW"
@@ -40,11 +43,16 @@ project "PlanetSim"
 		"src/Shaders/**.spv",
 		"vendor/glm/glm/**.hpp",
 		"vendor/glm/glm/**.inl",
+		"vendor/stb/stb/**.h",
+		--"vendor/tinyObjLoader/tinyObjLoader/**.h"
 	}
 
 	defines
 	{
-		"_CRT_SECURE_NO_WARNINGS"
+		"_CRT_SECURE_NO_WARNINGS",
+		"STB_IMAGE_IMPLEMENTATION",
+		"GLM_FORCE_RADIANS",
+		"GLM_FORCE_DEPTH_ZERO_TO_ONE"
 	}
 
 	includedirs
@@ -53,6 +61,9 @@ project "PlanetSim"
 		"vendor/spdlog/include",
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.glm}",
+		"%{IncludeDir.stb}",
+		--"%{IncludeDir.tinyObjLoader}",
+		--"%{IncludeDir.resources}",
 		"C:/VulkanSDK/1.1.108.0/Include"
 	}
 
