@@ -17,7 +17,6 @@ IncludeDir["GLFW"] = "vendor/GLFW/include"
 IncludeDir["glm"] = "vendor/glm"
 IncludeDir["stb"] = "vendor/stb"
 --IncludeDir["tinyObjLoader"] = "vendor/tinyObjLoader"
---IncludeDir["resources"] = "src/resources"
 
 group "Dependencies"
 	include "vendor/GLFW"
@@ -43,7 +42,7 @@ project "PlanetSim"
 		"src/Shaders/**.spv",
 		"vendor/glm/glm/**.hpp",
 		"vendor/glm/glm/**.inl",
-		"vendor/stb/stb/**.h",
+		"vendor/stb/stb/**.h"
 		--"vendor/tinyObjLoader/tinyObjLoader/**.h"
 	}
 
@@ -59,11 +58,12 @@ project "PlanetSim"
 	{
 		"src",
 		"vendor/spdlog/include",
+		"src/resources",
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.stb}",
 		--"%{IncludeDir.tinyObjLoader}",
-		--"%{IncludeDir.resources}",
+		
 		"C:/VulkanSDK/1.1.108.0/Include"
 	}
 

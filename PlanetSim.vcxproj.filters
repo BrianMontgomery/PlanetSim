@@ -16,6 +16,15 @@
     <Filter Include="src\Vk">
       <UniqueIdentifier>{7D4B661C-69ED-90F2-52A8-A4463EE91743}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\resources">
+      <UniqueIdentifier>{F78C15E7-634D-911D-2C88-DA9A9807D6F9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\resources\models">
+      <UniqueIdentifier>{EA16A999-D6A5-3263-7FC4-465E6B324309}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\resources\textures">
+      <UniqueIdentifier>{CA800C4C-B67A-359E-9FE7-CBAE8B809B0A}</UniqueIdentifier>
+    </Filter>
     <Filter Include="vendor">
       <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
     </Filter>
@@ -1180,5 +1189,16 @@
     <None Include="src\Shaders\TriangleShaderVert.spv">
       <Filter>src\Shaders</Filter>
     </None>
+    <None Include="src\resources\models\chalet.obj">
+      <Filter>src\resources\models</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="src\resources\textures\chalet.jpg">
+      <Filter>src\resources\textures</Filter>
+    </Image>
+    <Image Include="src\resources\textures\texture.jpg">
+      <Filter>src\resources\textures</Filter>
+    </Image>
   </ItemGroup>
 </Project>

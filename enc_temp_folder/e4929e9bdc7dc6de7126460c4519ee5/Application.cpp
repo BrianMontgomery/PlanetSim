@@ -18,7 +18,7 @@
 #include <cstdint> // Necessary for UINT32_MAX
 
 const std::string MODEL_PATH = "src/resources/models/chalet.obj";
-const char* TEXTURE_PATH = "src/resources/textures/texture.jpg";
+const char* TEXTURE_PATH = "src/resources/textures/chalet.jpg";
 
 //static funcs
 //--------------------------------------------------------------------------------------------------------------------------------
