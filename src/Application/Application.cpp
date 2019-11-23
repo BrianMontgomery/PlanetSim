@@ -1,24 +1,38 @@
+//in the premake but included here for redundancy
 #ifndef STB_IMAGE_IMPLEMENTATION
 	#define STB_IMAGE_IMPLEMENTATION
 #endif
 
+//core files
 #include "PSIMPCH.h"
 #include "Core.h"
 
 #include "Application.h"
-
 #include "Logging/Log.h"
 
+//vendor files
+#include <tinyObjLoader/tiny_obj_loader.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <stb/stb_image.h>
 
+//non-core std-lib
 #include <chrono>
 #include <fstream>
 #include <set>
 #include <cstdint> // Necessary for UINT32_MAX
 
-const std::string MODEL_PATH = "src/resources/models/chalet.obj";
-const char* TEXTURE_PATH = "src/resources/textures/texture.jpg";
+//need full paths from solution for resources
+const std::string MODEL_PATH = "resources/models/chalet.obj";
+const char* TEXTURE_PATH = "resources/textures/chalet.jpg";
+
+//GLOBAL namespaces
+namespace std {
+	template<> struct hash<Application::Vertex> {
+		size_t operator()(Application::Vertex const& vertex) const {
+			return ((hash<glm::vec3>()(vertex.pos) ^ (hash<glm::vec3>()(vertex.color) << 1)) >> 1) ^ (hash<glm::vec2>()(vertex.texCoord) << 1);
+		}
+	};
+}
 
 //static funcs
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -115,6 +129,7 @@ void Application::initVulkan()
 	createTextureImage();
 	createTextureImageView();
 	createTextureSampler();
+	loadModel();
 	createVertexBuffer();
 	createIndexBuffer();
 	createUniformBuffers();
@@ -1117,7 +1132,7 @@ void Application::createCommandBuffers()
 			VkBuffer vertexBuffers[] = { vertexBuffer };
 			VkDeviceSize offsets[] = { 0 };
 			vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers, offsets);
-			vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+			vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 			vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[i], 0, nullptr);
 
 			vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
@@ -1337,6 +1352,48 @@ void Application::createTextureSampler()
 }
 
 
+//Model Loading Funcs
+//--------------------------------------------------------------------------------------------------------------------------------
+void Application::loadModel() {
+	tinyobj::attrib_t attrib;
+	std::vector<tinyobj::shape_t> shapes;
+	std::vector<tinyobj::material_t> materials;
+	std::string warn, err;
+
+	if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, MODEL_PATH.c_str())) {
+		throw std::runtime_error(warn + err);
+	}
+
+	std::unordered_map<Vertex, uint32_t> uniqueVertices = {};
+
+	for (const auto& shape : shapes) {
+		for (const auto& index : shape.mesh.indices) {
+			Vertex vertex = {};
+
+			vertex.pos = {
+				attrib.vertices[3 * index.vertex_index + 0],
+				attrib.vertices[3 * index.vertex_index + 1],
+				attrib.vertices[3 * index.vertex_index + 2]
+			};
+
+			vertex.texCoord = {
+				attrib.texcoords[2 * index.texcoord_index + 0],
+				1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
+			};
+
+			vertex.color = { 1.0f, 1.0f, 1.0f };
+
+			if (uniqueVertices.count(vertex) == 0) {
+				uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+				vertices.push_back(vertex);
+			}
+
+			indices.push_back(uniqueVertices[vertex]);
+		}
+	}
+}
+
+
 //Vertex Buffer Funcs
 //--------------------------------------------------------------------------------------------------------------------------------
 void Application::createVertexBuffer() {
@@ -1505,8 +1562,8 @@ void Application::updateUniformBuffer(uint32_t currentImage) {
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
 	UniformBufferObject ubo = {};
-	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.model = glm::rotate(glm::mat4(1.0f), (time * glm::radians(90.0f)) / 8, glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 10.0f);
 	ubo.proj[1][1] *= -1;
 

@@ -1,4 +1,5 @@
 #pragma once
+//in the premake but included here for redundancy
 #ifndef GLM_FORCE_RADIANS
 	#define GLM_FORCE_RADIANS
 #endif
@@ -7,13 +8,21 @@
 	#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #endif
 
+#ifndef GLM_ENABLE_EXPERIMENTAL
+	#define GLM_ENABLE_EXPERIMENTAL
+#endif
+
+//vendor files
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
-
 #include <glm/glm.hpp>
+#include <glm/gtx/hash.hpp>
+
+//non-core std-lib
 #include <array>
 #include <optional>
 
+//GLOBAL vars
 const int WIDTH = 800;
 const int HEIGHT = 600;
 
@@ -24,25 +33,6 @@ public:
 	void run();
 
 	bool framebufferResized = false;
-
-private:
-	//structs for vulkan
-	//--------------------------------------------------------------------------------------------------------------------------------
-
-	struct QueueFamilyIndices {
-		std::optional<uint32_t> graphicsFamily;
-		std::optional<uint32_t> presentFamily;
-
-		bool isComplete() {
-			return (graphicsFamily.has_value() && presentFamily.has_value());
-		}
-	};
-
-	struct SwapChainSupportDetails {
-		VkSurfaceCapabilitiesKHR capabilities;
-		std::vector<VkSurfaceFormatKHR> formats;
-		std::vector<VkPresentModeKHR> presentModes;
-	};
 
 	struct Vertex {
 		glm::vec3 pos;
@@ -78,6 +68,29 @@ private:
 
 			return attributeDescriptions;
 		}
+
+		bool operator==(const Vertex& other) const {
+			return pos == other.pos && color == other.color && texCoord == other.texCoord;
+		}
+	};
+
+private:
+	//structs for vulkan
+	//--------------------------------------------------------------------------------------------------------------------------------
+
+	struct QueueFamilyIndices {
+		std::optional<uint32_t> graphicsFamily;
+		std::optional<uint32_t> presentFamily;
+
+		bool isComplete() {
+			return (graphicsFamily.has_value() && presentFamily.has_value());
+		}
+	};
+
+	struct SwapChainSupportDetails {
+		VkSurfaceCapabilitiesKHR capabilities;
+		std::vector<VkSurfaceFormatKHR> formats;
+		std::vector<VkPresentModeKHR> presentModes;
 	};
 
 	struct UniformBufferObject {
@@ -159,6 +172,9 @@ private:
 	void createTextureImageView();
 	void createTextureSampler();
 
+	//model loading funcs
+	void loadModel();
+
 	//vertex buffers funcs
 	void createVertexBuffer();
 	void createIndexBuffer();
@@ -239,24 +255,8 @@ private:
 	VkSampler textureSampler;
 
 	//vertex buffers
-	const std::vector<Vertex> vertices = {
-	{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-	{{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-	{{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-	{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
-
-	{{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-	{{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-	{{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-	{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
-	};
-
-	const std::vector<uint16_t> indices = {
-		0, 1, 2, 2, 3, 0,
-		4, 5, 6, 6, 7, 4
-	};
-
-
+	std::vector<Vertex> vertices;
+	std::vector<uint32_t> indices;
 	VkBuffer vertexBuffer;
 	VkDeviceMemory vertexBufferMemory;
 	VkBuffer indexBuffer;
@@ -277,4 +277,3 @@ private:
 	std::vector<VkFence> inFlightFences;
 	std::vector<VkFence> imagesInFlight;
 };
-
