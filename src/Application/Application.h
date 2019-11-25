@@ -29,11 +29,13 @@ const int HEIGHT = 600;
 class Application
 {
 public:
-	//public funcs
+	//public func
 	void run();
 
+	//public var for vulkan
 	bool framebufferResized = false;
 
+	//public structs for vulkan
 	struct Vertex {
 		glm::vec3 pos;
 		glm::vec3 color;
@@ -75,7 +77,7 @@ public:
 	};
 
 private:
-	//structs for vulkan
+	//private structs for vulkan
 	//--------------------------------------------------------------------------------------------------------------------------------
 
 	struct QueueFamilyIndices {

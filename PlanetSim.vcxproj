@@ -79,8 +79,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>PSIMPCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;STB_IMAGE_IMPLEMENTATION;GLM_FORCE_RADIANS;GLM_FORCE_DEPTH_ZERO_TO_ONE;TINYOBJLOADER_IMPLEMENTATION;PSIM_PLATFORM_WINDOWS;PSIM_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;resources;vendor\GLFW\include;vendor\glm;vendor\stb;vendor\tinyObjLoader;C:\VulkanSDK\1.1.108.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;STB_IMAGE_IMPLEMENTATION;GLM_FORCE_RADIANS;GLM_FORCE_DEPTH_ZERO_TO_ONE;GLM_ENABLE_EXPERIMENTAL;TINYOBJLOADER_IMPLEMENTATION;PSIM_PLATFORM_WINDOWS;PSIM_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\glm;vendor\stb;vendor\tinyObjLoader;C:\VulkanSDK\1.1.108.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -98,8 +98,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>PSIMPCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;STB_IMAGE_IMPLEMENTATION;GLM_FORCE_RADIANS;GLM_FORCE_DEPTH_ZERO_TO_ONE;TINYOBJLOADER_IMPLEMENTATION;PSIM_PLATFORM_WINDOWS;PSIM_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;resources;vendor\GLFW\include;vendor\glm;vendor\stb;vendor\tinyObjLoader;C:\VulkanSDK\1.1.108.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;STB_IMAGE_IMPLEMENTATION;GLM_FORCE_RADIANS;GLM_FORCE_DEPTH_ZERO_TO_ONE;GLM_ENABLE_EXPERIMENTAL;TINYOBJLOADER_IMPLEMENTATION;PSIM_PLATFORM_WINDOWS;PSIM_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\glm;vendor\stb;vendor\tinyObjLoader;C:\VulkanSDK\1.1.108.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -121,8 +121,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>PSIMPCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;STB_IMAGE_IMPLEMENTATION;GLM_FORCE_RADIANS;GLM_FORCE_DEPTH_ZERO_TO_ONE;TINYOBJLOADER_IMPLEMENTATION;PSIM_PLATFORM_WINDOWS;PSIM_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;resources;vendor\GLFW\include;vendor\glm;vendor\stb;vendor\tinyObjLoader;C:\VulkanSDK\1.1.108.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;STB_IMAGE_IMPLEMENTATION;GLM_FORCE_RADIANS;GLM_FORCE_DEPTH_ZERO_TO_ONE;GLM_ENABLE_EXPERIMENTAL;TINYOBJLOADER_IMPLEMENTATION;PSIM_PLATFORM_WINDOWS;PSIM_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\glm;vendor\stb;vendor\tinyObjLoader;C:\VulkanSDK\1.1.108.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
