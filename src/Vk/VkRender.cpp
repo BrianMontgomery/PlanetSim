@@ -165,7 +165,7 @@ bool VkRender::mainLoop()
 	glfwPollEvents();
 	//drawFrame();
 
-	return (!glfwWindowShouldClose(window));
+	return (glfwWindowShouldClose(window));
 }
 
 void VkRender::cleanUp()
@@ -246,8 +246,9 @@ void VkRender::createInstance()
 	}
 
 	//creating the instance
-	auto [result, instance] = vk::createInstance(vk::InstanceCreateInfo{ {}, &appInfo, static_cast<uint32_t>(vLayers.size()), vLayers.data(), static_cast<uint32_t>(extensions.size()), extensions.data() }, nullptr);
+	auto [result, tempInstance] = vk::createInstance(vk::InstanceCreateInfo{ {}, &appInfo, static_cast<uint32_t>(vLayers.size()), vLayers.data(), static_cast<uint32_t>(extensions.size()), extensions.data() }, nullptr);
 	PSIM_ASSERT(result == vk::Result::eSuccess, "Failed to create Vulkan instance!");
+	instance = tempInstance;
 	PSIM_CORE_INFO("Vulkan Instance Created");
 }
 
@@ -334,8 +335,9 @@ void VkRender::setupDebugMessenger()
 		pfnVkDestroyDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(instance.getProcAddr("vkDestroyDebugUtilsMessengerEXT"));
 		PSIM_ASSERT(pfnVkDestroyDebugUtilsMessengerEXT, "GetInstanceProcAddr: Unable to find pfnVkDestroyDebugUtilsMessengerEXT function.");
 
-		auto[result, debugUtilsMessenger] = instance.createDebugUtilsMessengerEXT(populateDebugMessengerCreateInfo());
+		auto[result, tempDebugUtilsMessenger] = instance.createDebugUtilsMessengerEXT(populateDebugMessengerCreateInfo());
 		PSIM_ASSERT(result == vk::Result::eSuccess, "Failed to set up debug messenger!");
+		debugUtilsMessenger = tempDebugUtilsMessenger;
 		PSIM_CORE_INFO("Debug Utils Messenger Created");
 	}
 }

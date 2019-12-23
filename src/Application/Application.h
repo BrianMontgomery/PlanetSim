@@ -21,7 +21,7 @@ private:
 
 	//member funcs
 	//--------------------------------------------------------------------------------------------------------------------------------
-	void mainLoop(VkRender vkRender);
+	void mainLoop();
 	/*
 
 	//debug messenger funcs

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DEFECTS>
+  <DEFECT>
+    <SFA>
+      <FILEPATH>c:\dev\planetsim\vendor\glfw\src</FILEPATH>
+      <FILENAME>monitor.c</FILENAME>
+      <LINE>99</LINE>
+      <COLUMN>19</COLUMN>
+    </SFA>
+    <DEFECTCODE>6308</DEFECTCODE>
+    <DESCRIPTION>'realloc' might return null pointer: assigning null pointer to '_glfw.monitors', which is passed as an argument to 'realloc', will cause the original memory block to be leaked.</DESCRIPTION>
+    <FUNCTION>_glfwInputMonitor</FUNCTION>
+    <DECORATED>_glfwInputMonitor</DECORATED>
+    <FUNCLINE>93</FUNCLINE>
+    <PATH></PATH>
+  </DEFECT>
+  <DEFECT>
+    <SFA>
+      <FILEPATH>c:\dev\planetsim\vendor\glfw\src</FILEPATH>
+      <FILENAME>monitor.c</FILENAME>
+      <LINE>166</LINE>
+      <COLUMN>21</COLUMN>
+    </SFA>
+    <DEFECTCODE>6011</DEFECTCODE>
+    <DESCRIPTION>Dereferencing NULL pointer 'monitor'. </DESCRIPTION>
+    <FUNCTION>_glfwAllocMonitor</FUNCTION>
+    <DECORATED>_glfwAllocMonitor</DECORATED>
+    <FUNCLINE>163</FUNCLINE>
+    <PROBABILITY>1</PROBABILITY>
+    <RANK>4</RANK>
+    <CATEGORY>
+      <RULECATEGORY>mspft</RULECATEGORY>
+    </CATEGORY>
+    <PATH>
+      <SFA>
+        <FILEPATH>c:\dev\planetsim\vendor\glfw\src</FILEPATH>
+        <FILENAME>monitor.c</FILENAME>
+        <LINE>165</LINE>
+        <COLUMN>18</COLUMN>
+        <KEYEVENT>
+          <ID>1</ID>
+          <KIND>declaration</KIND>
+          <IMPORTANCE>Essential</IMPORTANCE>
+          <MESSAGE>'monitor' may be NULL</MESSAGE>
+        </KEYEVENT>
+      </SFA>
+      <SFA>
+        <FILEPATH>c:\dev\planetsim\vendor\glfw\src</FILEPATH>
+        <FILENAME>monitor.c</FILENAME>
+        <LINE>166</LINE>
+        <COLUMN>21</COLUMN>
+        <KEYEVENT>
+          <ID>2</ID>
+          <KIND>usage</KIND>
+          <IMPORTANCE>Essential</IMPORTANCE>
+          <MESSAGE>'monitor' is dereferenced, but may still be NULL</MESSAGE>
+        </KEYEVENT>
+      </SFA>
+    </PATH>
+  </DEFECT>
+</DEFECTS>

@@ -32,13 +32,14 @@ CONFIGURABLE VARIABLES - WHERE TO FIND
 //--------------------------------------------------------------------------------------------------------------------------------
 void Application::run()
 {
-	VkRender vkRender;
 	//loop
-	mainLoop(vkRender);
+	mainLoop();
 }
 
-void Application::mainLoop(VkRender vkRender)
+void Application::mainLoop()
 {
+	VkRender vkRender;
+
 	bool close = false;
 	while (!close) {									//checks for the x to be pressed
 		close = vkRender.mainLoop();											//does drawing logic
