@@ -49,6 +49,7 @@ project "PlanetSim"
 	defines
 	{
 		"_CRT_SECURE_NO_WARNINGS",
+		"VULKAN_HPP_NO_EXCEPTIONS",
 		"STB_IMAGE_IMPLEMENTATION",
 		"GLM_FORCE_RADIANS",
 		"GLM_FORCE_DEPTH_ZERO_TO_ONE",
@@ -65,11 +66,11 @@ project "PlanetSim"
 		"%{IncludeDir.stb}",
 		"%{IncludeDir.tinyObjLoader}",
 		
-		"C:/VulkanSDK/1.1.108.0/Include"
+		"C:/VulkanSDK/1.1.121.2/Include"
 	}
 
 	libdirs { 
-				"C:/VulkanSDK/1.1.108.0/Lib",
+				"C:/VulkanSDK/1.1.121.2/Lib",
 				"vendor/glfw/bin/Debug-windows-x86_64/glfw"
 	}
 
@@ -85,7 +86,8 @@ project "PlanetSim"
 
 		defines
 		{
-			"PSIM_PLATFORM_WINDOWS"
+			"PSIM_PLATFORM_WINDOWS",
+			"VK_USE_PLATFORM_WIN32_KHR"
 		}
 
 	filter "configurations:Debug"

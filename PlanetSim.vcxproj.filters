@@ -63,7 +63,7 @@
     <ClInclude Include="src\PSIMPCH.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\Vk\Vk.h">
+    <ClInclude Include="src\Vk\VkRender.h">
       <Filter>src\Vk</Filter>
     </ClInclude>
     <ClInclude Include="vendor\glm\glm\common.hpp">
@@ -1175,7 +1175,7 @@
     <ClCompile Include="src\PSIMPCH.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\Vk\Vk.cpp">
+    <ClCompile Include="src\Vk\VkRender.cpp">
       <Filter>src\Vk</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp">
