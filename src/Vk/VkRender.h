@@ -71,7 +71,7 @@ private:
 	vk::Instance instance;
 	vk::DebugUtilsMessengerEXT debugUtilsMessenger;
 
-	//vk::SurfaceKHR surface;
+	vk::SurfaceKHR surface;
 
 	//--------------------------------------------------------------------------------------------------------------------------------
 
@@ -114,7 +114,7 @@ private:
 	void setupDebugMessenger();
 	vk::DebugUtilsMessengerCreateInfoEXT populateDebugMessengerCreateInfo();
 
-	//void createSurface();
+	void createSurface();
 
 	//--------------------------------------------------------------------------------------------------------------------------------
 };

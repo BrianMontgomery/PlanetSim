@@ -120,7 +120,7 @@ void VkRender::initVulkan()
 	initWindow();
 	createInstance();
 	setupDebugMessenger();
-	//createSurface();
+	createSurface();
 	//pickPhysicalDevice();
 	//createLogicalDevice();
 	//createSwapChain();
@@ -213,8 +213,8 @@ void VkRender::cleanUp()
 		PSIM_CORE_INFO("Debug Messenger deleted");
 	}
 
-	//vkDestroySurfaceKHR(instance, surface, nullptr);
-	//PSIM_CORE_INFO("Surface deleted");
+	vkDestroySurfaceKHR(instance, surface, nullptr);
+	PSIM_CORE_INFO("Surface deleted");
 
 	vkDestroyInstance(instance, nullptr);
 	PSIM_CORE_INFO("Vulkan instance deleted");
@@ -351,10 +351,10 @@ vk::DebugUtilsMessengerCreateInfoEXT VkRender::populateDebugMessengerCreateInfo(
 	return createInfo;
 }
 
-/*void VkRender::createSurface()
+void VkRender::createSurface()
 {
 	VkSurfaceKHR tempSurface;
 	PSIM_ASSERT(glfwCreateWindowSurface(VkInstance(instance), window, nullptr, &tempSurface) == VK_SUCCESS, "Failed to create window surface!");
 	surface = tempSurface; 
 	PSIM_CORE_INFO("Created Window Surface");
-}*/
+}
