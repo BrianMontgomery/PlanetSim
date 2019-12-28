@@ -71,7 +71,22 @@ private:
 	vk::Instance instance;
 	vk::DebugUtilsMessengerEXT debugUtilsMessenger;
 
+	std::vector<const char*> instanceLayers = { "VK_LAYER_KHRONOS_validation" };
+	const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+
 	vk::SurfaceKHR surface;
+
+	vk::PhysicalDevice physicalDevice = nullptr;
+
+	vk::Device device;
+
+	vk::Queue graphicsQueue;
+	vk::Queue presentQueue;
+
+	vk::SwapchainKHR swapChain;
+	std::vector<vk::Image> swapChainImages;
+	vk::Format swapChainImageFormat;
+	vk::Extent2D swapChainExtent;
 
 	//--------------------------------------------------------------------------------------------------------------------------------
 
@@ -88,9 +103,11 @@ private:
 	};
 
 	struct SwapChainSupportDetails {
+		SwapChainSupportDetails(vk::SurfaceCapabilitiesKHR surfaceCapabilites, std::vector<vk::SurfaceFormatKHR> surfaceFormats, std::vector<vk::PresentModeKHR> surfacePresentModes)
+			: capabilities(surfaceCapabilites), formats(surfaceFormats), presentModes(surfacePresentModes) {}
 		vk::SurfaceCapabilitiesKHR capabilities;
-		std::vector<VkSurfaceFormatKHR> formats;
-		std::vector<VkPresentModeKHR> presentModes;
+		std::vector<vk::SurfaceFormatKHR> formats;
+		std::vector<vk::PresentModeKHR> presentModes;
 	};
 
 	struct UniformBufferObject {
@@ -116,6 +133,22 @@ private:
 
 	void createSurface();
 
+	void pickPhysicalDevice();
+	bool isDeviceSuitable(vk::PhysicalDevice device);
+	int rateDevice(vk::PhysicalDevice device);
+	bool checkDeviceExtensionSupport(vk::PhysicalDevice device);
+
+	QueueFamilyIndices findQueueFamilies(vk::PhysicalDevice device);
+
+	void createLogicalDevice();
+
+	VkRender::SwapChainSupportDetails querySwapChainSupport(vk::PhysicalDevice device);
+	vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats);
+	vk::PresentModeKHR chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes);
+	vk::Extent2D chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities);
+	void createSwapChain();
+	void recreateSwapChain();
+	void cleanupSwapChain();
 	//--------------------------------------------------------------------------------------------------------------------------------
 };
 

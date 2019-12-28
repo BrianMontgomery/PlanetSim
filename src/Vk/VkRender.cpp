@@ -35,6 +35,7 @@ VKAPI_ATTR void VKAPI_CALL vkDestroyDebugUtilsMessengerEXT(VkInstance instance, 
 	return pfnVkDestroyDebugUtilsMessengerEXT(instance, messenger, pAllocator);
 }
 
+
 //GLOBAL namespaces
 namespace std {
 	template<> struct hash<VkRender::Vertex> {
@@ -121,9 +122,9 @@ void VkRender::initVulkan()
 	createInstance();
 	setupDebugMessenger();
 	createSurface();
-	//pickPhysicalDevice();
-	//createLogicalDevice();
-	//createSwapChain();
+	pickPhysicalDevice();
+	createLogicalDevice();
+	createSwapChain();
 	//createSwapchainImageViews();
 	//createRenderPass();
 	//createDescriptorSetLayout();
@@ -170,53 +171,53 @@ bool VkRender::mainLoop()
 
 void VkRender::cleanUp()
 {
-	/*vk::DeviceWaitIdle(device);
-
+	device.waitIdle();
+	
 	//final cleanup of Vulkan resources
 	cleanupSwapChain();
 
-	vkDestroySampler(device, textureSampler, nullptr);
-	PSIM_CORE_INFO("Texture sampler destroyed");
+	//device.destroySampler(textureSampler, nullptr);
+	//PSIM_CORE_INFO("Texture sampler destroyed");
 
-	vkDestroyImageView(device, textureImageView, nullptr);
-	PSIM_CORE_INFO("Texture image view destroyed");
+	//device.destroyImageView(textureImageView, nullptr);
+	//PSIM_CORE_INFO("Texture image view destroyed");
 
-	vkDestroyImage(device, textureImage, nullptr);
-	vkFreeMemory(device, textureImageMemory, nullptr);
-	PSIM_CORE_INFO("Image destroyed");
+	//device.destroyImage(textureImage, nullptr);
+	//device.freeMemory(textureImageMemory, nullptr);
+	//PSIM_CORE_INFO("Image destroyed");
 
-	vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+	//device.destroyDescriptorSetLayout(descriptorSetLayout, nullptr);
 
-	vkDestroyBuffer(device, indexBuffer, nullptr);
-	vkFreeMemory(device, indexBufferMemory, nullptr);
-	PSIM_CORE_INFO("Index Buffer Destroyed");
+	//device.destroyBuffer(indexBuffer, nullptr);
+	//device.freeMemory(indexBufferMemory, nullptr);
+	//PSIM_CORE_INFO("Index Buffer Destroyed");
 
-	vkDestroyBuffer(device, vertexBuffer, nullptr);
-	vkFreeMemory(device, vertexBufferMemory, nullptr);
-	PSIM_CORE_INFO("Vertex Buffer Destroyed");
+	//device.destroyBuffer(vertexBuffer, nullptr);
+	//device.freeMemory(vertexBufferMemory, nullptr);
+	//PSIM_CORE_INFO("Vertex Buffer Destroyed");
 
-	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
-		vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
-		vkDestroyFence(device, inFlightFences[i], nullptr);
-	}
+	//for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+	//	device.destroySemaphore(renderFinishedSemaphores[i], nullptr);
+	//	device.destroySemaphore(imageAvailableSemaphores[i], nullptr);
+	//	device.destroyFence(inFlightFences[i], nullptr);
+	//}
 	PSIM_CORE_INFO("Sync Objects deleted");
 
-	vkDestroyCommandPool(device, commandPool, nullptr);
-	PSIM_CORE_INFO("Command Pool deleted");
-
-	vkDestroyDevice(device, nullptr);
+	//device.destroyCommandPool(commandPool, nullptr);
+	//PSIM_CORE_INFO("Command Pool deleted");
+	
+	device.destroy(nullptr);
 	PSIM_CORE_INFO("Device deleted");
-	*/
+	
 	if (enableValidationLayers) {
-		vkDestroyDebugUtilsMessengerEXT(instance, debugUtilsMessenger, nullptr);
+		instance.destroyDebugUtilsMessengerEXT(debugUtilsMessenger, nullptr);
 		PSIM_CORE_INFO("Debug Messenger deleted");
 	}
 
-	vkDestroySurfaceKHR(instance, surface, nullptr);
+	instance.destroySurfaceKHR(surface, nullptr);
 	PSIM_CORE_INFO("Surface deleted");
 
-	vkDestroyInstance(instance, nullptr);
+	instance.destroy(nullptr);
 	PSIM_CORE_INFO("Vulkan instance deleted");
 
 	glfwDestroyWindow(window);
@@ -266,6 +267,7 @@ std::vector<const char*> VkRender::getInstanceExtensions()
 	}
 
 	auto [result, availableExtensions] = vk::enumerateInstanceExtensionProperties();
+	PSIM_ASSERT(result == vk::Result::eSuccess, "Failed to enumerate instance extension properties!");
 
 	//compare required extensions to supported
 	bool allFound = 1;
@@ -292,9 +294,8 @@ std::vector<const char*> VkRender::getInstanceExtensions()
 
 std::vector<const char*> VkRender::getInstanceLayers()
 {
-	std::vector<const char*> instanceLayers = { "VK_LAYER_KHRONOS_validation" };
-	
 	auto [result, availableLayers] = vk::enumerateInstanceLayerProperties();
+	PSIM_ASSERT(result == vk::Result::eSuccess, "Failed to enumerate instance layer properties!");
 
 	//checking if layers are available
 	bool allFound = 1;
@@ -351,10 +352,361 @@ vk::DebugUtilsMessengerCreateInfoEXT VkRender::populateDebugMessengerCreateInfo(
 	return createInfo;
 }
 
+//--------------------------------------------------------------------------------------------------------------------------------
+
+
+//Physical Device Funcs
+//--------------------------------------------------------------------------------------------------------------------------------
 void VkRender::createSurface()
 {
 	VkSurfaceKHR tempSurface;
 	PSIM_ASSERT(glfwCreateWindowSurface(VkInstance(instance), window, nullptr, &tempSurface) == VK_SUCCESS, "Failed to create window surface!");
 	surface = tempSurface; 
-	PSIM_CORE_INFO("Created Window Surface");
+	PSIM_ASSERT(bool(surface), "Created Window Surface");
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+
+//Physical Device Funcs
+//--------------------------------------------------------------------------------------------------------------------------------
+void VkRender::pickPhysicalDevice()
+{
+	PSIM_CORE_INFO("Picking GPU");
+	//get devices
+	uint32_t deviceCount = 0;
+	auto [result, physicalDevices] = instance.enumeratePhysicalDevices();
+	PSIM_ASSERT(result == vk::Result::eSuccess, "Failed to enumerate physical devices!");
+
+	//actually pick from available
+	std::unordered_map<int, vk::PhysicalDevice> candidates;
+
+	for (const auto& device : physicalDevices) {
+		if (isDeviceSuitable(device)) {
+			int score = rateDevice(device);
+			candidates.insert(std::make_pair(score, device));
+		}
+	}
+
+	// Check if the best candidate is suitable at all
+	PSIM_ASSERT(candidates.begin()->first > 0, "Failed to find a suitable GPU!");
+	physicalDevice = candidates.begin()->second;
+	PSIM_CORE_INFO("GPU selected");
+}
+
+bool VkRender::isDeviceSuitable(vk::PhysicalDevice device)
+{
+	QueueFamilyIndices indices = findQueueFamilies(device);
+
+	bool extensionsSupported = checkDeviceExtensionSupport(device);
+
+	bool swapChainAdequate = false;
+	if (extensionsSupported) {
+		SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
+		swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
+	}
+
+	vk::PhysicalDeviceFeatures supportedFeatures = device.getFeatures();
+
+	return indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
+}
+
+int VkRender::rateDevice(vk::PhysicalDevice device)
+{
+	//get features and properties
+	vk::PhysicalDeviceProperties deviceProperties = device.getProperties();
+	vk::PhysicalDeviceFeatures deviceFeatures = device.getFeatures();
+
+	int score = 0;
+
+	// Discrete GPUs have a significant performance advantage
+	if (deviceProperties.deviceType == vk::PhysicalDeviceType::eDiscreteGpu) {
+		score += 1000;
+	}
+
+	// Maximum possible size of textures affects graphics quality
+	score += deviceProperties.limits.maxImageDimension2D;
+
+	// Application can't function without geometry shaders
+	if (!deviceFeatures.geometryShader) {
+		return 0;
+	}
+
+	return score;
+}
+
+bool VkRender::checkDeviceExtensionSupport(vk::PhysicalDevice device)
+{
+	//get extensions for each device
+	auto [result, availableExtensions] = device.enumerateDeviceExtensionProperties();
+	PSIM_ASSERT(result == vk::Result::eSuccess, "Failed to enumerate device extension properties!");
+
+	std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+
+	//check against wanted extensions to see if all are found
+	for (const auto& extension : availableExtensions) {
+		requiredExtensions.erase(extension.extensionName);
+	}
+
+	return requiredExtensions.empty();
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+
+//Queue Funcs
+//--------------------------------------------------------------------------------------------------------------------------------
+VkRender::QueueFamilyIndices VkRender::findQueueFamilies(vk::PhysicalDevice device)
+{
+	//create the queue family indeces
+	QueueFamilyIndices indices;
+	std::vector<vk::QueueFamilyProperties> queueFamilies = device.getQueueFamilyProperties();
+
+	//check for graphics families in the queue
+	int i = 0;
+	for (const auto& queueFamily : queueFamilies) {
+		if (queueFamily.queueCount > 0 && queueFamily.queueFlags & vk::QueueFlagBits::eGraphics) {
+			indices.graphicsFamily = i;
+		}
+
+		vk::Bool32 presentSupport = false;
+		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
+
+		if (queueFamily.queueCount > 0 && presentSupport) {
+			indices.presentFamily = i;
+		}
+
+		//if complete we are done
+		if (indices.isComplete()) {
+			break;
+		}
+
+		//if not go to the next
+		i++;
+	}
+
+	//if none found, will not return with a value
+	return indices;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+
+//Logical Device Funcs
+//--------------------------------------------------------------------------------------------------------------------------------
+void VkRender::createLogicalDevice()
+{
+	//get families
+	QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+
+	//create queue info
+	std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
+	std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+
+	float queuePriority = 1.0f;
+	for (uint32_t queueFamily : uniqueQueueFamilies) {
+		vk::DeviceQueueCreateInfo queueCreateInfo = { {}, queueFamily, 1, &queuePriority };
+		queueCreateInfos.push_back(queueCreateInfo);
+	}
+
+	//create device info
+	vk::PhysicalDeviceFeatures deviceFeatures = {};
+	deviceFeatures.samplerAnisotropy = true;
+
+	vk::DeviceCreateInfo createInfo = { {}, static_cast<uint32_t>(queueCreateInfos.size()), queueCreateInfos.data(), 0, nullptr, static_cast<uint32_t>(deviceExtensions.size()),
+	deviceExtensions.data(), &deviceFeatures };
+
+	if (enableValidationLayers) {
+		createInfo.setEnabledLayerCount(static_cast<uint32_t>(instanceLayers.size()));
+		createInfo.setPpEnabledLayerNames(instanceLayers.data());
+	}
+
+	//create device
+	physicalDevice.createDevice(&createInfo, nullptr, &device);
+	PSIM_ASSERT(bool(device), "Failed to create logical device!");
+	PSIM_CORE_INFO("Created Logical Device");
+
+	//get handles to the queues
+	device.getQueue(indices.graphicsFamily.value(), 0, &graphicsQueue);
+	device.getQueue(indices.presentFamily.value(), 0, &presentQueue);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+
+//Swapchain Funcs
+//--------------------------------------------------------------------------------------------------------------------------------
+VkRender::SwapChainSupportDetails VkRender::querySwapChainSupport(vk::PhysicalDevice device)
+{
+	auto [result, surfaceCapabilities] = device.getSurfaceCapabilitiesKHR(surface);
+	PSIM_ASSERT(result == vk::Result::eSuccess, "Failed to get surface capabilities!");
+	//formats
+
+	auto [result1, surfaceFormats] = device.getSurfaceFormatsKHR(surface);
+	PSIM_ASSERT(result1 == vk::Result::eSuccess, "Failed to get surface formats!");
+
+	//modes
+	auto[result2, surfacePresentModes] = device.getSurfacePresentModesKHR(surface);
+	PSIM_ASSERT(result2 == vk::Result::eSuccess, "Failed to get surface present modes!");
+
+	SwapChainSupportDetails details(surfaceCapabilities, surfaceFormats, surfacePresentModes);
+	return details;
+}
+
+vk::SurfaceFormatKHR VkRender::chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats)
+{
+	//check for srgb
+	for (const auto& availableFormat : availableFormats) {
+		if (availableFormat.format == vk::Format::eB8G8R8A8Unorm && availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
+			return availableFormat;
+		}
+	}
+
+	return availableFormats[0];
+}
+
+vk::PresentModeKHR VkRender::chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes)
+{
+	//check for mailbox mode
+	for (const auto& availablePresentMode : availablePresentModes) {
+		if (availablePresentMode == vk::PresentModeKHR::eMailbox) {
+			return availablePresentMode;
+		}
+	}
+
+	return vk::PresentModeKHR::eFifo;
+}
+
+vk::Extent2D VkRender::chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities)
+{
+	//wanted extent
+	if (capabilities.currentExtent.width != UINT32_MAX) {
+		return capabilities.currentExtent;
+	}
+	//fallback extent
+	else {
+		int width, height;
+		glfwGetFramebufferSize(window, &width, &height);
+
+		vk::Extent2D actualExtent = {
+			static_cast<uint32_t>(width),
+			static_cast<uint32_t>(height)
+		};
+
+		actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
+		actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
+
+		return actualExtent;
+	}
+}
+
+void VkRender::createSwapChain()
+{
+	//create/populate the swapChainSupport struct
+	SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
+
+	vk::SurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
+	vk::PresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
+	vk::Extent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
+
+	//define an image count
+	uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
+	if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount) {
+		imageCount = swapChainSupport.capabilities.maxImageCount;
+	}
+
+	//create/populate a vkSwapChainInfo struct
+	vk::SwapchainCreateInfoKHR createInfo = { {}, surface, imageCount, surfaceFormat.format, surfaceFormat.colorSpace, extent, 1, vk::ImageUsageFlagBits::eColorAttachment,
+	vk::SharingMode::eExclusive, 0, nullptr, swapChainSupport.capabilities.currentTransform, vk::CompositeAlphaFlagBitsKHR::eOpaque, presentMode, true, nullptr };
+
+	QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+	uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+
+	if (indices.graphicsFamily != indices.presentFamily) {
+		createInfo.setImageSharingMode(vk::SharingMode::eConcurrent);
+		createInfo.setQueueFamilyIndexCount(2);
+		createInfo.setPQueueFamilyIndices(queueFamilyIndices);
+	}
+
+	//create the swapchain
+	device.createSwapchainKHR(&createInfo, nullptr, &swapChain);
+	PSIM_ASSERT(bool(swapChain), "Failed to create swap chain!");
+	PSIM_CORE_INFO("Created Swap Chain");
+
+	//retrieving images
+	auto [result, images] = device.getSwapchainImagesKHR(swapChain);
+	PSIM_ASSERT(result == vk::Result::eSuccess, "Failed to get swapChain Images!");
+	swapChainImages = images;
+
+	//storing vars for later
+	swapChainImageFormat = surfaceFormat.format;
+	swapChainExtent = extent;
+}
+
+void VkRender::recreateSwapChain()
+{
+	//check new window size and adapt
+	int width = 0, height = 0;
+	while (width == 0 || height == 0) {
+		glfwGetFramebufferSize(window, &width, &height);
+		glfwWaitEvents();
+	}
+
+	device.waitIdle();
+
+	//clean swapchain specific resources
+	cleanupSwapChain();
+
+
+	//recreate new swapchain specific resources
+	createSwapChain();
+	//createSwapchainImageViews();
+	//createRenderPass();
+	//createGraphicsPipeline();
+	//createDepthResources();
+	//createFramebuffers();
+	//createUniformBuffers();
+	//createDescriptorPool();
+	//createDescriptorSets();
+	//createCommandBuffers();
+
+	PSIM_CORE_INFO("SwapChain recreated!");
+}
+
+void VkRender::cleanupSwapChain()
+{
+	
+	//clean swapcain specific resources
+	//device.destroyImageView(depthImageView, nullptr);
+	//device.destroyImage(depthImage, nullptr);
+	//device.freeMemory(depthImageMemory, nullptr);
+
+	//for (size_t i = 0; i < swapChainFramebuffers.size(); i++) {
+	//	device.destroyFramebuffer(swapChainFramebuffers[i], nullptr);
+	//}
+
+	//device.freeCommandBuffers(commandPool, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
+	//PSIM_CORE_INFO("Command Buffers freed");
+
+	//device.destroyPipeline(graphicsPipeline, nullptr);
+	//device.destroyPipelineLayout(pipelineLayout, nullptr);
+	//device.destroyRenderPass(renderPass, nullptr);
+	//PSIM_CORE_INFO("Pipeline deleted");
+
+	//for (size_t i = 0; i < swapChainImageViews.size(); i++) {
+	//	device.destroyImageView(swapChainImageViews[i], nullptr);
+	//}
+	//PSIM_CORE_INFO("ImageViews deleted");
+
+	device.destroySwapchainKHR(swapChain, nullptr);
+	PSIM_CORE_INFO("Swapchain cleaned up");
+
+	//for (size_t i = 0; i < swapChainImages.size(); i++) {
+	//	device.destroyBuffer(uniformBuffers[i], nullptr);
+	//	device.freeMemory(uniformBuffersMemory[i], nullptr);
+	//}
+	//PSIM_CORE_INFO("Uniform Buffers cleaned up");
+
+	//device.destroyDescriptorPool(descriptorPool, nullptr);
+	//PSIM_CORE_INFO("Descriptor Pool cleaned up");
 }

@@ -24,32 +24,14 @@ private:
 	void mainLoop();
 	/*
 
-	//debug messenger funcs
-	void setupDebugMessenger();
-	void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
-	VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
-	void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);
-
-	//physical device funcs
-	void pickPhysicalDevice();
-	bool isDeviceSuitable(VkPhysicalDevice device);
-	int rateDevice(VkPhysicalDevice device);
-	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
-
 	//queue funcs
-	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+	
 
 	//logical device funcs
 	void createLogicalDevice();
 
 	//Swapchain funcs
-	Application::SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
-	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
-	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
-	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-	void createSwapChain();
-	void recreateSwapChain();
-	void cleanupSwapChain();
+	
 
 	//image view funcs
 	void createSwapchainImageViews();
@@ -114,21 +96,10 @@ private:
 	//surface
 	VkSurfaceKHR surface;
 
-	//physical device
-	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+	
 
-	//logical device
-	VkDevice device;
+	
 
-	//queue 
-	VkQueue graphicsQueue;
-	VkQueue presentQueue;
-
-	//Swapchain
-	VkSwapchainKHR swapChain;
-	std::vector<VkImage> swapChainImages;
-	VkFormat swapChainImageFormat;
-	VkExtent2D swapChainExtent;
 
 	//image view
 	std::vector<VkImageView> swapChainImageViews;
