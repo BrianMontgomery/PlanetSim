@@ -88,6 +88,45 @@ private:
 	vk::Format swapChainImageFormat;
 	vk::Extent2D swapChainExtent;
 
+	std::vector<vk::ImageView> swapChainImageViews;
+
+	vk::RenderPass renderPass;
+	vk::PipelineLayout pipelineLayout;
+	vk::Pipeline graphicsPipeline;
+
+	std::vector<vk::Framebuffer> swapChainFramebuffers;
+
+	vk::CommandPool commandPool;
+	std::vector<vk::CommandBuffer> commandBuffers;
+
+	vk::Image depthImage;
+	vk::DeviceMemory depthImageMemory;
+	vk::ImageView depthImageView;
+
+	vk::Image textureImage;
+	vk::DeviceMemory textureImageMemory;
+	vk::ImageView textureImageView;
+	vk::Sampler textureSampler;
+
+	std::vector<Vertex> vertices;
+	std::vector<uint32_t> indices;
+	vk::Buffer vertexBuffer;
+	vk::DeviceMemory vertexBufferMemory;
+	vk::Buffer indexBuffer;
+	vk::DeviceMemory indexBufferMemory;
+
+	vk::DescriptorSetLayout descriptorSetLayout;
+	std::vector<vk::Buffer> uniformBuffers;
+	std::vector<vk::DeviceMemory> uniformBuffersMemory;
+	vk::DescriptorPool descriptorPool;
+	std::vector<vk::DescriptorSet> descriptorSets;
+
+	const int MAX_FRAMES_IN_FLIGHT = 2;
+	size_t currentFrame = 0;
+	std::vector<vk::Semaphore> imageAvailableSemaphores;
+	std::vector<vk::Semaphore> renderFinishedSemaphores;
+	std::vector<vk::Fence> inFlightFences;
+	std::vector<vk::Fence> imagesInFlight;
 	//--------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -149,6 +188,49 @@ private:
 	void createSwapChain();
 	void recreateSwapChain();
 	void cleanupSwapChain();
+
+	void createSwapchainImageViews();
+	vk::ImageView createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags);
+
+	void createRenderPass();
+	void createGraphicsPipeline();
+	vk::ShaderModule createShaderModule(const std::vector<char>& code);
+
+	void createFramebuffers();
+
+	void createCommandPool();
+	void createCommandBuffers();
+
+	void createDepthResources();
+	vk::Format findSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features);
+	vk::Format findDepthFormat();
+	bool hasStencilComponent(vk::Format format);
+
+	void createTextureImage();
+	void createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& imageMemory);
+	void transitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout);
+	void copyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height);
+	void createTextureImageView();
+	void createTextureSampler();
+
+	void loadModel();
+
+	void createVertexBuffer();
+	void createIndexBuffer();
+	void createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Buffer& buffer, vk::DeviceMemory& bufferMemory);
+	uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
+	vk::CommandBuffer beginSingleTimeCommands();
+	void endSingleTimeCommands(vk::CommandBuffer commandBuffer);
+	void copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size);
+
+	void createDescriptorSetLayout();
+	void createUniformBuffers();
+	void updateUniformBuffer(uint32_t currentImage);
+	void createDescriptorPool();
+	void createDescriptorSets();
+
+	void drawFrame();
+	void createSyncObjects();
 	//--------------------------------------------------------------------------------------------------------------------------------
 };
 
