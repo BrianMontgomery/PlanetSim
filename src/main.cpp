@@ -1,7 +1,6 @@
 #include "PSIMPCH.h"
 
 #include "Application/Application.h"
-#include "Logging/Log.h"
 
 
 int main() {

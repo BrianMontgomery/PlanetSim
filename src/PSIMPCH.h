@@ -12,6 +12,10 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "Core/Core.h"
+#include "Core/Logging/Log.h"
+#include "Core/Debug/Instrumentor.h"
+
 #ifdef PSIM_PLATFORM_WINDOWS
 	#include <Windows.h>
 #endif

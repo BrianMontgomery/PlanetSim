@@ -1,9 +1,7 @@
 //core files
 #include "PSIMPCH.h"
-#include "Core.h"
 
 #include "Application.h"
-#include "Logging/Log.h"
 
 //vulkan entry point
 //--------------------------------------------------------------------------------------------------------------------------------

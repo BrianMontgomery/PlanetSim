@@ -23,9 +23,7 @@ CONFIGURABLE VARIABLES - WHERE TO FIND
 
 //core files
 #include "PSIMPCH.h"
-#include "Core.h"
 
-#include "Logging/Log.h"
 #include "VkRender.h"
 
 //vendor files
@@ -795,8 +793,8 @@ void VkRender::createRenderPass()
 
 void VkRender::createGraphicsPipeline()
 {
-	auto vertShaderCode = readFileByteCode("src/Shaders/TriangleShaderVert.spv");
-	auto fragShaderCode = readFileByteCode("src/Shaders/TriangleShaderFrag.spv");
+	auto vertShaderCode = readFileByteCode("src/Platform/Vk/Shaders/TriangleShaderVert.spv");
+	auto fragShaderCode = readFileByteCode("src/Platform/Vk/Shaders/TriangleShaderFrag.spv");
 
 	vk::ShaderModule vertShaderModule = createShaderModule(vertShaderCode);
 	vk::ShaderModule fragShaderModule = createShaderModule(fragShaderCode);
