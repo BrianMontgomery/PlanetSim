@@ -7,14 +7,47 @@
     <Filter Include="src\Application">
       <UniqueIdentifier>{701253C7-DC9D-C08B-E5AE-438051B91C8C}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\Logging">
-      <UniqueIdentifier>{C368B2F1-2F1E-2BE7-B812-25BE24C721EB}</UniqueIdentifier>
+    <Filter Include="src\Core">
+      <UniqueIdentifier>{A5D31CCF-91A0-77DA-BAB9-6582A6E5AC68}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\Shaders">
-      <UniqueIdentifier>{06ADC7FB-7262-40F1-FB56-3AC8670B37F5}</UniqueIdentifier>
+    <Filter Include="src\Core\Debug">
+      <UniqueIdentifier>{DB452204-C713-160A-B0A7-86309C14F26E}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\Vk">
-      <UniqueIdentifier>{7D4B661C-69ED-90F2-52A8-A4463EE91743}</UniqueIdentifier>
+    <Filter Include="src\Core\Input">
+      <UniqueIdentifier>{64EB8104-50B9-750A-394D-E63025BA516F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Core\Logging">
+      <UniqueIdentifier>{3B894315-2782-6267-50B4-47EC3C0C4273}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Events">
+      <UniqueIdentifier>{7162C20E-5D1A-045C-C621-DDB7B2F89E4C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Graphics">
+      <UniqueIdentifier>{0D564864-F9B8-D708-A23E-10BF8E80A38B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Graphics\Context">
+      <UniqueIdentifier>{A18D1875-8D1C-A23E-363B-B63922A9B2E4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Graphics\RenderAPI">
+      <UniqueIdentifier>{7625D490-621F-FDE2-4B8C-93F33725634F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Platform">
+      <UniqueIdentifier>{21CA02E5-0D2D-9289-B6B2-CA3FA2F45D0C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Platform\Vk">
+      <UniqueIdentifier>{F175994C-5D01-0711-6612-8A05D21C6311}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Platform\Vk\Context">
+      <UniqueIdentifier>{8551EDEE-F188-3586-FA92-99A966495C7F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Platform\Vk\Modules">
+      <UniqueIdentifier>{B963FFEF-259B-4787-2EA5-ABAA9A5B6E80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Platform\Vk\RenderAPI">
+      <UniqueIdentifier>{5A72E9D2-C634-1D5D-0FE5-ABE97BE6F53A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Platform\Windows">
+      <UniqueIdentifier>{5B054582-4794-CE4B-F0B2-E246DC20DFF1}</UniqueIdentifier>
     </Filter>
     <Filter Include="vendor">
       <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
@@ -54,8 +87,110 @@
     <ClInclude Include="src\Application\Application.h">
       <Filter>src\Application</Filter>
     </ClInclude>
+    <ClInclude Include="src\Core\Core.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Debug\Instrumentor.h">
+      <Filter>src\Core\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Input\Input.h">
+      <Filter>src\Core\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Input\KeyCodes.h">
+      <Filter>src\Core\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Input\MouseCodes.h">
+      <Filter>src\Core\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Logging\Log.h">
+      <Filter>src\Core\Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\TimeStep.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\WindowPrototype.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Events\ApplicationEvents.h">
+      <Filter>src\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Events\Events.h">
+      <Filter>src\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Events\KeyEvents.h">
+      <Filter>src\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Events\MouseEvents.h">
+      <Filter>src\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graphics\Context\GraphicsContext.h">
+      <Filter>src\Graphics\Context</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graphics\RenderAPI\RendererAPI.h">
+      <Filter>src\Graphics\RenderAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graphics\RenderAPI\RendererCommands.h">
+      <Filter>src\Graphics\RenderAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graphics\Renderer.h">
+      <Filter>src\Graphics</Filter>
+    </ClInclude>
     <ClInclude Include="src\PSIMPCH.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vk\Context\VulkanContext.h">
+      <Filter>src\Platform\Vk\Context</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vk\Modules\VulkanBuffer.h">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vk\Modules\VulkanCommandBuffer.h">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vk\Modules\VulkanDebugger.h">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vk\Modules\VulkanDepthBuffer.h">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vk\Modules\VulkanDescriptorSet.h">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vk\Modules\VulkanDevice.h">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vk\Modules\VulkanImage.h">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vk\Modules\VulkanInstance.h">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vk\Modules\VulkanMemory.h">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vk\Modules\VulkanPipeline.h">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vk\Modules\VulkanQueue.h">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vk\Modules\VulkanShader.h">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vk\Modules\VulkanSwapchain.h">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vk\Modules\VulkanTexture.h">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vk\Modules\VulkanUniformBuffer.h">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vk\RenderAPI\VulkanRendererAPI.h">
+      <Filter>src\Platform\Vk\RenderAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Windows\WindowsWindow.h">
+      <Filter>src\Platform\Windows</Filter>
     </ClInclude>
     <ClInclude Include="vendor\glm\glm\common.hpp">
       <Filter>vendor\glm\glm</Filter>
@@ -1155,60 +1290,93 @@
     <ClInclude Include="vendor\tinyObjLoader\tinyObjLoader\tiny_obj_loader.h">
       <Filter>vendor\tinyObjLoader\tinyObjLoader</Filter>
     </ClInclude>
-    <ClInclude Include="src\Graphics\Renderer.h" />
-    <ClInclude Include="src\Core\Core.h">
-      <Filter>src</Filter>
+    <ClInclude Include="src\Platform\Vk\Modules\VulkanSync.h" />
+    <ClInclude Include="src\Platform\Vk\FrameWork\VulkanFrameWork.h">
+      <Filter>src\Platform\Vk\Modules</Filter>
     </ClInclude>
-    <ClInclude Include="src\Core\Logging\Log.h">
-      <Filter>src\Logging</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Core\WindowPrototype.h" />
-    <ClInclude Include="src\Platform\Vk\VkRender.h">
-      <Filter>src\Vk</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Core\Debug\Instrumentor.h" />
-    <ClInclude Include="src\Events\Events.h" />
-    <ClInclude Include="src\Events\ApplicationEvents.h" />
-    <ClInclude Include="src\Events\MouseEvents.h" />
-    <ClInclude Include="src\Events\KeyEvents.h" />
-    <ClInclude Include="src\Platform\Vk\Context\VulkanContext.h" />
-    <ClInclude Include="src\Graphics\Context\GraphicsContext.h" />
-    <ClInclude Include="src\Graphics\RenderAPI\RendererAPI.h" />
-    <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
-    <ClInclude Include="src\Platform\Vk\RenderAPI\VulkanRendererAPI.h" />
-    <ClInclude Include="src\Core\Input\Input.h" />
-    <ClInclude Include="src\Core\Input\KeyCodes.h" />
-    <ClInclude Include="src\Core\Input\MouseCodes.h" />
-    <ClInclude Include="src\Graphics\RenderAPI\RendererCommands.h" />
+    <ClInclude Include="src\Platform\Vk\Modules\VulkanModelLoad.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Application\Application.cpp">
       <Filter>src\Application</Filter>
     </ClCompile>
+    <ClCompile Include="src\Core\Logging\Log.cpp">
+      <Filter>src\Core\Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\Context\GraphicsContext.cpp">
+      <Filter>src\Graphics\Context</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\RenderAPI\RendererAPI.cpp">
+      <Filter>src\Graphics\RenderAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\RenderAPI\RendererCommands.cpp">
+      <Filter>src\Graphics\RenderAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\Renderer.cpp">
+      <Filter>src\Graphics</Filter>
+    </ClCompile>
     <ClCompile Include="src\PSIMPCH.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vk\Modules\VulkanCommandBuffer.cpp">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vk\Modules\VulkanDebugger.cpp">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vk\Modules\VulkanDepthBuffer.cpp">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vk\Modules\VulkanDescriptorSet.cpp">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vk\Modules\VulkanDevice.cpp">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vk\Modules\VulkanImage.cpp">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vk\Modules\VulkanInstance.cpp">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vk\Modules\VulkanMemory.cpp">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vk\Modules\VulkanPipeline.cpp">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vk\Modules\VulkanQueue.cpp">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vk\Modules\VulkanShader.cpp">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vk\Modules\VulkanSwapchain.cpp">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vk\Modules\VulkanTexture.cpp">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vk\Modules\VulkanUniformBuffer.cpp">
+      <Filter>src\Platform\Vk\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vk\RenderAPI\VulkanRendererAPI.cpp">
+      <Filter>src\Platform\Vk\RenderAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp">
+      <Filter>src\Platform\Windows</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\Graphics\Renderer.cpp" />
-    <ClCompile Include="src\Core\Logging\Log.cpp">
-      <Filter>src\Logging</Filter>
+    <ClCompile Include="src\Platform\Vk\Modules\VulkanSync.cpp" />
+    <ClCompile Include="src\Platform\Vk\FrameWork\VulkanFrameWork.cpp">
+      <Filter>src\Platform\Vk\Modules</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\Vk\VkRender.cpp">
-      <Filter>src\Vk</Filter>
+    <ClCompile Include="src\Platform\Vk\Modules\VulkanModelLoad.cpp" />
+    <ClCompile Include="src\Platform\Vk\Modules\VulkanBuffer.cpp">
+      <Filter>src\Platform\Vk\Modules</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Vk\Context\VulkanContext.cpp" />
-    <ClCompile Include="src\Graphics\Context\GraphicsContext.cpp" />
-    <ClCompile Include="src\Graphics\RenderAPI\RendererAPI.cpp" />
-    <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
-    <ClCompile Include="src\Platform\Vk\RenderAPI\VulkanRendererAPI.cpp" />
-    <ClCompile Include="src\Graphics\RenderAPI\RendererCommands.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="src\Platform\Vk\Shaders\TriangleShaderFrag.spv" />
-    <None Include="src\Platform\Vk\Shaders\TriangleShaderGLSL.frag" />
-    <None Include="src\Platform\Vk\Shaders\TriangleShaderGLSL.vert" />
-    <None Include="src\Platform\Vk\Shaders\TriangleShaderVert.spv" />
   </ItemGroup>
 </Project>

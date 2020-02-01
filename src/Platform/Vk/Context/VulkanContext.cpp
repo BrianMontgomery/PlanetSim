@@ -5,7 +5,7 @@
 #include "vulkan/vulkan.hpp"
 
 VulkanContext::VulkanContext(GLFWwindow* windowHandle)
-	: m_WindowHandle(windowHandle)
+	: windowHandle(windowHandle)
 {
 	PSIM_ASSERT(windowHandle, "Window handle is null!")
 }
@@ -13,13 +13,12 @@ VulkanContext::VulkanContext(GLFWwindow* windowHandle)
 void VulkanContext::Init()
 {
 	PSIM_PROFILE_FUNCTION();
-
-	glfwMakeContextCurrent(m_WindowHandle);
+	framework.init(windowHandle);
 }
 
-void VulkanContext::SwapBuffers()
+void VulkanContext::drawFrame()
 {
 	PSIM_PROFILE_FUNCTION();
 
-	glfwSwapBuffers(m_WindowHandle);
+	framework.drawFrame(windowHandle);
 }
