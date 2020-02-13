@@ -3,8 +3,6 @@
 ToDo:
 Add prototypes within graphics for when I want to try implementing OpenGl
 
-Layers: add and implement
-
 Implement Window Events
 
 Create three separate types of config, MachineConfig and UserConfig, Save:

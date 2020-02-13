@@ -14,6 +14,7 @@ VulkanDepthBuffer::~VulkanDepthBuffer()
 
 vk::ImageView VulkanDepthBuffer::createDepthResources(vk::PhysicalDevice& physicalDevice, vk::Device& device, vk::Extent2D& swapchainExtent, vk::Image& depthImage, vk::DeviceMemory& depthImageMemory)
 {
+	PSIM_PROFILE_FUNCTION();
 	//get depth format
 	vk::Format depthFormat = findDepthFormat(physicalDevice);
 
@@ -28,6 +29,7 @@ vk::ImageView VulkanDepthBuffer::createDepthResources(vk::PhysicalDevice& physic
 
 vk::Format VulkanDepthBuffer::findSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features, vk::PhysicalDevice& physicalDevice)
 {
+	PSIM_PROFILE_FUNCTION();
 	//check for optimal formats
 	for (vk::Format format : candidates) {
 		vk::FormatProperties props;
@@ -48,12 +50,14 @@ vk::Format VulkanDepthBuffer::findSupportedFormat(const std::vector<vk::Format>&
 
 vk::Format VulkanDepthBuffer::findDepthFormat(vk::PhysicalDevice& physicalDevice)
 {
+	PSIM_PROFILE_FUNCTION();
 	//return the best format here
 	return findSupportedFormat({ vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint }, vk::ImageTiling::eOptimal, vk::FormatFeatureFlagBits::eDepthStencilAttachment, physicalDevice);
 }
 
 bool VulkanDepthBuffer::hasStencilComponent(vk::Format format)
 {
+	PSIM_PROFILE_FUNCTION();
 	//check for this stencil component
 	return format == vk::Format::eD32SfloatS8Uint || format == vk::Format::eD24UnormS8Uint;
 }

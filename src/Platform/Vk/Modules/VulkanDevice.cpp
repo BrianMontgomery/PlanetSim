@@ -17,6 +17,7 @@ VulkanDevice::~VulkanDevice()
 
 vk::PhysicalDevice VulkanDevice::pickPhysicalDevice(vk::Instance& instance, vk::SurfaceKHR& surface)
 {
+	PSIM_PROFILE_FUNCTION();
 	PSIM_CORE_INFO("Picking GPU");
 	//get devices
 	uint32_t deviceCount = 0;
@@ -42,11 +43,13 @@ vk::PhysicalDevice VulkanDevice::pickPhysicalDevice(vk::Instance& instance, vk::
 
 void VulkanDevice::getDefaults()
 {
+	PSIM_PROFILE_FUNCTION();
 	deviceExtensions.push_back( VK_KHR_SWAPCHAIN_EXTENSION_NAME );
 }
 
 bool VulkanDevice::isDeviceSuitable(vk::PhysicalDevice device, vk::SurfaceKHR& surface)
 {
+	PSIM_PROFILE_FUNCTION();
 	VulkanQueue queue;
 	VulkanQueue::QueueFamilyIndices indices = queue.findQueueFamilies(device, surface);
 
@@ -66,6 +69,7 @@ bool VulkanDevice::isDeviceSuitable(vk::PhysicalDevice device, vk::SurfaceKHR& s
 
 int VulkanDevice::rateDevice(const vk::PhysicalDevice device)
 {
+	PSIM_PROFILE_FUNCTION();
 	//get features and properties
 	vk::PhysicalDeviceProperties deviceProperties = device.getProperties();
 	vk::PhysicalDeviceFeatures deviceFeatures = device.getFeatures();
@@ -90,6 +94,7 @@ int VulkanDevice::rateDevice(const vk::PhysicalDevice device)
 
 bool VulkanDevice::checkDeviceExtensionSupport(vk::PhysicalDevice& device)
 {
+	PSIM_PROFILE_FUNCTION();
 	//get extensions for each device
 	auto[result, availableExtensions] = device.enumerateDeviceExtensionProperties();
 	PSIM_ASSERT(result == vk::Result::eSuccess, "Failed to enumerate device extension properties!");
@@ -106,6 +111,7 @@ bool VulkanDevice::checkDeviceExtensionSupport(vk::PhysicalDevice& device)
 
 vk::Device VulkanDevice::createLogicalDevice(vk::PhysicalDevice& physicalDevice, vk::SurfaceKHR& surface, std::vector<const char*> instanceLayers, vk::Queue &graphicsQueue, vk::Queue &presentQueue)
 {
+	PSIM_PROFILE_FUNCTION();
 	//get families
 	VulkanQueue queue;
 	VulkanQueue::QueueFamilyIndices indices = queue.findQueueFamilies(physicalDevice, surface);

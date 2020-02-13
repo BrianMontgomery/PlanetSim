@@ -6,6 +6,7 @@
 
 Scope<GraphicsContext> GraphicsContext::Create(void* window)
 {
+	PSIM_PROFILE_FUNCTION();
 	switch (Renderer::GetAPI())
 	{
 		case RendererAPI::API::None:    PSIM_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;

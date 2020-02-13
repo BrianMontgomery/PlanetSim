@@ -16,6 +16,7 @@ VulkanPipeline::~VulkanPipeline()
 
 vk::RenderPass VulkanPipeline::createRenderPass(vk::Format swapchainImageFormat, vk::PhysicalDevice& physicalDevice, vk::Device& device)
 {
+	PSIM_PROFILE_FUNCTION();
 	//color attachment
 	vk::AttachmentDescription colorAttachment = { {}, swapchainImageFormat, vk::SampleCountFlagBits::e1, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore,
 	vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eDontCare, vk::ImageLayout::eUndefined, vk::ImageLayout::ePresentSrcKHR };
@@ -49,6 +50,7 @@ vk::RenderPass VulkanPipeline::createRenderPass(vk::Format swapchainImageFormat,
 
 vk::Pipeline VulkanPipeline::createGraphicsPipeline(vk::Extent2D& swapchainExtent, vk::Device& device, vk::RenderPass& renderPass, vk::DescriptorSetLayout& descriptorSetlayout)
 {
+	PSIM_PROFILE_FUNCTION();
 	VulkanShader shaderMaker;
 	vk::ShaderModule vertShaderModule = shaderMaker.createShaderModule("src/Platform/Vk/Shaders/TriangleShaderVert.spv", device);
 	vk::ShaderModule fragShaderModule = shaderMaker.createShaderModule("src/Platform/Vk/Shaders/TriangleShaderFrag.spv", device);

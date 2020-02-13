@@ -19,6 +19,7 @@ static void GLFWErrorCallback(int error, const char* description)
 
 Scope<WindowPrototype> WindowPrototype::Create(const WindowProps& props)
 {
+	PSIM_PROFILE_FUNCTION();
 	return CreateScope<WindowsWindow>(props);
 }
 

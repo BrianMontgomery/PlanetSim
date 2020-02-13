@@ -8,26 +8,6 @@
 #include "GLFW/glfw3.h"
 //vulkan entry point
 //--------------------------------------------------------------------------------------------------------------------------------
-/*
-void Application::run()
-{
-	//loop
-	mainLoop();
-}
-
-void Application::mainLoop()
-{
-	VkRender vkRender;
-
-	bool close = false;
-	while (!close) {								
-		close = vkRender.mainLoop();				
-	}
-
-	PSIM_CORE_WARN("Shutdown Initiated");
-}
-*/
-
 
 Application* Application::s_AppInstance = nullptr;
 
@@ -53,7 +33,6 @@ Application::~Application()
 	Renderer::Shutdown();
 }
 
-/*
 void Application::PushLayer(Layer* layer)
 {
 	PSIM_PROFILE_FUNCTION();
@@ -68,7 +47,7 @@ void Application::PushOverlay(Layer* layer)
 
 	m_LayerStack.PushOverlay(layer);
 	layer->OnAttach();
-} */
+} 
 
 void Application::OnEvent(Event& e)
 {
@@ -78,14 +57,12 @@ void Application::OnEvent(Event& e)
 	dispatcher.Dispatch<WindowCloseEvent>(PSIM_BIND_EVENT_FN(Application::OnWindowClose));
 	dispatcher.Dispatch<WindowResizeEvent>(PSIM_BIND_EVENT_FN(Application::OnWindowResize));
 
-	/*
 	for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it)
 	{
 		(*it)->OnEvent(e);
 		if (e.Handled)
 			break;
 	}
-	*/
 }
 
 void Application::Run()
@@ -101,7 +78,6 @@ void Application::Run()
 		m_LastFrameTime = time;
 		std::cout << m_LastFrameTime << std::endl;
 
-		/*
 		if (!m_Minimized)
 		{
 			
@@ -112,6 +88,7 @@ void Application::Run()
 					layer->OnUpdate(timestep);
 			}
 
+			/*
 			m_ImGuiLayer->Begin();
 			{
 				PSIM_PROFILE_SCOPE("LayerStack OnImGuiRender");
@@ -120,8 +97,8 @@ void Application::Run()
 					layer->OnImGuiRender();
 			}
 			m_ImGuiLayer->End();
-			
-		} */
+			*/
+		}
 
 		m_Window->OnUpdate();
 	}
@@ -144,7 +121,7 @@ bool Application::OnWindowResize(WindowResizeEvent& e)
 	}
 
 	m_Minimized = false;
-	//Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
+	Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
 
 	return false;
 }

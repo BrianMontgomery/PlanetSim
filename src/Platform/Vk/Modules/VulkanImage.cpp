@@ -13,7 +13,9 @@ VulkanImage::~VulkanImage()
 {
 }
 
-vk::ImageView VulkanImage::createImageView(vk::Image& image, vk::Device& device, vk::Format format, vk::ImageAspectFlags aspectFlags) {
+vk::ImageView VulkanImage::createImageView(vk::Image& image, vk::Device& device, vk::Format format, vk::ImageAspectFlags aspectFlags) 
+{
+	PSIM_PROFILE_FUNCTION();
 	//define image view
 	vk::ImageViewCreateInfo viewInfo = { {}, image, vk::ImageViewType::e2D, format, {}, {aspectFlags, 0, 1, 0, 1} };
 
@@ -26,6 +28,7 @@ vk::ImageView VulkanImage::createImageView(vk::Image& image, vk::Device& device,
 
 vk::Image VulkanImage::createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::PhysicalDevice& physicalDevice, vk::Device& device, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& imageMemory)
 {
+	PSIM_PROFILE_FUNCTION();
 	//define an image 
 	vk::ImageCreateInfo imageInfo = { {}, vk::ImageType::e2D, format, vk::Extent3D { width, height, 1 }, 1, 1, vk::SampleCountFlagBits::e1, tiling, usage, vk::SharingMode::eExclusive };
 
@@ -46,4 +49,3 @@ vk::Image VulkanImage::createImage(uint32_t width, uint32_t height, vk::Format f
 
 	return image;
 }
-

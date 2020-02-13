@@ -4,6 +4,7 @@
 #include "spdlog/sinks/stdout_color_sinks.h"
 
 void Log::init() {
+	PSIM_PROFILE_FUNCTION();
 	//sets the logging format pattern
 	spdlog::set_pattern("%^[%T] %n: %v%$");
 
@@ -17,6 +18,7 @@ void Log::init() {
 }
 
 void Log::shutdown() {
+	PSIM_PROFILE_FUNCTION();
 	spdlog::shutdown();
 }
 

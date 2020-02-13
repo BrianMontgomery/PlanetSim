@@ -17,6 +17,7 @@ VulkanBuffer::~VulkanBuffer()
 //--------------------------------------------------------------------------------------------------------------------------------
 vk::Buffer VulkanBuffer::createVertexBuffer(std::vector<Vertex>& vertices, vk::DeviceMemory& vertexBufferMemory, vk::PhysicalDevice& physicalDevice, vk::Device& device, vk::CommandPool& commandPool, vk::Queue& graphicsQueue)
 {
+	PSIM_PROFILE_FUNCTION();
 	//get vertex buffer size
 	vk::DeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 	
@@ -64,6 +65,7 @@ vk::Buffer VulkanBuffer::createVertexBuffer(std::vector<Vertex>& vertices, vk::D
 
 vk::Buffer VulkanBuffer::createIndexBuffer(vk::DeviceMemory& indexBufferMemory, vk::PhysicalDevice& physicalDevice, vk::Device& device, std::vector<uint32_t>& indices, vk::CommandPool& commandPool, vk::Queue& graphicsQueue)
 {
+	PSIM_PROFILE_FUNCTION();
 	//get buffer size
 	vk::DeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
@@ -97,6 +99,7 @@ vk::Buffer VulkanBuffer::createIndexBuffer(vk::DeviceMemory& indexBufferMemory, 
 
 void VulkanBuffer::createBuffer(vk::DeviceSize& size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Buffer& buffer, vk::DeviceMemory& bufferMemory, vk::PhysicalDevice& physicalDevice, vk::Device& device)
 {
+	PSIM_PROFILE_FUNCTION();
 	//define and create buffer
 	vk::BufferCreateInfo bufferInfo = { {}, size, usage,vk::SharingMode::eExclusive };
 

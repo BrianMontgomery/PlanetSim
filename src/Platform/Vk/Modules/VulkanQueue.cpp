@@ -13,6 +13,7 @@ VulkanQueue::~VulkanQueue()
 
 VulkanQueue::QueueFamilyIndices VulkanQueue::findQueueFamilies(vk::PhysicalDevice& device, vk::SurfaceKHR& surface)
 {
+	PSIM_PROFILE_FUNCTION();
 	//create the queue family indeces
 	QueueFamilyIndices indices;
 	std::vector<vk::QueueFamilyProperties> queueFamilies = device.getQueueFamilyProperties();

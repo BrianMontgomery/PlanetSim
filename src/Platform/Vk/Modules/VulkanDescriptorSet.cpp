@@ -15,6 +15,7 @@ VulkanDescriptorSet::~VulkanDescriptorSet()
 
 vk::DescriptorSetLayout VulkanDescriptorSet::createDescriptorSetLayout(vk::Device& device)
 {
+	PSIM_PROFILE_FUNCTION();
 	//define the descriptor set layout
 	vk::DescriptorSetLayoutBinding uboLayoutBinding = { 0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eVertex };
 
@@ -33,6 +34,7 @@ vk::DescriptorSetLayout VulkanDescriptorSet::createDescriptorSetLayout(vk::Devic
 
 vk::DescriptorPool VulkanDescriptorSet::createDescriptorPool(std::vector<vk::Image>& swapchainImages, vk::Device& device)
 {
+	PSIM_PROFILE_FUNCTION();
 	//set both descriptor pool sizes
 	std::array<vk::DescriptorPoolSize, 2> poolSizes = {};
 	poolSizes[0] = { vk::DescriptorType::eUniformBuffer, static_cast<uint32_t>(swapchainImages.size()) };
@@ -49,6 +51,7 @@ vk::DescriptorPool VulkanDescriptorSet::createDescriptorPool(std::vector<vk::Ima
 
 std::vector<vk::DescriptorSet> VulkanDescriptorSet::createDescriptorSets(std::vector<vk::Image>& swapchainImages, vk::DescriptorSetLayout& descriptorSetLayout, vk::DescriptorPool& descriptorPool, vk::Device& device, std::vector<vk::Buffer>& uniformBuffers, vk::Sampler& textureSampler, vk::ImageView& textureImageView)
 {
+	PSIM_PROFILE_FUNCTION();
 	//get number of vectors
 	std::vector<vk::DescriptorSetLayout> layouts(swapchainImages.size(), descriptorSetLayout);
 

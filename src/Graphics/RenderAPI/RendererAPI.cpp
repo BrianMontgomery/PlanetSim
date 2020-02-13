@@ -7,6 +7,7 @@ RendererAPI::API RendererAPI::s_API = RendererAPI::API::Vulkan;
 
 Scope<RendererAPI> RendererAPI::Create()
 {
+	PSIM_PROFILE_FUNCTION();
 	switch (s_API)
 	{
 	case RendererAPI::API::None:    PSIM_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;

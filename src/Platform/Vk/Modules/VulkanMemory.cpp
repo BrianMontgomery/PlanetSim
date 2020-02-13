@@ -15,6 +15,7 @@ VulkanMemory::~VulkanMemory()
 
 void VulkanMemory::transitionImageLayout(vk::Image& image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::CommandPool& commandPool, vk::Device& device, vk::Queue& graphicsQueue)
 {
+	PSIM_PROFILE_FUNCTION();
 	VulkanCommandBuffer buff;
 
 	//set up fences and semaphores for when wanted
@@ -54,6 +55,7 @@ void VulkanMemory::transitionImageLayout(vk::Image& image, vk::Format format, vk
 
 void VulkanMemory::copyBufferToImage(vk::Buffer& buffer, vk::Image& image, uint32_t width, uint32_t height, vk::CommandPool& commandPool, vk::Device& device, vk::Queue& graphicsQueue)
 {
+	PSIM_PROFILE_FUNCTION();
 	VulkanCommandBuffer buff;
 
 	vk::CommandBuffer commandBuffer = buff.beginSingleTimeCommands(commandPool, device);
@@ -69,6 +71,7 @@ void VulkanMemory::copyBufferToImage(vk::Buffer& buffer, vk::Image& image, uint3
 
 uint32_t VulkanMemory::findMemoryType(vk::PhysicalDevice& physicalDevice, uint32_t typeFilter, vk::MemoryPropertyFlags properties)
 {
+	PSIM_PROFILE_FUNCTION();
 	//get memory props
 	vk::PhysicalDeviceMemoryProperties memProperties;
 	physicalDevice.getMemoryProperties(&memProperties);
@@ -85,6 +88,7 @@ uint32_t VulkanMemory::findMemoryType(vk::PhysicalDevice& physicalDevice, uint32
 
 void VulkanMemory::copyBuffer(vk::Buffer& srcBuffer, vk::Buffer& dstBuffer, vk::DeviceSize& size, vk::CommandPool& commandPool, vk::Device& device, vk::Queue& graphicsQueue)
 {
+	PSIM_PROFILE_FUNCTION();
 	VulkanCommandBuffer buff;
 
 	//copy one buffer to another
@@ -98,6 +102,7 @@ void VulkanMemory::copyBuffer(vk::Buffer& srcBuffer, vk::Buffer& dstBuffer, vk::
 
 uint32_t VulkanMemory::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties, vk::PhysicalDevice& physicalDevice)
 {
+	PSIM_PROFILE_FUNCTION();
 	//get memory props
 	vk::PhysicalDeviceMemoryProperties memProperties;
 	physicalDevice.getMemoryProperties(&memProperties);

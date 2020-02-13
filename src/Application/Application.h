@@ -3,26 +3,7 @@
 #include "Events/Events.h"
 #include "Events/ApplicationEvents.h"
 #include "Core/WindowPrototype.h"
-
-/*
-class Application
-{
-public:
-	//public func
-	void run();
-
-	//public var for vulkan
-	bool framebufferResized = false;
-
-private:
-	//private structs for vulkan
-	//--------------------------------------------------------------------------------------------------------------------------------
-
-	//member funcs
-	//--------------------------------------------------------------------------------------------------------------------------------
-	void mainLoop();
-};
-*/
+#include "Layers/LayerStack.h"
 
 class Application
 {
@@ -34,8 +15,8 @@ public:
 
 	void OnEvent(Event& e);
 
-	//void PushLayer(Layer* layer);
-	//void PushOverlay(Layer* layer);
+	void PushLayer(Layer* layer);
+	void PushOverlay(Layer* layer);
 
 	inline WindowPrototype& GetWindow() { return *m_Window; }
 
@@ -48,7 +29,7 @@ private:
 	//ImGuiLayer* m_ImGuiLayer;
 	bool m_Running = true;
 	bool m_Minimized = false;
-	//LayerStack m_LayerStack;
+	LayerStack m_LayerStack;
 	float m_LastFrameTime = 0.0f;
 private:
 	static Application* s_AppInstance;

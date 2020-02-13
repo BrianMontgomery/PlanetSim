@@ -48,18 +48,24 @@ void VulkanRendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint
 
 void VulkanRendererAPI::SetClearColor(const glm::vec4& color)
 {
+	PSIM_PROFILE_FUNCTION();
+
 	//glClearColor(color.r, color.g, color.b, color.a);
 }
 */
 
 void VulkanRendererAPI::Clear()
 {
+	PSIM_PROFILE_FUNCTION();
+
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 /*
 void VulkanRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray)
 {
+	PSIM_PROFILE_FUNCTION();
+
 	//glDrawElements(GL_TRIANGLES, vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 	//glBindTexture(GL_TEXTURE_2D, 0);
 }

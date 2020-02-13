@@ -16,6 +16,7 @@ VulkanInstance::~VulkanInstance()
 
 vk::Instance VulkanInstance::createNewInstance()
 {
+	PSIM_PROFILE_FUNCTION();
 	PSIM_CORE_INFO("Initializing Vulkan instance and extensions");
 
 	//creating the instance
@@ -27,6 +28,7 @@ vk::Instance VulkanInstance::createNewInstance()
 
 void VulkanInstance::getDefaults()
 {
+	PSIM_PROFILE_FUNCTION();
 	//appInfo
 	//creating info for vk instances
 	appInfo = { "Default Name", VK_MAKE_VERSION(1, 0, 0), "PSIM Engine", VK_MAKE_VERSION(1, 0, 0), VK_API_VERSION_1_0 };
@@ -61,6 +63,7 @@ void VulkanInstance::getDefaults()
 
 bool VulkanInstance::checkAvailableExtensions(const char* extension)
 {
+	PSIM_PROFILE_FUNCTION();
 	//get available
 	auto[result, availableExtensions] = vk::enumerateInstanceExtensionProperties();
 	PSIM_ASSERT(result == vk::Result::eSuccess, "Failed to enumerate instance extension properties!");
@@ -79,6 +82,7 @@ bool VulkanInstance::checkAvailableExtensions(const char* extension)
 
 bool VulkanInstance::checkAvailableLayers(const char* layer)
 {
+	PSIM_PROFILE_FUNCTION();
 	//get available layers
 	auto[result, availableLayers] = vk::enumerateInstanceLayerProperties();
 	PSIM_ASSERT(result == vk::Result::eSuccess, "Failed to enumerate instance layer properties!");
@@ -97,6 +101,7 @@ bool VulkanInstance::checkAvailableLayers(const char* layer)
 //for any additional extensions to be added by the application
 void VulkanInstance::addExtension(const char* extension)
 {
+	PSIM_PROFILE_FUNCTION();
 	PSIM_ASSERT(checkAvailableExtensions(extension), "Extension {0} addition: failed!", extension);
 
 	instanceExtensions.push_back(extension);
@@ -106,6 +111,7 @@ void VulkanInstance::addExtension(const char* extension)
 
 void VulkanInstance::addLayer(const char* layer)
 {
+	PSIM_PROFILE_FUNCTION();
 	PSIM_ASSERT(checkAvailableLayers(layer), "Layer {0} addition: failed!", layer);
 
 	instanceLayers.push_back(layer);
@@ -116,6 +122,7 @@ void VulkanInstance::addLayer(const char* layer)
 /// Set the name of the application.
 void VulkanInstance::setApplicationName(const char* pApplicationName_)
 {
+	PSIM_PROFILE_FUNCTION();
 	appInfo.pApplicationName = pApplicationName_;
 	return;
 }
@@ -123,6 +130,7 @@ void VulkanInstance::setApplicationName(const char* pApplicationName_)
 /// Set the version of the application.
 void VulkanInstance::setApplicationVersion(uint32_t applicationVersion_)
 {
+	PSIM_PROFILE_FUNCTION();
 	appInfo.applicationVersion = applicationVersion_;
 	return;
 }
@@ -130,6 +138,7 @@ void VulkanInstance::setApplicationVersion(uint32_t applicationVersion_)
 /// Set the name of the engine.
 void VulkanInstance::setEngineName(const char* pEngineName_)
 {
+	PSIM_PROFILE_FUNCTION();
 	appInfo.pEngineName = pEngineName_;
 	return;
 }
@@ -137,6 +146,7 @@ void VulkanInstance::setEngineName(const char* pEngineName_)
 /// Set the version of the engine.
 void VulkanInstance::setEngineVersion(uint32_t engineVersion_)
 {
+	PSIM_PROFILE_FUNCTION();
 	appInfo.engineVersion = engineVersion_;
 	return;
 }
@@ -144,6 +154,7 @@ void VulkanInstance::setEngineVersion(uint32_t engineVersion_)
 /// Set the version of the api.
 void VulkanInstance::setApiVersion(uint32_t apiVersion_)
 {
+	PSIM_PROFILE_FUNCTION();
 	appInfo.apiVersion = apiVersion_;
 	return;
 }
@@ -158,6 +169,7 @@ VulkanSurface::~VulkanSurface()
 
 vk::SurfaceKHR VulkanSurface::createNewSurface(GLFWwindow* window, vk::Instance& instance)
 {
+	PSIM_PROFILE_FUNCTION();
 	VkSurfaceKHR tempSurface;
 	PSIM_ASSERT(glfwCreateWindowSurface(VkInstance(instance), window, nullptr, &tempSurface) == VK_SUCCESS, "Failed to create window surface!");
 	PSIM_CORE_INFO("SurfaceKHR Created");

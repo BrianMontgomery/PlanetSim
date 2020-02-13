@@ -18,6 +18,8 @@ VulkanTexture::~VulkanTexture()
 
 vk::Image VulkanTexture::createTextureImage(const char* TEXTURE_PATH, vk::CommandPool& commandPool, vk::Device& device, vk::Queue& graphicsQueue, vk::PhysicalDevice& physicalDevice, vk::DeviceMemory& textureImageMemory)
 {
+	PSIM_PROFILE_FUNCTION();
+
 	//load texture
 	int texWidth, texHeight, texChannels;
 	stbi_uc* pixels = stbi_load(TEXTURE_PATH, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
@@ -61,6 +63,8 @@ vk::Image VulkanTexture::createTextureImage(const char* TEXTURE_PATH, vk::Comman
 
 vk::ImageView VulkanTexture::createTextureImageView(vk::Image& textureImage, vk::Device& device)
 {
+	PSIM_PROFILE_FUNCTION();
+
 	//create tex image view
 	VulkanImage imageMaker;
 	vk::ImageView textureImageView = imageMaker.createImageView(textureImage, device, vk::Format::eR8G8B8A8Unorm, vk::ImageAspectFlagBits::eColor);
@@ -71,6 +75,8 @@ vk::ImageView VulkanTexture::createTextureImageView(vk::Image& textureImage, vk:
 
 vk::Sampler VulkanTexture::createTextureSampler(vk::Device& device)
 {
+	PSIM_PROFILE_FUNCTION();
+
 	//define and create texture sampler
 	vk::SamplerCreateInfo samplerInfo = { {}, vk::Filter::eLinear, vk::Filter::eLinear, vk::SamplerMipmapMode::eLinear, vk::SamplerAddressMode::eRepeat, vk::SamplerAddressMode::eRepeat,
 	vk::SamplerAddressMode::eRepeat, 0.0f, true, 16, false, vk::CompareOp::eAlways, 0.0f, 0.0f, vk::BorderColor::eIntOpaqueBlack, false };

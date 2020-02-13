@@ -1295,6 +1295,8 @@
       <Filter>src\Platform\Vk\Modules</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Vk\Modules\VulkanModelLoad.h" />
+    <ClInclude Include="src\Layers\Layer.h" />
+    <ClInclude Include="src\Layers\LayerStack.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Application\Application.cpp">
@@ -1378,5 +1380,7 @@
       <Filter>src\Platform\Vk\Modules</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Vk\Context\VulkanContext.cpp" />
+    <ClCompile Include="src\Layers\Layer.cpp" />
+    <ClCompile Include="src\Layers\LayerStack.cpp" />
   </ItemGroup>
 </Project>

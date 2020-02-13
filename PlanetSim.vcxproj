@@ -140,6 +140,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Layers\LayerStack.h" />
+    <ClInclude Include="src\Layers\Layer.h" />
     <ClInclude Include="src\Application\Application.h" />
     <ClInclude Include="src\Core\Core.h" />
     <ClInclude Include="src\Core\Debug\Instrumentor.h" />
@@ -547,6 +549,8 @@
     <ClInclude Include="src\Platform\Vk\Modules\VulkanModelLoad.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Layers\LayerStack.cpp" />
+    <ClCompile Include="src\Layers\Layer.cpp" />
     <ClCompile Include="src\Application\Application.cpp" />
     <ClCompile Include="src\Core\Logging\Log.cpp" />
     <ClCompile Include="src\Graphics\Context\GraphicsContext.cpp" />

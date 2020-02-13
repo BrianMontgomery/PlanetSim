@@ -46,6 +46,7 @@ VulkanDebugger::~VulkanDebugger()
 
 vk::DebugUtilsMessengerEXT VulkanDebugger::createNewDebugger(vk::Instance& instance)
 {
+	PSIM_PROFILE_FUNCTION();
 	pfnVkCreateDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(instance.getProcAddr("vkCreateDebugUtilsMessengerEXT"));
 	PSIM_ASSERT(pfnVkCreateDebugUtilsMessengerEXT, "GetInstanceProcAddr: Unable to find pfnVkCreateDebugUtilsMessengerEXT function.");
 
@@ -60,6 +61,7 @@ vk::DebugUtilsMessengerEXT VulkanDebugger::createNewDebugger(vk::Instance& insta
 
 vk::DebugUtilsMessengerCreateInfoEXT VulkanDebugger::populateDebugMessengerCreateInfo()
 {
+	PSIM_PROFILE_FUNCTION();
 	//puts this info into the VkDebugger
 	vk::DebugUtilsMessengerCreateInfoEXT createInfo = { {}, vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError,
 	vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation,

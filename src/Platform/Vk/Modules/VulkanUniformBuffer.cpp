@@ -18,6 +18,8 @@ VulkanUniformBuffer::~VulkanUniformBuffer()
 
 std::vector<vk::Buffer> VulkanUniformBuffer::createUniformBuffers(std::vector<vk::DeviceMemory>& uniformBuffersMemory, std::vector<vk::Image>& swapchainImages, vk::PhysicalDevice& physicalDevice, vk::Device& device)
 {
+	PSIM_PROFILE_FUNCTION();
+
 	//get uniform buffer sizes
 	vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
 
@@ -36,6 +38,8 @@ std::vector<vk::Buffer> VulkanUniformBuffer::createUniformBuffers(std::vector<vk
 
 void VulkanUniformBuffer::updateUniformBuffer(uint32_t currentImage, vk::Extent2D& swapchainExtent, vk::Device& device, std::vector<vk::DeviceMemory>& uniformBuffersMemory)
 {
+	PSIM_PROFILE_FUNCTION();
+
 	//set clock for time
 	static auto startTime = std::chrono::high_resolution_clock::now();
 

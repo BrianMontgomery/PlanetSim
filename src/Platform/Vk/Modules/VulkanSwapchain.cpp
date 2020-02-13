@@ -21,6 +21,8 @@ VulkanSwapchain::~VulkanSwapchain()
 
 SwapChainSupportDetails VulkanSwapchain::querySwapChainSupport(vk::PhysicalDevice& physicalDevice, vk::SurfaceKHR& surface)
 {
+	PSIM_PROFILE_FUNCTION();
+
 	auto[result, surfaceCapabilities] = physicalDevice.getSurfaceCapabilitiesKHR(surface);
 	PSIM_ASSERT(result == vk::Result::eSuccess, "Failed to get surface capabilities!");
 	//formats
@@ -38,6 +40,8 @@ SwapChainSupportDetails VulkanSwapchain::querySwapChainSupport(vk::PhysicalDevic
 
 vk::SurfaceFormatKHR VulkanSwapchain::chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats)
 {
+	PSIM_PROFILE_FUNCTION();
+
 	//check for srgb
 	for (const auto& availableFormat : availableFormats) {
 		if (availableFormat.format == vk::Format::eB8G8R8A8Unorm && availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
@@ -50,6 +54,8 @@ vk::SurfaceFormatKHR VulkanSwapchain::chooseSwapSurfaceFormat(const std::vector<
 
 vk::PresentModeKHR VulkanSwapchain::chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes)
 {
+	PSIM_PROFILE_FUNCTION();
+
 	//check for mailbox mode
 	for (const auto& availablePresentMode : availablePresentModes) {
 		if (availablePresentMode == vk::PresentModeKHR::eMailbox) {
@@ -62,6 +68,8 @@ vk::PresentModeKHR VulkanSwapchain::chooseSwapPresentMode(const std::vector<vk::
 
 vk::Extent2D VulkanSwapchain::chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities, GLFWwindow* window)
 {
+	PSIM_PROFILE_FUNCTION();
+
 	//wanted extent
 	if (capabilities.currentExtent.width != UINT32_MAX) {
 		return capabilities.currentExtent;
@@ -85,6 +93,8 @@ vk::Extent2D VulkanSwapchain::chooseSwapExtent(const vk::SurfaceCapabilitiesKHR&
 
 vk::SwapchainKHR VulkanSwapchain::createSwapChain(vk::PhysicalDevice& physicalDevice, vk::SurfaceKHR& surface, GLFWwindow* window, vk::Device& device)
 {
+	PSIM_PROFILE_FUNCTION();
+
 	//create/populate the swapChainSupport struct
 	SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice, surface);
 
@@ -131,6 +141,7 @@ vk::SwapchainKHR VulkanSwapchain::createSwapChain(vk::PhysicalDevice& physicalDe
 
 void VulkanSwapchain::recreateSwapChain(vk::PhysicalDevice& physicalDevice, vk::SurfaceKHR& surface, GLFWwindow* window, vk::Device& device, vk::ImageView& depthImageView, vk::Image& depthImage, vk::DeviceMemory& depthImageMemory, std::vector<vk::Framebuffer>& swapchainFramebuffers, vk::CommandPool& commandPool, std::vector<vk::CommandBuffer>& commandBuffers, vk::Pipeline& graphicsPipeline, vk::PipelineLayout& pipelineLayout, vk::RenderPass& renderPass, std::vector<vk::ImageView>& swapchainImageViews, vk::SwapchainKHR& swapchain, std::vector<vk::Buffer>& uniformBuffers, std::vector<vk::DeviceMemory>& uniformBuffersMemory, std::vector<vk::DescriptorSet>& descriptorSets, vk::DescriptorPool& descriptorPool, vk::DescriptorSetLayout& descriptorSetLayout, vk::Sampler& textureSampler, vk::ImageView& textureImageView, vk::Buffer& vertexBuffer, vk::Buffer& indexBuffer, std::vector<uint32_t>& indices)
 {
+	PSIM_PROFILE_FUNCTION();
 	//check new window size and adapt
 	int width = 0, height = 0;
 	while (width == 0 || height == 0) {
@@ -167,6 +178,7 @@ void VulkanSwapchain::recreateSwapChain(vk::PhysicalDevice& physicalDevice, vk::
 
 void VulkanSwapchain::cleanupSwapChain(vk::Device& device, vk::ImageView& depthImageView, vk::Image& depthImage, vk::DeviceMemory& depthImageMemory, std::vector<vk::Framebuffer>& swapchainFramebuffers, vk::CommandPool& commandPool, std::vector<vk::CommandBuffer>& commandBuffers, vk::Pipeline& graphicsPipeline, vk::PipelineLayout& pipelineLayout, vk::RenderPass& renderPass, std::vector<vk::ImageView>& swapchainImageViews, vk::SwapchainKHR& swapchain, std::vector<vk::Buffer>& uniformBuffers, std::vector<vk::DeviceMemory>& uniformBuffersMemory, vk::DescriptorPool& descriptorPool)
 {
+	PSIM_PROFILE_FUNCTION();
 
 	//clean swapcain specific resources
 	device.destroyImageView(depthImageView, nullptr);
@@ -205,6 +217,8 @@ void VulkanSwapchain::cleanupSwapChain(vk::Device& device, vk::ImageView& depthI
 
 std::vector<vk::ImageView> VulkanSwapchain::createSwapchainImageViews(vk::Device& device)
 {
+	PSIM_PROFILE_FUNCTION();
+
 	std::vector<vk::ImageView> swapchainImageViews;
 	//get number of swapchain image views needed
 	swapchainImageViews.resize(swapchainImages.size());
@@ -221,6 +235,8 @@ std::vector<vk::ImageView> VulkanSwapchain::createSwapchainImageViews(vk::Device
 
 std::vector<vk::Framebuffer> VulkanSwapchain::createFramebuffers(std::vector<vk::ImageView>& swapchainImageViews, vk::RenderPass& renderPass, vk::Device& device, vk::ImageView& depthImageView)
 {
+	PSIM_PROFILE_FUNCTION();
+
 	//get number of framebuffers
 	std::vector<vk::Framebuffer> swapchainFramebuffers;
 	swapchainFramebuffers.resize(swapchainImageViews.size());
@@ -243,15 +259,21 @@ std::vector<vk::Framebuffer> VulkanSwapchain::createFramebuffers(std::vector<vk:
 
 std::vector<vk::Image> VulkanSwapchain::getSwapchainImages() 
 {
+	PSIM_PROFILE_FUNCTION();
+
 	return swapchainImages;
 }
 
 vk::Format VulkanSwapchain::getSwapchainImageFormat()
 {
+	PSIM_PROFILE_FUNCTION();
+
 	return swapchainImageFormat;
 }
 
 vk::Extent2D VulkanSwapchain::getSwapchainExtent()
 {
+	PSIM_PROFILE_FUNCTION();
+
 	return swapchainExtent;
 }

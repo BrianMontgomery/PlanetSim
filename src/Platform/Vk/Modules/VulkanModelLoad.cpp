@@ -23,6 +23,7 @@ VulkanModelLoad::~VulkanModelLoad()
 
 void VulkanModelLoad::loadModel(const std::string MODEL_PATH, std::vector<VulkanBuffer::Vertex>& vertices, std::vector<uint32_t>& indices)
 {
+	PSIM_PROFILE_FUNCTION();
 	tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;

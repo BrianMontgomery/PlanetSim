@@ -15,6 +15,7 @@ VulkanCommandBuffer::~VulkanCommandBuffer()
 
 vk::CommandPool VulkanCommandBuffer::createCommandPool(vk::PhysicalDevice& physicalDevice, vk::SurfaceKHR& surface, vk::Device& device)
 {
+	PSIM_PROFILE_FUNCTION();
 	//find all available queue families
 	VulkanQueue queueFinder;
 	VulkanQueue::QueueFamilyIndices queueFamilyIndices = queueFinder.findQueueFamilies(physicalDevice, surface);
@@ -31,6 +32,7 @@ vk::CommandPool VulkanCommandBuffer::createCommandPool(vk::PhysicalDevice& physi
 
 std::vector<vk::CommandBuffer> VulkanCommandBuffer::createCommandBuffers(std::vector<vk::Framebuffer>& swapChainFramebuffers, vk::CommandPool& commandPool, vk::Device& device, vk::RenderPass& renderPass, vk::Extent2D& swapchainExtent, vk::Pipeline& graphicsPipeline, vk::PipelineLayout& pipelineLayout, vk::Buffer& vertexBuffer, vk::Buffer& indexBuffer, std::vector<vk::DescriptorSet>& descriptorSets, std::vector<uint32_t>& indices)
 {
+	PSIM_PROFILE_FUNCTION();
 	//get number of framebuffers
 	std::vector<vk::CommandBuffer> commandBuffers;
 	commandBuffers.resize(swapChainFramebuffers.size());
@@ -79,6 +81,7 @@ std::vector<vk::CommandBuffer> VulkanCommandBuffer::createCommandBuffers(std::ve
 
 vk::CommandBuffer VulkanCommandBuffer::beginSingleTimeCommands(vk::CommandPool& commandPool, vk::Device& device)
 {
+	PSIM_PROFILE_FUNCTION();
 	//setup a command buffer to be synchronized
 	vk::CommandBufferAllocateInfo allocInfo = { commandPool, vk::CommandBufferLevel::ePrimary, 1 };
 
@@ -94,6 +97,7 @@ vk::CommandBuffer VulkanCommandBuffer::beginSingleTimeCommands(vk::CommandPool& 
 
 void VulkanCommandBuffer::endSingleTimeCommands(vk::CommandBuffer& commandBuffer, vk::Queue& graphicsQueue, vk::CommandPool& commandPool, vk::Device& device)
 {
+	PSIM_PROFILE_FUNCTION();
 	//submit and sync command buffers
 	commandBuffer.end();
 

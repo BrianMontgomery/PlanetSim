@@ -3,6 +3,7 @@
 
 static std::vector<char> readFileByteCode(const std::string& filename)
 {
+	PSIM_PROFILE_FUNCTION();
 	//open file
 	std::ifstream file(filename, std::ios::ate | std::ios::binary);
 	PSIM_ASSERT(file.is_open(), "Failed to open file!");
@@ -32,6 +33,7 @@ VulkanShader::~VulkanShader()
 
 vk::ShaderModule VulkanShader::createShaderModule(const std::string& filename, vk::Device& device)
 {
+	PSIM_PROFILE_FUNCTION();
 	const std::vector<char>& code = readFileByteCode(filename);
 	//shader module  info
 	vk::ShaderModuleCreateInfo createInfo = { {}, code.size(), reinterpret_cast<const uint32_t*>(code.data()) };

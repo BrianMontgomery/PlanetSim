@@ -36,6 +36,7 @@ VulkanFrameWork::VulkanFrameWork()
 
 VulkanFrameWork::~VulkanFrameWork()
 {
+	PSIM_PROFILE_FUNCTION();
 	VulkanSwapchain swapchainDestroy;
 	swapchainDestroy.cleanupSwapChain(device, depthImageView, depthImage, depthImageMemory, swapchainFramebuffers, commandPool, commandBuffers, graphicsPipeline, pipelineLayout, renderPass, swapchainImageViews, swapchain, uniformBuffers, uniformBuffersMemory, descriptorPool);
 
@@ -86,6 +87,7 @@ VulkanFrameWork::~VulkanFrameWork()
 
 void VulkanFrameWork::init(GLFWwindow* window)
 {
+	PSIM_PROFILE_FUNCTION();
 	//setup instance
 	VulkanInstance instanceMaker;
 	instance = instanceMaker.createNewInstance();
@@ -156,6 +158,7 @@ void VulkanFrameWork::init(GLFWwindow* window)
 
 void VulkanFrameWork::drawFrame(GLFWwindow* window)
 {
+	PSIM_PROFILE_FUNCTION();
 	//ensure that all previous draws are completed
 	device.waitForFences(1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
