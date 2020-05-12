@@ -8,9 +8,9 @@ public:
 	VulkanDepthBuffer();
 	~VulkanDepthBuffer();
 
-	vk::ImageView createDepthResources(vk::PhysicalDevice& physicalDevice, vk::Device& device, vk::Extent2D& swapchainExtent, vk::Image& depthImage, vk::DeviceMemory& depthImageMemory);
-	vk::Format findSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features, vk::PhysicalDevice& physicalDevice);
-	vk::Format findDepthFormat(vk::PhysicalDevice& physicalDevice);
+	vk::ImageView createDepthResources();
+	vk::Format findSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features);
+	vk::Format findDepthFormat();
 	bool hasStencilComponent(vk::Format format);
 };
 

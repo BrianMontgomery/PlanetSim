@@ -1,6 +1,7 @@
 #include "PSIMPCH.h"
 #include "VulkanModelLoad.h"
 
+#include "Platform/Vk/FrameWork/VulkanFrameWork.h"
 #include <tinyObjLoader/tiny_obj_loader.h>
 #include <glm/gtx/hash.hpp>
 
@@ -21,9 +22,10 @@ VulkanModelLoad::~VulkanModelLoad()
 {
 }
 
-void VulkanModelLoad::loadModel(const std::string MODEL_PATH, std::vector<VulkanBuffer::Vertex>& vertices, std::vector<uint32_t>& indices)
+void VulkanModelLoad::loadModel(const std::string MODEL_PATH)
 {
 	PSIM_PROFILE_FUNCTION();
+	VulkanFrameWork *framework = VulkanFrameWork::getFramework();
 	tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
@@ -55,11 +57,11 @@ void VulkanModelLoad::loadModel(const std::string MODEL_PATH, std::vector<Vulkan
 			vertex.color = { 1.0f, 1.0f, 1.0f };
 
 			if (uniqueVertices.count(vertex) == 0) {
-				uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-				vertices.push_back(vertex);
+				uniqueVertices[vertex] = static_cast<uint32_t>(framework->vertices.size());
+				framework->vertices.push_back(vertex);
 			}
 
-			indices.push_back(uniqueVertices[vertex]);
+			framework->indices.push_back(uniqueVertices[vertex]);
 		}
 	}
 }

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Core/WindowPrototype.h"
-#include "Graphics/Context/GraphicsContext.h"
+#include "PSIM/WindowPrototype.h"
+#include "PSIM/Graphics/Context/GraphicsContext.h"
 
 #include <GLFW/glfw3.h>
 

@@ -14,7 +14,7 @@ public:
 	VulkanUniformBuffer();
 	~VulkanUniformBuffer();
 
-	std::vector<vk::Buffer> createUniformBuffers(std::vector<vk::DeviceMemory>& uniformBuffersMemory, std::vector<vk::Image>& swapchainImages, vk::PhysicalDevice& physicalDevice, vk::Device& device);
-	void updateUniformBuffer(uint32_t currentImage, vk::Extent2D& swapchainExtent, vk::Device& device, std::vector<vk::DeviceMemory>& uniformBuffersMemory);
+	std::vector<vk::Buffer> createUniformBuffers();
+	void updateUniformBuffer(uint32_t currentImage);
 };
 

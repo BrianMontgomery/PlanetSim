@@ -1,14 +1,13 @@
 #include "PSIMPCH.h"
 #include "WindowsWindow.h"
 
-#include "Graphics/Renderer.h"
-#include "Platform/Vk/Context/VulkanContext.h"
+#include "PSIM/Graphics/Renderer.h"
 
-#include "Core/Input/Input.h"
+#include "PSIM/Input/Input.h"
 
-#include "Events/ApplicationEvents.h"
-#include "Events/MouseEvents.h"
-#include "Events/KeyEvents.h"
+#include "PSIM/Events/ApplicationEvents.h"
+#include "PSIM/Events/MouseEvents.h"
+#include "PSIM/Events/KeyEvents.h"
 
 static uint8_t s_GLFWWindowCount = 0;
 
@@ -60,6 +59,8 @@ void WindowsWindow::Init(const WindowProps& props)
 #if defined(PSIM_DEBUG)
 		if (Renderer::GetAPI() == RendererAPI::API::Vulkan)
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		if (Renderer::GetAPI() == RendererAPI::API::OpenGL)
+			glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif
 		window = glfwCreateWindow((int)props.Width, (int)props.Height, windowData.Title.c_str(), nullptr, nullptr);
 		++s_GLFWWindowCount;

@@ -1,6 +1,8 @@
 #include "PSIMPCH.h"
 #include "VulkanDebugger.h"
 
+#include "Platform/Vk/FrameWork/VulkanFrameWork.h"
+
 
 PFN_vkCreateDebugUtilsMessengerEXT pfnVkCreateDebugUtilsMessengerEXT;
 PFN_vkDestroyDebugUtilsMessengerEXT pfnVkDestroyDebugUtilsMessengerEXT;
@@ -44,16 +46,17 @@ VulkanDebugger::~VulkanDebugger()
 {
 }
 
-vk::DebugUtilsMessengerEXT VulkanDebugger::createNewDebugger(vk::Instance& instance)
+vk::DebugUtilsMessengerEXT VulkanDebugger::createNewDebugger()
 {
 	PSIM_PROFILE_FUNCTION();
-	pfnVkCreateDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(instance.getProcAddr("vkCreateDebugUtilsMessengerEXT"));
+	VulkanFrameWork *framework = VulkanFrameWork::getFramework();
+	pfnVkCreateDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(framework->instance.getProcAddr("vkCreateDebugUtilsMessengerEXT"));
 	PSIM_ASSERT(pfnVkCreateDebugUtilsMessengerEXT, "GetInstanceProcAddr: Unable to find pfnVkCreateDebugUtilsMessengerEXT function.");
 
-	pfnVkDestroyDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(instance.getProcAddr("vkDestroyDebugUtilsMessengerEXT"));
+	pfnVkDestroyDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(framework->instance.getProcAddr("vkDestroyDebugUtilsMessengerEXT"));
 	PSIM_ASSERT(pfnVkDestroyDebugUtilsMessengerEXT, "GetInstanceProcAddr: Unable to find pfnVkDestroyDebugUtilsMessengerEXT function.");
 
-	auto[result, tempDebugUtilsMessenger] = instance.createDebugUtilsMessengerEXT(populateDebugMessengerCreateInfo());
+	auto[result, tempDebugUtilsMessenger] = framework->instance.createDebugUtilsMessengerEXT(populateDebugMessengerCreateInfo());
 	PSIM_ASSERT(result == vk::Result::eSuccess, "Failed to set up debug messenger!");
 	PSIM_CORE_INFO("Debug Utils Messenger Created");
 	return tempDebugUtilsMessenger;

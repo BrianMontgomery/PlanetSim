@@ -5,18 +5,37 @@
 #include "GLFW/glfw3.h"
 #include "Platform/Vk/Modules/VulkanBuffer.h"
 
+
 class VulkanFrameWork
 {
-public:
+private:
+	//singleton funcs
 	VulkanFrameWork();
+
+	static VulkanFrameWork *m_framework;
+
+public:
+	static VulkanFrameWork *getFramework() {
+		if (!m_framework)
+			m_framework = new VulkanFrameWork;
+		return m_framework;
+	}
+
 	~VulkanFrameWork();
 
+
+
+	//main vulkan funcs
 	void init(GLFWwindow* window);
+	void createPipeline();
 	void drawFrame(GLFWwindow* window);
+
+
+
+	//Vulkan variables
 
 	bool framebufferResized = false;
 
-private:
 	vk::Instance instance;
 	vk::SurfaceKHR surface;
 

@@ -1,6 +1,7 @@
 #include "PSIMPCH.h"
 #include "VulkanDevice.h"
 
+#include "Platform/Vk/FrameWork/VulkanFrameWork.h"
 #include "Platform/Vk/Modules/VulkanQueue.h"
 #include "Platform/Vk/Modules/VulkanSwapchain.h"
 #include <set>
@@ -15,23 +16,24 @@ VulkanDevice::~VulkanDevice()
 {
 }
 
-vk::PhysicalDevice VulkanDevice::pickPhysicalDevice(vk::Instance& instance, vk::SurfaceKHR& surface)
+vk::PhysicalDevice VulkanDevice::pickPhysicalDevice()
 {
 	PSIM_PROFILE_FUNCTION();
+	VulkanFrameWork *framework = VulkanFrameWork::getFramework();
 	PSIM_CORE_INFO("Picking GPU");
 	//get devices
 	uint32_t deviceCount = 0;
-	auto[result, physicalDevices] = instance.enumeratePhysicalDevices();
+	auto[result, physicalDevices] = framework->instance.enumeratePhysicalDevices();
 	PSIM_ASSERT(result == vk::Result::eSuccess, "Failed to enumerate physical devices!");
 	getDefaults();
 
 	//actually pick from available
 	std::unordered_map<int, vk::PhysicalDevice> candidates;
 
-	for (const auto& device : physicalDevices) {
-		if (isDeviceSuitable(device, surface)) {
-			int score = rateDevice(device);
-			candidates.insert(std::make_pair(score, device));
+	for (const auto& testPhysicalDevice : physicalDevices) {
+		if (isDeviceSuitable(testPhysicalDevice)) {
+			int score = rateDevice(testPhysicalDevice);
+			candidates.insert(std::make_pair(score, testPhysicalDevice));
 		}
 	}
 
@@ -47,32 +49,33 @@ void VulkanDevice::getDefaults()
 	deviceExtensions.push_back( VK_KHR_SWAPCHAIN_EXTENSION_NAME );
 }
 
-bool VulkanDevice::isDeviceSuitable(vk::PhysicalDevice device, vk::SurfaceKHR& surface)
+bool VulkanDevice::isDeviceSuitable(vk::PhysicalDevice testPhysicalDevice)
 {
 	PSIM_PROFILE_FUNCTION();
+	VulkanFrameWork *framework = VulkanFrameWork::getFramework();
 	VulkanQueue queue;
-	VulkanQueue::QueueFamilyIndices indices = queue.findQueueFamilies(device, surface);
+	VulkanQueue::QueueFamilyIndices indices = queue.findQueueFamilies(testPhysicalDevice);
 
-	bool extensionsSupported = checkDeviceExtensionSupport(device);
+	bool extensionsSupported = checkDeviceExtensionSupport(testPhysicalDevice);
 
 	bool swapChainAdequate = false;
 	if (extensionsSupported) {
 		VulkanSwapchain swapchainFuncs;
-		SwapChainSupportDetails swapChainSupport = swapchainFuncs.querySwapChainSupport(device, surface);
+		SwapChainSupportDetails swapChainSupport = swapchainFuncs.querySwapChainSupport(testPhysicalDevice);
 		swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
 	}
 
-	vk::PhysicalDeviceFeatures supportedFeatures = device.getFeatures();
+	vk::PhysicalDeviceFeatures supportedFeatures = testPhysicalDevice.getFeatures();
 
 	return indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
 }
 
-int VulkanDevice::rateDevice(const vk::PhysicalDevice device)
+int VulkanDevice::rateDevice(const vk::PhysicalDevice testPhysicalDevice)
 {
 	PSIM_PROFILE_FUNCTION();
 	//get features and properties
-	vk::PhysicalDeviceProperties deviceProperties = device.getProperties();
-	vk::PhysicalDeviceFeatures deviceFeatures = device.getFeatures();
+	vk::PhysicalDeviceProperties deviceProperties = testPhysicalDevice.getProperties();
+	vk::PhysicalDeviceFeatures deviceFeatures = testPhysicalDevice.getFeatures();
 
 	int score = 0;
 
@@ -92,11 +95,12 @@ int VulkanDevice::rateDevice(const vk::PhysicalDevice device)
 	return score;
 }
 
-bool VulkanDevice::checkDeviceExtensionSupport(vk::PhysicalDevice& device)
+bool VulkanDevice::checkDeviceExtensionSupport(vk::PhysicalDevice& testPhysicalDevice)
 {
 	PSIM_PROFILE_FUNCTION();
+	VulkanFrameWork *framework = VulkanFrameWork::getFramework();
 	//get extensions for each device
-	auto[result, availableExtensions] = device.enumerateDeviceExtensionProperties();
+	auto[result, availableExtensions] = testPhysicalDevice.enumerateDeviceExtensionProperties();
 	PSIM_ASSERT(result == vk::Result::eSuccess, "Failed to enumerate device extension properties!");
 
 	std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
@@ -109,12 +113,13 @@ bool VulkanDevice::checkDeviceExtensionSupport(vk::PhysicalDevice& device)
 	return requiredExtensions.empty();
 }
 
-vk::Device VulkanDevice::createLogicalDevice(vk::PhysicalDevice& physicalDevice, vk::SurfaceKHR& surface, std::vector<const char*> instanceLayers, vk::Queue &graphicsQueue, vk::Queue &presentQueue)
+vk::Device VulkanDevice::createLogicalDevice(std::vector<const char*> instanceLayers)
 {
 	PSIM_PROFILE_FUNCTION();
+	VulkanFrameWork *framework = VulkanFrameWork::getFramework();
 	//get families
 	VulkanQueue queue;
-	VulkanQueue::QueueFamilyIndices indices = queue.findQueueFamilies(physicalDevice, surface);
+	VulkanQueue::QueueFamilyIndices indices = queue.findQueueFamilies(framework->physicalDevice);
 
 	//create queue info
 	std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
@@ -140,12 +145,12 @@ vk::Device VulkanDevice::createLogicalDevice(vk::PhysicalDevice& physicalDevice,
 
 	//create device
 	vk::Device device;
-	PSIM_ASSERT(physicalDevice.createDevice(&createInfo, nullptr, &device) == vk::Result::eSuccess, "Failed to create logical device!");
+	PSIM_ASSERT(framework->physicalDevice.createDevice(&createInfo, nullptr, &device) == vk::Result::eSuccess, "Failed to create logical device!");
 	PSIM_CORE_INFO("Created Logical Device");
 
 	//get handles to the queues
-	device.getQueue(indices.graphicsFamily.value(), 0, &graphicsQueue);
-	device.getQueue(indices.presentFamily.value(), 0, &presentQueue);
+	device.getQueue(indices.graphicsFamily.value(), 0, &framework->graphicsQueue);
+	device.getQueue(indices.presentFamily.value(), 0, &framework->presentQueue);
 
 	return device;
 }

@@ -1,6 +1,8 @@
 #include "PSIMPCH.h"
 #include "VulkanQueue.h"
 
+#include "Platform/Vk/FrameWork/VulkanFrameWork.h"
+
 
 VulkanQueue::VulkanQueue()
 {
@@ -11,9 +13,10 @@ VulkanQueue::~VulkanQueue()
 {
 }
 
-VulkanQueue::QueueFamilyIndices VulkanQueue::findQueueFamilies(vk::PhysicalDevice& device, vk::SurfaceKHR& surface)
+VulkanQueue::QueueFamilyIndices VulkanQueue::findQueueFamilies(vk::PhysicalDevice& device)
 {
 	PSIM_PROFILE_FUNCTION();
+	VulkanFrameWork *framework = VulkanFrameWork::getFramework();
 	//create the queue family indeces
 	QueueFamilyIndices indices;
 	std::vector<vk::QueueFamilyProperties> queueFamilies = device.getQueueFamilyProperties();
@@ -26,7 +29,7 @@ VulkanQueue::QueueFamilyIndices VulkanQueue::findQueueFamilies(vk::PhysicalDevic
 		}
 
 		vk::Bool32 presentSupport = false;
-		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
+		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, framework->surface, &presentSupport);
 
 		if (queueFamily.queueCount > 0 && presentSupport) {
 			indices.presentFamily = i;

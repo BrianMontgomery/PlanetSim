@@ -1,7 +1,7 @@
 #include "PSIMPCH.h"
 #include "VulkanInstance.h"
 
-
+#include "Platform/Vk/FrameWork/VulkanFrameWork.h"
 
 
 VulkanInstance::VulkanInstance()
@@ -167,11 +167,12 @@ VulkanSurface::~VulkanSurface()
 {
 }
 
-vk::SurfaceKHR VulkanSurface::createNewSurface(GLFWwindow* window, vk::Instance& instance)
+vk::SurfaceKHR VulkanSurface::createNewSurface(GLFWwindow *window)
 {
 	PSIM_PROFILE_FUNCTION();
+	VulkanFrameWork *framework = VulkanFrameWork::getFramework();
 	VkSurfaceKHR tempSurface;
-	PSIM_ASSERT(glfwCreateWindowSurface(VkInstance(instance), window, nullptr, &tempSurface) == VK_SUCCESS, "Failed to create window surface!");
+	PSIM_ASSERT(glfwCreateWindowSurface(VkInstance(framework->instance), window, nullptr, &tempSurface) == VK_SUCCESS, "Failed to create window surface!");
 	PSIM_CORE_INFO("SurfaceKHR Created");
 	return tempSurface;
 }

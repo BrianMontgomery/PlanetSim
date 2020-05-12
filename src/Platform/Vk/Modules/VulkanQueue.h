@@ -17,6 +17,6 @@ public:
 	VulkanQueue();
 	~VulkanQueue();
 
-	QueueFamilyIndices findQueueFamilies(vk::PhysicalDevice& device, vk::SurfaceKHR& surface);
+	QueueFamilyIndices findQueueFamilies(vk::PhysicalDevice& device);
 };
 

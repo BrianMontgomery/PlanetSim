@@ -1,6 +1,7 @@
 #include "PSIMPCH.h"
 #include "VulkanBuffer.h"
 
+#include "Platform/Vk/FrameWork/VulkanFrameWork.h"
 #include "Platform/Vk/Modules/VulkanMemory.h"
 
 
@@ -15,11 +16,12 @@ VulkanBuffer::~VulkanBuffer()
 
 //Vertex Buffer Funcs
 //--------------------------------------------------------------------------------------------------------------------------------
-vk::Buffer VulkanBuffer::createVertexBuffer(std::vector<Vertex>& vertices, vk::DeviceMemory& vertexBufferMemory, vk::PhysicalDevice& physicalDevice, vk::Device& device, vk::CommandPool& commandPool, vk::Queue& graphicsQueue)
+vk::Buffer VulkanBuffer::createVertexBuffer()
 {
 	PSIM_PROFILE_FUNCTION();
+	VulkanFrameWork *framework = VulkanFrameWork::getFramework();
 	//get vertex buffer size
-	vk::DeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+	vk::DeviceSize bufferSize = sizeof(framework->vertices[0]) * framework->vertices.size();
 	
 	
 	if (bufferSize == 0) {
@@ -35,85 +37,87 @@ vk::Buffer VulkanBuffer::createVertexBuffer(std::vector<Vertex>& vertices, vk::D
 
 		vertex.color = { 1.0f, 1.0f, 1.0f };
 
-		vertices.push_back(vertex);
+		framework->vertices.push_back(vertex);
 
-		bufferSize = sizeof(vertices[0]) * vertices.size();
+		bufferSize = sizeof(framework->vertices[0]) * framework->vertices.size();
 	}
 	
 	//create buffer
 	vk::Buffer stagingBuffer;
 	vk::DeviceMemory stagingBufferMemory;
-	createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, stagingBuffer, stagingBufferMemory, physicalDevice, device);
+	createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, stagingBuffer, stagingBufferMemory);
 
 	//fill buffer
 	void* data;
-	device.mapMemory(stagingBufferMemory, vk::DeviceSize(), bufferSize, vk::MemoryMapFlags(), &data);
-	memcpy(data, vertices.data(), (size_t)bufferSize);
-	device.unmapMemory(stagingBufferMemory);
+	framework->device.mapMemory(stagingBufferMemory, vk::DeviceSize(), bufferSize, vk::MemoryMapFlags(), &data);
+	memcpy(data, framework->vertices.data(), (size_t)bufferSize);
+	framework->device.unmapMemory(stagingBufferMemory);
 
 	vk::Buffer vertexBuffer;
-	createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer, vk::MemoryPropertyFlagBits::eDeviceLocal, vertexBuffer, vertexBufferMemory, physicalDevice, device);
+	createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer, vk::MemoryPropertyFlagBits::eDeviceLocal, vertexBuffer, framework->vertexBufferMemory);
 
 	VulkanMemory mem;
-	mem.copyBuffer(stagingBuffer, vertexBuffer, bufferSize, commandPool, device, graphicsQueue);
+	mem.copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
 
-	device.destroyBuffer(stagingBuffer, nullptr);
-	device.freeMemory(stagingBufferMemory, nullptr);
+	framework->device.destroyBuffer(stagingBuffer, nullptr);
+	framework->device.freeMemory(stagingBufferMemory, nullptr);
 
 	return vertexBuffer;
 }
 
-vk::Buffer VulkanBuffer::createIndexBuffer(vk::DeviceMemory& indexBufferMemory, vk::PhysicalDevice& physicalDevice, vk::Device& device, std::vector<uint32_t>& indices, vk::CommandPool& commandPool, vk::Queue& graphicsQueue)
+vk::Buffer VulkanBuffer::createIndexBuffer()
 {
 	PSIM_PROFILE_FUNCTION();
+	VulkanFrameWork *framework = VulkanFrameWork::getFramework();
 	//get buffer size
-	vk::DeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+	vk::DeviceSize bufferSize = sizeof(framework->indices[0]) * framework->indices.size();
 
 	if (bufferSize == 0) {
-		indices = { 0 };
-		bufferSize = sizeof(indices[0]) * indices.size();
+		framework->indices = { 0 };
+		bufferSize = sizeof(framework->indices[0]) * framework->indices.size();
 	}
 
 	//create buffer
 	vk::Buffer stagingBuffer;
 	vk::DeviceMemory stagingBufferMemory;
-	createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, stagingBuffer, stagingBufferMemory, physicalDevice, device);
+	createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, stagingBuffer, stagingBufferMemory);
 
 	//fill buffer
 	void* data;
-	device.mapMemory(stagingBufferMemory, vk::DeviceSize(), bufferSize, vk::MemoryMapFlags(), &data);
-	memcpy(data, indices.data(), (size_t)bufferSize);
-	device.unmapMemory(stagingBufferMemory);
+	framework->device.mapMemory(stagingBufferMemory, vk::DeviceSize(), bufferSize, vk::MemoryMapFlags(), &data);
+	memcpy(data, framework->indices.data(), (size_t)bufferSize);
+	framework->device.unmapMemory(stagingBufferMemory);
 
 	vk::Buffer indexBuffer;
-	createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer, vk::MemoryPropertyFlagBits::eDeviceLocal, indexBuffer, indexBufferMemory, physicalDevice, device);
+	createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer, vk::MemoryPropertyFlagBits::eDeviceLocal, indexBuffer, framework->indexBufferMemory);
 
 	VulkanMemory mem;
-	mem.copyBuffer(stagingBuffer, indexBuffer, bufferSize, commandPool, device, graphicsQueue);
+	mem.copyBuffer(stagingBuffer, indexBuffer, bufferSize);
 
-	device.destroyBuffer(stagingBuffer, nullptr);
-	device.freeMemory(stagingBufferMemory, nullptr);
+	framework->device.destroyBuffer(stagingBuffer, nullptr);
+	framework->device.freeMemory(stagingBufferMemory, nullptr);
 
 	return indexBuffer;
 }
 
-void VulkanBuffer::createBuffer(vk::DeviceSize& size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Buffer& buffer, vk::DeviceMemory& bufferMemory, vk::PhysicalDevice& physicalDevice, vk::Device& device)
+void VulkanBuffer::createBuffer(vk::DeviceSize& size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Buffer& buffer, vk::DeviceMemory& bufferMemory)
 {
 	PSIM_PROFILE_FUNCTION();
+	VulkanFrameWork *framework = VulkanFrameWork::getFramework();
 	//define and create buffer
 	vk::BufferCreateInfo bufferInfo = { {}, size, usage,vk::SharingMode::eExclusive };
 
 
-	PSIM_ASSERT(device.createBuffer(&bufferInfo, nullptr, &buffer) == vk::Result::eSuccess, "Failed to create buffer!");
+	PSIM_ASSERT(framework->device.createBuffer(&bufferInfo, nullptr, &buffer) == vk::Result::eSuccess, "Failed to create buffer!");
 
 	//allocate buffer memory
 	vk::MemoryRequirements memRequirements;
-	device.getBufferMemoryRequirements(buffer, &memRequirements);
+	framework->device.getBufferMemoryRequirements(buffer, &memRequirements);
 
 	VulkanMemory mem;
-	vk::MemoryAllocateInfo allocInfo = { memRequirements.size, mem.findMemoryType(physicalDevice, memRequirements.memoryTypeBits, properties) };
+	vk::MemoryAllocateInfo allocInfo = { memRequirements.size, mem.findMemoryType(memRequirements.memoryTypeBits, properties) };
 
-	PSIM_ASSERT(device.allocateMemory(&allocInfo, nullptr, &bufferMemory) == vk::Result::eSuccess, "Failed to allocate buffer memory!");
+	PSIM_ASSERT(framework->device.allocateMemory(&allocInfo, nullptr, &bufferMemory) == vk::Result::eSuccess, "Failed to allocate buffer memory!");
 
-	device.bindBufferMemory(buffer, bufferMemory, 0);
+	framework->device.bindBufferMemory(buffer, bufferMemory, 0);
 }

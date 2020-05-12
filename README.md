@@ -3,8 +3,6 @@
 ToDo:
 Add prototypes within graphics for when I want to try implementing OpenGl
 
-Implement Window Events
-
 Create three separate types of config, MachineConfig and UserConfig, Save:
 Machine Config will not be editable by the user, contains info that needs to be readily changed during development
 -Add configuration to the extensions and layers for instance from outside the engine using a PSIM_VULKAN_CONFIG file

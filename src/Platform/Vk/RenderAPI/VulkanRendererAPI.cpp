@@ -40,9 +40,10 @@ void VulkanRendererAPI::Init()
 	//glEnable(GL_DEPTH_TEST);
 }
 
-/*
+
 void VulkanRendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 {
+	PSIM_PROFILE_FUNCTION();
 	//glViewport(x, y, width, height);
 }
 
@@ -52,7 +53,7 @@ void VulkanRendererAPI::SetClearColor(const glm::vec4& color)
 
 	//glClearColor(color.r, color.g, color.b, color.a);
 }
-*/
+
 
 void VulkanRendererAPI::Clear()
 {
@@ -61,7 +62,7 @@ void VulkanRendererAPI::Clear()
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-/*
+
 void VulkanRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray)
 {
 	PSIM_PROFILE_FUNCTION();
@@ -69,4 +70,3 @@ void VulkanRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray)
 	//glDrawElements(GL_TRIANGLES, vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 	//glBindTexture(GL_TEXTURE_2D, 0);
 }
-*/

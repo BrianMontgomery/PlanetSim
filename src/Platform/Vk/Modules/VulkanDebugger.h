@@ -7,7 +7,6 @@ public:
 	VulkanDebugger();
 	~VulkanDebugger();
 
-	vk::DebugUtilsMessengerEXT createNewDebugger(vk::Instance& instance);
+	vk::DebugUtilsMessengerEXT createNewDebugger();
 	vk::DebugUtilsMessengerCreateInfoEXT populateDebugMessengerCreateInfo();
 };
-

@@ -40,9 +40,5 @@ public:
 	VulkanSurface();
 	~VulkanSurface();
 
-	vk::SurfaceKHR createNewSurface(GLFWwindow* window, vk::Instance& instance);
-
-private:
-	GLFWwindow* window;
-	vk::Instance* instance;
+	vk::SurfaceKHR createNewSurface(GLFWwindow* window);
 };

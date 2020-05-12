@@ -3,6 +3,8 @@
 
 #include "Platform/Vk/Modules/VulkanImage.h"
 
+#include "Platform/Vk/FrameWork/VulkanFrameWork.h"
+
 VulkanDepthBuffer::VulkanDepthBuffer()
 {
 }
@@ -12,28 +14,30 @@ VulkanDepthBuffer::~VulkanDepthBuffer()
 {
 }
 
-vk::ImageView VulkanDepthBuffer::createDepthResources(vk::PhysicalDevice& physicalDevice, vk::Device& device, vk::Extent2D& swapchainExtent, vk::Image& depthImage, vk::DeviceMemory& depthImageMemory)
+vk::ImageView VulkanDepthBuffer::createDepthResources()
 {
 	PSIM_PROFILE_FUNCTION();
+	VulkanFrameWork *framework = VulkanFrameWork::getFramework();
 	//get depth format
-	vk::Format depthFormat = findDepthFormat(physicalDevice);
+	vk::Format depthFormat = findDepthFormat();
 
 	//create depth resources
 	VulkanImage imageMaker;
-	imageMaker.createImage(swapchainExtent.width, swapchainExtent.height, depthFormat, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eDepthStencilAttachment,
-		physicalDevice, device, vk::MemoryPropertyFlagBits::eDeviceLocal, depthImage, depthImageMemory);
-	vk::ImageView depthImageView = imageMaker.createImageView(depthImage, device, depthFormat, vk::ImageAspectFlagBits::eDepth);
+	imageMaker.createImage(framework->swapchainExtent.width, framework->swapchainExtent.height, depthFormat, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eDepthStencilAttachment,
+	 vk::MemoryPropertyFlagBits::eDeviceLocal, framework->depthImage, framework->depthImageMemory);
+	vk::ImageView depthImageView = imageMaker.createImageView(framework->depthImage, depthFormat, vk::ImageAspectFlagBits::eDepth);
 
 	return depthImageView;
 }
 
-vk::Format VulkanDepthBuffer::findSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features, vk::PhysicalDevice& physicalDevice)
+vk::Format VulkanDepthBuffer::findSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features)
 {
 	PSIM_PROFILE_FUNCTION();
+	VulkanFrameWork *framework = VulkanFrameWork::getFramework();
 	//check for optimal formats
 	for (vk::Format format : candidates) {
 		vk::FormatProperties props;
-		physicalDevice.getFormatProperties(format, &props);
+		framework->physicalDevice.getFormatProperties(format, &props);
 
 		if (tiling == vk::ImageTiling::eLinear && (props.linearTilingFeatures & features) == features) {
 			return format;
@@ -48,11 +52,12 @@ vk::Format VulkanDepthBuffer::findSupportedFormat(const std::vector<vk::Format>&
 	return vk::Format::eUndefined;
 }
 
-vk::Format VulkanDepthBuffer::findDepthFormat(vk::PhysicalDevice& physicalDevice)
+vk::Format VulkanDepthBuffer::findDepthFormat()
 {
 	PSIM_PROFILE_FUNCTION();
+	VulkanFrameWork *framework = VulkanFrameWork::getFramework();
 	//return the best format here
-	return findSupportedFormat({ vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint }, vk::ImageTiling::eOptimal, vk::FormatFeatureFlagBits::eDepthStencilAttachment, physicalDevice);
+	return findSupportedFormat({ vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint }, vk::ImageTiling::eOptimal, vk::FormatFeatureFlagBits::eDepthStencilAttachment);
 }
 
 bool VulkanDepthBuffer::hasStencilComponent(vk::Format format)

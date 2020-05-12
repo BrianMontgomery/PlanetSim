@@ -35,12 +35,12 @@ public:
 	~VulkanBuffer();
 
 	//create buffer
-	void createBuffer(vk::DeviceSize& size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Buffer& buffer, vk::DeviceMemory& bufferMemory, vk::PhysicalDevice& physicalDevice, vk::Device& device);
+	void createBuffer(vk::DeviceSize& size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Buffer& buffer, vk::DeviceMemory& bufferMemory);
 
 	//create vertex buffer
-	vk::Buffer VulkanBuffer::createVertexBuffer(std::vector<Vertex>& vertices, vk::DeviceMemory& vertexBufferMemory, vk::PhysicalDevice& physicalDevice, vk::Device& device, vk::CommandPool& commandPool, vk::Queue& graphicsQueue);
+	vk::Buffer VulkanBuffer::createVertexBuffer();
 
 	//index buffer
-	vk::Buffer VulkanBuffer::createIndexBuffer(vk::DeviceMemory& indexBufferMemory, vk::PhysicalDevice& physicalDevice, vk::Device& device, std::vector<uint32_t>& indices, vk::CommandPool& commandPool, vk::Queue& graphicsQueue);
+	vk::Buffer VulkanBuffer::createIndexBuffer();
 };
 

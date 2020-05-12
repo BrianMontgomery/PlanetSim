@@ -7,13 +7,13 @@ public:
 	VulkanDevice();
 	~VulkanDevice();
 
-	vk::PhysicalDevice pickPhysicalDevice(vk::Instance& instance, vk::SurfaceKHR& surface);
+	vk::PhysicalDevice pickPhysicalDevice();
 	void getDefaults();
-	bool isDeviceSuitable(vk::PhysicalDevice device, vk::SurfaceKHR& surface);
+	bool isDeviceSuitable(vk::PhysicalDevice device);
 	int rateDevice(vk::PhysicalDevice device);
 	bool checkDeviceExtensionSupport(vk::PhysicalDevice& device);
 
-	vk::Device createLogicalDevice(vk::PhysicalDevice& physicalDevice, vk::SurfaceKHR& surface, std::vector<const char*> instanceLayers, vk::Queue &graphicsQueue, vk::Queue &presentQueue);
+	vk::Device createLogicalDevice(std::vector<const char*> instanceLayers);
 
 private:
 	std::vector<const char*> deviceExtensions;

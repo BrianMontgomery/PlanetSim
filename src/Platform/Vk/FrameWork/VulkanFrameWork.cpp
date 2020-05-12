@@ -38,7 +38,7 @@ VulkanFrameWork::~VulkanFrameWork()
 {
 	PSIM_PROFILE_FUNCTION();
 	VulkanSwapchain swapchainDestroy;
-	swapchainDestroy.cleanupSwapChain(device, depthImageView, depthImage, depthImageMemory, swapchainFramebuffers, commandPool, commandBuffers, graphicsPipeline, pipelineLayout, renderPass, swapchainImageViews, swapchain, uniformBuffers, uniformBuffersMemory, descriptorPool);
+	swapchainDestroy.cleanupSwapChain();
 
 	device.destroySampler(textureSampler, nullptr);
 	PSIM_CORE_INFO("Texture sampler destroyed");
@@ -85,6 +85,7 @@ VulkanFrameWork::~VulkanFrameWork()
 	PSIM_CORE_INFO("Vulkan instance deleted");
 }
 
+
 void VulkanFrameWork::init(GLFWwindow* window)
 {
 	PSIM_PROFILE_FUNCTION();
@@ -96,63 +97,63 @@ void VulkanFrameWork::init(GLFWwindow* window)
 #ifdef PSIM_DEBUG
 	{
 		VulkanDebugger debuggerMaker;
-		debugUtilsMessenger = debuggerMaker.createNewDebugger(instance);
+		debugUtilsMessenger = debuggerMaker.createNewDebugger();
 	}
 #endif
 
 	VulkanSurface surfaceMaker;
-	surface = surfaceMaker.createNewSurface(window, instance);
+	surface = surfaceMaker.createNewSurface(window);
 
 	VulkanDevice deviceMaker;
-	physicalDevice = deviceMaker.pickPhysicalDevice(instance, surface);
-	device = deviceMaker.createLogicalDevice(physicalDevice, surface, instanceMaker.getLayers(), graphicsQueue, presentQueue);
+	physicalDevice = deviceMaker.pickPhysicalDevice();
+	device = deviceMaker.createLogicalDevice(instanceMaker.getLayers());
 
 	VulkanSwapchain swapchainMaker;
-	swapchain = swapchainMaker.createSwapChain(physicalDevice, surface, window, device);
-	swapchainImageViews = swapchainMaker.createSwapchainImageViews(device);
+	swapchain = swapchainMaker.createSwapChain(window);
+	swapchainImageViews = swapchainMaker.createSwapchainImageViews();
 	swapchainImages = swapchainMaker.getSwapchainImages();
 	swapchainImageFormat = swapchainMaker.getSwapchainImageFormat();
 	swapchainExtent = swapchainMaker.getSwapchainExtent();
 
 	VulkanPipeline pipelineMaker;
-	renderPass = pipelineMaker.createRenderPass(swapchainImageFormat, physicalDevice, device);
+	renderPass = pipelineMaker.createRenderPass();
 
 	VulkanDescriptorSet descriptorMaker;
-	descriptorSetLayout = descriptorMaker.createDescriptorSetLayout(device);
+	descriptorSetLayout = descriptorMaker.createDescriptorSetLayout();
 
-	graphicsPipeline = pipelineMaker.createGraphicsPipeline(swapchainExtent, device, renderPass, descriptorSetLayout);
+	graphicsPipeline = pipelineMaker.createGraphicsPipeline();
 	pipelineLayout = pipelineMaker.getPipelineLayout();
 
 	VulkanDepthBuffer depthBufferMaker;
-	depthImageView = depthBufferMaker.createDepthResources(physicalDevice, device, swapchainExtent, depthImage, depthImageMemory);
+	depthImageView = depthBufferMaker.createDepthResources();
 
-	swapchainFramebuffers = swapchainMaker.createFramebuffers(swapchainImageViews, renderPass, device, depthImageView);
+	swapchainFramebuffers = swapchainMaker.createFramebuffers();
 
 	VulkanCommandBuffer commandBufferMaker;
-	commandPool = commandBufferMaker.createCommandPool(physicalDevice, surface, device);
+	commandPool = commandBufferMaker.createCommandPool();
 
 	VulkanTexture textureMaker;
-	textureImage = textureMaker.createTextureImage(TEXTURE_PATH, commandPool, device, graphicsQueue, physicalDevice, textureImageMemory);
-	textureImageView = textureMaker.createTextureImageView(textureImage, device);
-	textureSampler = textureMaker.createTextureSampler(device);
+	textureImage = textureMaker.createTextureImage(TEXTURE_PATH);
+	textureImageView = textureMaker.createTextureImageView();
+	textureSampler = textureMaker.createTextureSampler();
 
 	VulkanModelLoad modelLoader;
-	modelLoader.loadModel(MODEL_PATH, vertices, indices);
+	modelLoader.loadModel(MODEL_PATH);
 
 	VulkanBuffer bufferMaker;
-	vertexBuffer = bufferMaker.createVertexBuffer(vertices, vertexBufferMemory, physicalDevice, device, commandPool, graphicsQueue);
-	indexBuffer = bufferMaker.createIndexBuffer(indexBufferMemory, physicalDevice, device, indices, commandPool, graphicsQueue);
+	vertexBuffer = bufferMaker.createVertexBuffer();
+	indexBuffer = bufferMaker.createIndexBuffer();
 
 	VulkanUniformBuffer uniformMaker;
-	uniformBuffers = uniformMaker.createUniformBuffers(uniformBuffersMemory, swapchainImages, physicalDevice, device);
+	uniformBuffers = uniformMaker.createUniformBuffers();
 
-	descriptorPool = descriptorMaker.createDescriptorPool(swapchainImages, device);
-	descriptorSets = descriptorMaker.createDescriptorSets(swapchainImages, descriptorSetLayout, descriptorPool, device, uniformBuffers, textureSampler, textureImageView);
+	descriptorPool = descriptorMaker.createDescriptorPool();
+	descriptorSets = descriptorMaker.createDescriptorSets();
 
-	commandBuffers = commandBufferMaker.createCommandBuffers(swapchainFramebuffers, commandPool, device, renderPass, swapchainExtent, graphicsPipeline, pipelineLayout, vertexBuffer, indexBuffer, descriptorSets, indices);
+	commandBuffers = commandBufferMaker.createCommandBuffers();
 	
 	VulkanSync syncMaker;
-	syncMaker.createSyncObjects(MAX_FRAMES_IN_FLIGHT, currentFrame, imageAvailableSemaphores, renderFinishedSemaphores, inFlightFences, imagesInFlight, swapchainImages, device);
+	syncMaker.createSyncObjects(MAX_FRAMES_IN_FLIGHT, currentFrame);
 	PSIM_CORE_INFO("Vulkan initialization complete");
 }
 
@@ -169,7 +170,7 @@ void VulkanFrameWork::drawFrame(GLFWwindow* window)
 	//check for resize
 	VulkanSwapchain swapchainMaker;
 	if (result == vk::Result::eErrorOutOfDateKHR) {
-		swapchainMaker.recreateSwapChain(physicalDevice, surface, window, device, depthImageView, depthImage, depthImageMemory, swapchainFramebuffers, commandPool, commandBuffers, graphicsPipeline, pipelineLayout, renderPass, swapchainImageViews, swapchain, uniformBuffers, uniformBuffersMemory, descriptorSets, descriptorPool, descriptorSetLayout, textureSampler, textureImageView, vertexBuffer, indexBuffer, indices);
+		swapchainMaker.recreateSwapChain(window);
 		return;
 	}
 	else {
@@ -178,7 +179,7 @@ void VulkanFrameWork::drawFrame(GLFWwindow* window)
 
 	//update to next frame
 	VulkanUniformBuffer uniformUpdater;
-	uniformUpdater.updateUniformBuffer(imageIndex, swapchainExtent, device, uniformBuffersMemory);
+	uniformUpdater.updateUniformBuffer(imageIndex);
 
 	if (bool(imagesInFlight[imageIndex]) != false) {
 		device.waitForFences(1, &imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
@@ -208,7 +209,7 @@ void VulkanFrameWork::drawFrame(GLFWwindow* window)
 	//check if frame was presented
 	if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR || framebufferResized) {
 		framebufferResized = false;
-		swapchainMaker.recreateSwapChain(physicalDevice, surface, window, device, depthImageView, depthImage, depthImageMemory, swapchainFramebuffers, commandPool, commandBuffers, graphicsPipeline, pipelineLayout, renderPass, swapchainImageViews, swapchain, uniformBuffers, uniformBuffersMemory, descriptorSets, descriptorPool, descriptorSetLayout, textureSampler, textureImageView, vertexBuffer, indexBuffer, indices);
+		swapchainMaker.recreateSwapChain(window);
 	}
 	else {
 		PSIM_ASSERT(result == vk::Result::eSuccess, "Failed to present swap chain image!");

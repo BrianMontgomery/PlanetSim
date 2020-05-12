@@ -16,16 +16,16 @@ public:
 	VulkanSwapchain();
 	~VulkanSwapchain();
 
-	SwapChainSupportDetails VulkanSwapchain::querySwapChainSupport(vk::PhysicalDevice& device, vk::SurfaceKHR& surface);
+	SwapChainSupportDetails VulkanSwapchain::querySwapChainSupport(vk::PhysicalDevice& physicalDevice);
 	vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats);
 	vk::PresentModeKHR chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes);
 	vk::Extent2D chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities, GLFWwindow* window);
 
-	vk::SwapchainKHR createSwapChain(vk::PhysicalDevice& physicalDevice, vk::SurfaceKHR& surface, GLFWwindow* window, vk::Device& device);
-	void VulkanSwapchain::recreateSwapChain(vk::PhysicalDevice& physicalDevice, vk::SurfaceKHR& surface, GLFWwindow* window, vk::Device& device, vk::ImageView& depthImageView, vk::Image& depthImage, vk::DeviceMemory& depthImageMemory, std::vector<vk::Framebuffer>& swapchainFramebuffers, vk::CommandPool& commandPool, std::vector<vk::CommandBuffer>& commandBuffers, vk::Pipeline& graphicsPipeline, vk::PipelineLayout& pipelineLayout, vk::RenderPass& renderPass, std::vector<vk::ImageView>& swapchainImageViews, vk::SwapchainKHR& swapchain, std::vector<vk::Buffer>& uniformBuffers, std::vector<vk::DeviceMemory>& uniformBuffersMemory, std::vector<vk::DescriptorSet>& descriptorSets, vk::DescriptorPool& descriptorPool, vk::DescriptorSetLayout& descriptorSetLayout, vk::Sampler& textureSampler, vk::ImageView& textureImageView, vk::Buffer& vertexBuffer, vk::Buffer& indexBuffer, std::vector<uint32_t>& indices);
-	void cleanupSwapChain(vk::Device& device, vk::ImageView& depthImageView, vk::Image& depthImage, vk::DeviceMemory& depthImageMemory, std::vector<vk::Framebuffer>& swapchainFramebuffers, vk::CommandPool& commandPool, std::vector<vk::CommandBuffer>& commandBuffers, vk::Pipeline& graphicsPipeline, vk::PipelineLayout& pipelineLayout, vk::RenderPass& renderPass, std::vector<vk::ImageView>& swapchainImageViews, vk::SwapchainKHR& swapchain, std::vector<vk::Buffer>& uniformBuffers, std::vector<vk::DeviceMemory>& uniformBuffersMemory, vk::DescriptorPool& descriptorPool);
-	std::vector<vk::ImageView> createSwapchainImageViews(vk::Device& device);
-	std::vector<vk::Framebuffer> createFramebuffers(std::vector<vk::ImageView>& swapchainImageViews, vk::RenderPass& renderPass, vk::Device& device, vk::ImageView& depthImageView);
+	vk::SwapchainKHR createSwapChain(GLFWwindow* window);
+	void VulkanSwapchain::recreateSwapChain(GLFWwindow* window);
+	void cleanupSwapChain();
+	std::vector<vk::ImageView> createSwapchainImageViews();
+	std::vector<vk::Framebuffer> createFramebuffers();
 
 	std::vector<vk::Image> getSwapchainImages();
 	vk::Format getSwapchainImageFormat();
