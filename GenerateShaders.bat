@@ -1,2 +1,2 @@
-C:/VulkanSDK/1.1.121.2/Bin/glslc.exe src/Shaders/TriangleShaderGLSL.vert -o src/Shaders/TriangleShaderVert.spv
-C:/VulkanSDK/1.1.121.2/Bin/glslc.exe src/Shaders/TriangleShaderGLSL.frag -o src/Shaders/TriangleShaderFrag.spv
+C:/VulkanSDK/1.1.121.2/Bin/glslc.exe src/Platform/Vk/Shaders/TriangleShaderGLSL.vert -o src/Platform/Vk/Shaders/TriangleShaderVert.spv
+C:/VulkanSDK/1.1.121.2/Bin/glslc.exe src/Platform/Vk/Shaders/TriangleShaderGLSL.frag -o src/Platform/Vk/Shaders/TriangleShaderFrag.spv
