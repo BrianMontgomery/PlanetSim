@@ -32,10 +32,9 @@ Usage:
 class ShaderLibrary
 {
 public:
-	virtual Ref<LinkedShader> load(const std::string& vertexPath, const std::string& fragmentPath) = 0;
-	virtual Ref<LinkedShader> load(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath) = 0;
+	virtual void load(const std::string& vertexPath, const std::string& fragmentPath) = 0;
+	virtual void load(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath) = 0;
 
-	virtual Ref<LinkedShader> get(const std::string& name) = 0;
 	virtual bool exists(const std::string& name) const = 0;
 
 	static Ref<ShaderLibrary> ShaderLibrary::Create();

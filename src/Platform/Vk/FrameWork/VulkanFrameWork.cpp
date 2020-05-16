@@ -115,14 +115,15 @@ void VulkanFrameWork::init(GLFWwindow* window)
 	swapchainImageFormat = swapchainMaker.getSwapchainImageFormat();
 	swapchainExtent = swapchainMaker.getSwapchainExtent();
 
-	VulkanPipeline pipelineMaker;
-	renderPass = pipelineMaker.createRenderPass();
+	VulkanRenderPassLibrary * renderPassLib = VulkanRenderPassLibrary::getRenderPassLibrary();
+	renderPassLib->load();
 
 	VulkanDescriptorSet descriptorMaker;
 	descriptorSetLayout = descriptorMaker.createDescriptorSetLayout();
 
-	graphicsPipeline = pipelineMaker.createGraphicsPipeline();
-	pipelineLayout = pipelineMaker.getPipelineLayout();
+	VulkanPipelineLibrary *pipelineLib = VulkanPipelineLibrary::getPipelineLibrary();
+	VulkanLinkedShaderLibrary *shaderLib = VulkanLinkedShaderLibrary::getShaderLibrary();
+	pipelineLib->load(currentPipelineName, shaderLib->get(currentPipelineName));
 
 	VulkanDepthBuffer depthBufferMaker;
 	depthImageView = depthBufferMaker.createDepthResources();

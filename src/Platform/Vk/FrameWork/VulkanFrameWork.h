@@ -55,9 +55,7 @@ public:
 
 	std::vector<vk::ImageView> swapchainImageViews;
 
-	vk::RenderPass renderPass;
-	vk::PipelineLayout pipelineLayout;
-	vk::Pipeline graphicsPipeline;
+	std::string currentPipelineName = "Triangle Shader";
 
 	std::vector<vk::Framebuffer> swapchainFramebuffers;
 

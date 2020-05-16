@@ -44,6 +44,14 @@ private:
 class VulkanShaderLibrary
 {
 public:
+	static VulkanShaderLibrary *getIndividualShadersLibrary() {
+		if (!m_IndividualShaders)
+			m_IndividualShaders = new VulkanShaderLibrary;
+		return m_IndividualShaders;
+	}
+
+	~VulkanShaderLibrary() {}
+
 	//add a shader from another lib
 	void add(const std::string& name, const Ref<VulkanShader>& shader);
 
@@ -56,6 +64,7 @@ public:
 	bool exists(const std::string& name) const;
 private:
 	std::unordered_map<std::string, Ref<VulkanShader>> m_Shaders;
+	static VulkanShaderLibrary *m_IndividualShaders;
 };
 
 class VulkanLinkedShader : public LinkedShader
@@ -88,32 +97,42 @@ public:
 
 	//returns nameof the linked shader
 	virtual const std::string& getName() const override { return m_Name; }
-	const Ref<VulkanShader> getVertexShader() const { return m_VertexShader; }
-	const Ref<VulkanShader> getFragmentShader() const { return m_FragmentShader; }
+	Ref<VulkanShader> getVertexShader() const { return m_VertexShader; }
+	Ref<VulkanShader> getFragmentShader() const { return m_FragmentShader; }
 
 private:
 	std::string m_Name;
-	const Ref<VulkanShader> m_VertexShader;
-	const Ref<VulkanShader> m_FragmentShader;
+	Ref<VulkanShader> m_VertexShader;
+	Ref<VulkanShader> m_FragmentShader;
 };
 
 class VulkanLinkedShaderLibrary : public ShaderLibrary
 {
 public:
+	static VulkanLinkedShaderLibrary *getShaderLibrary() {
+		if (!m_shaderLib)
+			m_shaderLib = new VulkanLinkedShaderLibrary;
+		return m_shaderLib;
+	}
+
+	~VulkanLinkedShaderLibrary() {}
+
 	//add a completed Linked Shader from another Library
 	void add(const std::string& name, const Ref<VulkanLinkedShader> linkedShader);
 
 	//add a new shader grouping, name created automatically
-	virtual Ref<LinkedShader> load(const std::string& vertexPath, const std::string& fragmentPath) override;
+	virtual void load(const std::string& vertexPath, const std::string& fragmentPath) override;
 
 	//add a new shader grouping with a name
-	virtual Ref<LinkedShader> load(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath) override;
+	virtual void load(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath) override;
 
 	//returns the specified linkedShader
-	virtual Ref<LinkedShader> get(const std::string& name) override;
+	Ref<VulkanLinkedShader> get(const std::string& name) const;
 
 	//checks if a shader exists
 	virtual bool exists(const std::string& name) const override;
 private:
+	static VulkanLinkedShaderLibrary *m_shaderLib;
+	VulkanShaderLibrary *individualShaders = VulkanShaderLibrary::getIndividualShadersLibrary();;
 	std::unordered_map<std::string, Ref<VulkanLinkedShader>> m_LinkedShaders;
 };

@@ -3,6 +3,7 @@
 
 #include "Platform/Vk/FrameWork/VulkanFrameWork.h"
 #include "Platform/Vk/Modules/VulkanQueue.h"
+#include "Platform/Vk/Modules/VulkanPipeline.h"
 
 
 VulkanCommandBuffer::VulkanCommandBuffer()
@@ -56,19 +57,21 @@ std::vector<vk::CommandBuffer> VulkanCommandBuffer::createCommandBuffers()
 		clearValues[0].setColor(vk::ClearColorValue(std::array{ 0.0f, 0.0f, 0.0f, 1.0f }));
 		clearValues[1].setDepthStencil(vk::ClearDepthStencilValue({ 1.0f, 0 }));
 
-		vk::RenderPassBeginInfo renderPassInfo = { framework->renderPass, framework->swapchainFramebuffers[i], vk::Rect2D { { 0, 0 }, framework->swapchainExtent }, static_cast<uint32_t>(clearValues.size()), clearValues.data() };
+		VulkanRenderPassLibrary * renderPassLib = VulkanRenderPassLibrary::getRenderPassLibrary();
+		vk::RenderPassBeginInfo renderPassInfo = { renderPassLib->get(0)->getrenderPass(), framework->swapchainFramebuffers[i], vk::Rect2D { { 0, 0 }, framework->swapchainExtent }, static_cast<uint32_t>(clearValues.size()), clearValues.data() };
 
 		//use command buffers
 		commandBuffers[i].beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
 		//bind pipeline
-		commandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, framework->graphicsPipeline);
+		VulkanPipelineLibrary *pipelineLib = VulkanPipelineLibrary::getPipelineLibrary();
+		commandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, pipelineLib->get(framework->currentPipelineName)->getPipeline());
 
 		vk::Buffer vertexBuffers[] = { framework->vertexBuffer };
 		vk::DeviceSize offsets[] = { 0 };
 
 		commandBuffers[i].bindVertexBuffers(0, 1, vertexBuffers, offsets);
 		commandBuffers[i].bindIndexBuffer(framework->indexBuffer, 0, vk::IndexType::eUint32);
-		commandBuffers[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, framework->pipelineLayout, 0, 1, &framework->descriptorSets[i], 0, nullptr);
+		commandBuffers[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLib->get(framework->currentPipelineName)->getPipelineLayout(), 0, 1, &framework->descriptorSets[i], 0, nullptr);
 
 		//draw from pipeline
 		commandBuffers[i].drawIndexed(static_cast<uint32_t>(framework->indices.size()), 1, 0, 0, 0);

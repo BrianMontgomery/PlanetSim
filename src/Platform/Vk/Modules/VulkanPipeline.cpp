@@ -8,6 +8,11 @@
 
 VulkanPipeline::VulkanPipeline(const Ref<VulkanLinkedShader> shader)
 {
+	
+}
+
+VulkanPipeline::VulkanPipeline(const std::string& name, const Ref<VulkanLinkedShader> shader)
+{
 	PSIM_PROFILE_FUNCTION();
 	VulkanFrameWork *framework = VulkanFrameWork::getFramework();
 
@@ -63,19 +68,15 @@ VulkanPipeline::VulkanPipeline(const Ref<VulkanLinkedShader> shader)
 	PSIM_ASSERT(framework->device.createPipelineLayout(&pipelineLayoutInfo, nullptr, &m_pipelineLayout) == vk::Result::eSuccess, "Failed to create pipeline layout!");
 
 	//creating the pipeline
+	VulkanRenderPassLibrary * renderPassLib = VulkanRenderPassLibrary::getRenderPassLibrary();
 	vk::GraphicsPipelineCreateInfo pipelineInfo = { {}, 2, shaderStages, &vertexInputInfo, &inputAssembly, nullptr, &viewportState, &rasterizer, &multisampling, &depthStencil,
-	&colorBlending, nullptr, m_pipelineLayout, framework->renderPass, 0 };
+	&colorBlending, nullptr, m_pipelineLayout, renderPassLib->get(0)->getrenderPass(), 0 };
 
 	PSIM_ASSERT(framework->device.createGraphicsPipelines(vk::PipelineCache(), 1, &pipelineInfo, nullptr, &m_pipeline) == vk::Result::eSuccess, "Failed to create graphics pipeline!");
 	PSIM_CORE_INFO("Created Graphics Pipeline");
 
-	m_Name = shader->getName();
+	m_Name = name;
 	*m_shader = *shader;
-}
-
-VulkanPipeline::VulkanPipeline(const std::string& name, const Ref<VulkanLinkedShader> shader)
-{
-
 }
 
 VulkanPipeline::~VulkanPipeline()
@@ -83,15 +84,53 @@ VulkanPipeline::~VulkanPipeline()
 
 }
 
-vk::RenderPass VulkanPipeline::createRenderPass()
+void VulkanPipelineLibrary::add(const std::string& name, Ref<VulkanPipeline> pipeline)
+{
+	PSIM_ASSERT(!exists(name), "This Pipeline: {0} already exists!", name);
+	m_VulkanPipelines[name] = pipeline;
+}
+
+void VulkanPipelineLibrary::load(Ref<VulkanLinkedShader> shader)
+{
+	PSIM_PROFILE_FUNCTION();
+
+	auto pipeline = CreateRef<VulkanPipeline>(shader);
+	add(pipeline->getName(), pipeline);
+	return;
+}
+
+void VulkanPipelineLibrary::load(const std::string& name, Ref<VulkanLinkedShader> shader)
+{
+	PSIM_PROFILE_FUNCTION();
+
+	auto pipeline = CreateRef<VulkanPipeline>(shader);
+	add(pipeline->getName(), pipeline);
+	return;
+}
+
+Ref<VulkanPipeline> VulkanPipelineLibrary::get(const std::string& name)
+{
+	PSIM_ASSERT(exists(name), "Pipeline not found!");
+	return m_VulkanPipelines[name];
+}
+
+bool VulkanPipelineLibrary::exists(const std::string& name) const
+{
+	return m_VulkanPipelines.find(name) != m_VulkanPipelines.end();
+}
+
+
+
+VulkanRenderPass::VulkanRenderPass() 
 {
 	PSIM_PROFILE_FUNCTION();
 	VulkanFrameWork *framework = VulkanFrameWork::getFramework();
-	//color attachment
+
+	//color attachment - contains format - multisampling - whether to store framebuffer data or not - image layout on way in and out
 	vk::AttachmentDescription colorAttachment = { {}, framework->swapchainImageFormat, vk::SampleCountFlagBits::e1, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore,
 	vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eDontCare, vk::ImageLayout::eUndefined, vk::ImageLayout::ePresentSrcKHR };
 
-	//depth attachment
+	//depth attachment - contains format - multisampling - whether to store framebuffer data or not - image layout on way in and out
 	VulkanDepthBuffer depthMaker;
 	vk::AttachmentDescription depthAttachment = { {}, depthMaker.findDepthFormat(), vk::SampleCountFlagBits::e1, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare,
 	vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eDontCare, vk::ImageLayout::eUndefined, vk::ImageLayout::eDepthStencilAttachmentOptimal };
@@ -113,44 +152,99 @@ vk::RenderPass VulkanPipeline::createRenderPass()
 	std::array<vk::AttachmentDescription, 2> attachments = { colorAttachment, depthAttachment };
 	vk::RenderPassCreateInfo renderPassInfo = { {}, static_cast<uint32_t>(attachments.size()), attachments.data(), 1, &subpass, 1, &dependency };
 
-	vk::RenderPass renderPass;
-	PSIM_ASSERT(framework->device.createRenderPass(&renderPassInfo, nullptr, &renderPass) == vk::Result::eSuccess, "Failed to create render pass!");
+	PSIM_ASSERT(framework->device.createRenderPass(&renderPassInfo, nullptr, &m_renderPass) == vk::Result::eSuccess, "Failed to create render pass!");
+}
+
+VulkanRenderPass::~VulkanRenderPass()
+{
+	VulkanFrameWork *framework = VulkanFrameWork::getFramework();
+	framework->device.destroyRenderPass(m_renderPass, nullptr);
+}
+
+//to be used when the swapchain changes due to resize
+void VulkanRenderPass::recreate()
+{
+	PSIM_PROFILE_FUNCTION();
+	VulkanFrameWork *framework = VulkanFrameWork::getFramework();
+
+	//color attachment - contains format - multisampling - whether to store framebuffer data or not - image layout on way in and out
+	vk::AttachmentDescription colorAttachment = { {}, framework->swapchainImageFormat, vk::SampleCountFlagBits::e1, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore,
+	vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eDontCare, vk::ImageLayout::eUndefined, vk::ImageLayout::ePresentSrcKHR };
+
+	//depth attachment - contains format - multisampling - whether to store framebuffer data or not - image layout on way in and out
+	VulkanDepthBuffer depthMaker;
+	vk::AttachmentDescription depthAttachment = { {}, depthMaker.findDepthFormat(), vk::SampleCountFlagBits::e1, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare,
+	vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eDontCare, vk::ImageLayout::eUndefined, vk::ImageLayout::eDepthStencilAttachmentOptimal };
+
+	//color attachment reference
+	vk::AttachmentReference colorAttachmentRef = { 0, vk::ImageLayout::eColorAttachmentOptimal };
+
+	//depth attachment reference
+	vk::AttachmentReference depthAttachmentRef = { 1, vk::ImageLayout::eDepthStencilAttachmentOptimal };
+
+	//subpass
+	vk::SubpassDescription subpass = { {}, vk::PipelineBindPoint::eGraphics, 0, nullptr, 1, &colorAttachmentRef, nullptr, &depthAttachmentRef, 0, nullptr };
+
+	//dependencies
+	vk::SubpassDependency dependency = { VK_SUBPASS_EXTERNAL, 0, vk::PipelineStageFlagBits::eColorAttachmentOutput, vk::PipelineStageFlagBits::eColorAttachmentOutput, {},
+	vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite, {} };
+
+	//create render pass
+	std::array<vk::AttachmentDescription, 2> attachments = { colorAttachment, depthAttachment };
+	vk::RenderPassCreateInfo renderPassInfo = { {}, static_cast<uint32_t>(attachments.size()), attachments.data(), 1, &subpass, 1, &dependency };
+
+	PSIM_ASSERT(framework->device.createRenderPass(&renderPassInfo, nullptr, &m_renderPass) == vk::Result::eSuccess, "Failed to create render pass!");
+}
+
+void VulkanRenderPassLibrary::add(Ref<VulkanRenderPass> renderPass)
+{
+	for (int i = 0; i < m_VulkanRenderPasses.size(); i++)
+	{
+		PSIM_ASSERT(!exists(i), "This renderPass: {0} already exists!", i);
+		if (renderPass == m_VulkanRenderPasses[i]) 
+		{
+			return;
+		}
+	}
+
+	for (int i = 0; i <= m_VulkanRenderPasses.size(); i++)
+	{
+		if (!exists(i))
+		{
+			m_VulkanRenderPasses[i] = renderPass;
+			return;
+		}
+	}
+
+	PSIM_ASSERT(0, "Could not add renderPass to the Render Pass Library!");
+}
+
+//add a new shader grouping, name created automatically
+Ref<VulkanRenderPass> VulkanRenderPassLibrary::load()
+{
+	PSIM_PROFILE_FUNCTION();
+
+	auto renderPass = CreateRef<VulkanRenderPass>();
+	add(renderPass);
 	return renderPass;
 }
 
-
-
-void VulkanPipelineLibrary::add(const std::string& name, const Ref<VulkanPipeline> pipeline)
+//returns the specified linkedShader
+Ref<VulkanRenderPass> VulkanRenderPassLibrary::get(int ID)
 {
-	PSIM_ASSERT(!exists(name), "This Shader: {0} already exists!", name);
-	m_VulkanPipelines[name] = pipeline;
+	PSIM_ASSERT(exists(ID), "RenderPass not found!");
+	return m_VulkanRenderPasses[ID];
 }
 
-Ref<VulkanPipeline> VulkanPipelineLibrary::load(const Ref<VulkanLinkedShader> shader)
+//checks if a shader exists
+bool VulkanRenderPassLibrary::exists(int ID) const
 {
-	PSIM_PROFILE_FUNCTION();
-
-	auto pipeline = CreateRef<VulkanPipeline>(shader);
-	add(pipeline->getName(), pipeline);
-	return pipeline;
+	return m_VulkanRenderPasses.find(ID) != m_VulkanRenderPasses.end();
 }
 
-Ref<VulkanPipeline> VulkanPipelineLibrary::load(const std::string& name, const Ref<VulkanLinkedShader> shader)
+void VulkanRenderPassLibrary::destroy(int ID)
 {
-	PSIM_PROFILE_FUNCTION();
-
-	auto pipeline = CreateRef<VulkanPipeline>(shader);
-	add(pipeline->getName(), pipeline);
-	return pipeline;
-}
-
-Ref<VulkanPipeline> VulkanPipelineLibrary::get(const std::string& name)
-{
-	PSIM_ASSERT(exists(name), "Shader not found!");
-	return m_VulkanPipelines[name];
-}
-
-bool VulkanPipelineLibrary::exists(const std::string& name) const
-{
-	return m_VulkanPipelines.find(name) != m_VulkanPipelines.end();
+	PSIM_ASSERT(exists(ID), "RenderPass not found!");
+	m_VulkanRenderPasses.erase(ID);
+	return;
 }

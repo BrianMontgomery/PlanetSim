@@ -246,7 +246,7 @@ void VulkanLinkedShaderLibrary::add(const std::string& name, const Ref<VulkanLin
 	m_LinkedShaders[name] = linkedShader;
 }
 
-Ref<LinkedShader> VulkanLinkedShaderLibrary::load(const std::string& vertexPath, const std::string& fragmentPath)
+void VulkanLinkedShaderLibrary::load(const std::string& vertexPath, const std::string& fragmentPath)
 {
 	PSIM_PROFILE_FUNCTION();
 
@@ -264,10 +264,10 @@ Ref<LinkedShader> VulkanLinkedShaderLibrary::load(const std::string& vertexPath,
 
 	//add to the linked shader list
 	add(linkedShader->getName(), linkedShader);
-	return linkedShader;
+	return;
 }
 
-Ref<LinkedShader> VulkanLinkedShaderLibrary::load(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath)
+void VulkanLinkedShaderLibrary::load(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath)
 {
 	PSIM_PROFILE_FUNCTION();
 
@@ -284,10 +284,10 @@ Ref<LinkedShader> VulkanLinkedShaderLibrary::load(const std::string& name, const
 	auto linkedShader = CreateRef<VulkanLinkedShader>(name, shaderLibrary.get(vertexShaderName), shaderLibrary.get(fragmentShaderName));
 
 	add(name, linkedShader);
-	return linkedShader;
+	return;
 }
 
-Ref<LinkedShader> VulkanLinkedShaderLibrary::get(const std::string& name)
+Ref<VulkanLinkedShader> VulkanLinkedShaderLibrary::get(const std::string& name) const
 {
 	PSIM_ASSERT(exists(name), "Shader not found!");
 	return m_LinkedShaders[name];

@@ -46,7 +46,8 @@ void Renderer2D::Init()
 	s_Data->WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
 
 	Ref<ShaderLibrary>shaderLib = ShaderLibrary::Create();
-	s_Data->TextureShader = shaderLib->load("assets/shaders/TriangleShaderVert.spv", "assets/shaders/TriangleShaderFrag.spv");
+	shaderLib->load("Triangle Shader", "assets/shaders/TriangleShaderVert.spv", "assets/shaders/TriangleShaderFrag.spv");
+	//s_Data->TextureShader = shaderLib->get("Triangle Shader");
 	s_Data->TextureShader->bind();
 	s_Data->TextureShader->setInt("u_Texture", 0);
 }

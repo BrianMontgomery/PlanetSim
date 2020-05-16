@@ -425,7 +425,7 @@ void OpenGLLinkedShaderLibrary::add(const std::string& name, const Ref<OpenGLLin
 	m_LinkedShaders[name] = linkedShader;
 }
 
-Ref<LinkedShader> OpenGLLinkedShaderLibrary::load(const std::string& vertexPath, const std::string& fragmentPath)
+void OpenGLLinkedShaderLibrary::load(const std::string& vertexPath, const std::string& fragmentPath)
 {
 	PSIM_PROFILE_FUNCTION();
 
@@ -443,10 +443,10 @@ Ref<LinkedShader> OpenGLLinkedShaderLibrary::load(const std::string& vertexPath,
 
 	//add to the linked shader list
 	add(linkedShader->getName(), linkedShader);
-	return linkedShader;
+	return;
 }
 
-Ref<LinkedShader> OpenGLLinkedShaderLibrary::load(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath)
+void OpenGLLinkedShaderLibrary::load(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath)
 {
 	PSIM_PROFILE_FUNCTION();
 
@@ -463,10 +463,10 @@ Ref<LinkedShader> OpenGLLinkedShaderLibrary::load(const std::string& name, const
 	auto linkedShader = CreateRef<OpenGLLinkedShader>(name, shaderLibrary.get(vertexShaderName), shaderLibrary.get(fragmentShaderName));
 
 	add(name, linkedShader);
-	return linkedShader;
+	return;
 }
 
-Ref<LinkedShader> OpenGLLinkedShaderLibrary::get(const std::string& name)
+Ref<LinkedShader> OpenGLLinkedShaderLibrary::get(const std::string& name) const
 {
 	PSIM_ASSERT(exists(name), "Shader not found!");
 	return m_LinkedShaders[name];

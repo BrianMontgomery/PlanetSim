@@ -158,7 +158,6 @@ void VulkanSwapchain::recreateSwapChain(GLFWwindow* window)
 	//clean swapchain specific resources
 	cleanupSwapChain();
 
-	VulkanPipeline pipelineMaker;
 	VulkanDepthBuffer depthMaker;
 	VulkanUniformBuffer uniformMaker;
 	VulkanDescriptorSet descriptorMaker;
@@ -167,9 +166,14 @@ void VulkanSwapchain::recreateSwapChain(GLFWwindow* window)
 	//recreate new swapchain specific resources
 	framework->swapchain = createSwapChain(window);
 	framework->swapchainImageViews = createSwapchainImageViews();
-	framework->renderPass = pipelineMaker.createRenderPass();
-	framework->graphicsPipeline = pipelineMaker.createGraphicsPipeline();
-	framework->pipelineLayout = pipelineMaker.getPipelineLayout();
+
+	VulkanRenderPassLibrary * renderPassLib = VulkanRenderPassLibrary::getRenderPassLibrary();
+	VulkanPipelineLibrary *pipelineLib = VulkanPipelineLibrary::getPipelineLibrary();
+	VulkanLinkedShaderLibrary *shaderLib = VulkanLinkedShaderLibrary::getShaderLibrary();
+
+	renderPassLib->get(0)->recreate();
+	pipelineLib->reload();
+
 	framework->depthImageView = depthMaker.createDepthResources();
 	framework->swapchainFramebuffers = createFramebuffers();
 	framework->uniformBuffers = uniformMaker.createUniformBuffers();
@@ -197,10 +201,9 @@ void VulkanSwapchain::cleanupSwapChain()
 	framework->device.freeCommandBuffers(framework->commandPool, static_cast<uint32_t>(framework->commandBuffers.size()), framework->commandBuffers.data());
 	PSIM_CORE_INFO("Command Buffers freed");
 
-	framework->device.destroyPipeline(framework->graphicsPipeline, nullptr);
-	framework->device.destroyPipelineLayout(framework->pipelineLayout, nullptr);
-	framework->device.destroyRenderPass(framework->renderPass, nullptr);
-	PSIM_CORE_INFO("Pipeline deleted");
+	VulkanRenderPassLibrary * renderPassLib = VulkanRenderPassLibrary::getRenderPassLibrary();
+	renderPassLib->destroy(0);
+	PSIM_CORE_INFO("Render Pass deleted");
 
 	for (size_t i = 0; i < framework->swapchainImageViews.size(); i++) {
 		framework->device.destroyImageView(framework->swapchainImageViews[i], nullptr);
@@ -255,7 +258,8 @@ std::vector<vk::Framebuffer> VulkanSwapchain::createFramebuffers()
 			framework->depthImageView
 		};
 
-		vk::FramebufferCreateInfo framebufferInfo = { {}, framework->renderPass, static_cast<uint32_t>(attachments.size()), attachments.data(), swapchainExtent.width, swapchainExtent.height, 1 };
+		VulkanRenderPassLibrary * renderPassLib = VulkanRenderPassLibrary::getRenderPassLibrary();
+		vk::FramebufferCreateInfo framebufferInfo = { {}, renderPassLib->get(0)->getrenderPass(), static_cast<uint32_t>(attachments.size()), attachments.data(), swapchainExtent.width, swapchainExtent.height, 1 };
 
 		PSIM_ASSERT(framework->device.createFramebuffer(&framebufferInfo, nullptr, &swapchainFramebuffers[i]) == vk::Result::eSuccess, "Failed to create framebuffer!");
 	}

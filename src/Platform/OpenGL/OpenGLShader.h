@@ -85,10 +85,10 @@ class OpenGLLinkedShaderLibrary : public ShaderLibrary
 public:
 	void add(const std::string& name, const Ref<OpenGLLinkedShader>& linkedShader);
 
-	virtual Ref<LinkedShader> load(const std::string& vertexPath, const std::string& fragmentPath) override;
-	virtual Ref<LinkedShader> load(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath) override;
+	virtual void load(const std::string& vertexPath, const std::string& fragmentPath) override;
+	virtual void load(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath) override;
 
-	virtual Ref<LinkedShader> get(const std::string& name) override;
+	Ref<LinkedShader> get(const std::string& name) const;
 	virtual bool exists(const std::string& name) const override;
 private:
 	std::unordered_map<std::string, Ref<OpenGLLinkedShader>> m_LinkedShaders;
