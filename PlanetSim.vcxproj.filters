@@ -13,14 +13,14 @@
     <Filter Include="src\PSIM\Core">
       <UniqueIdentifier>{8DF183DC-F9B1-FF12-C2EC-48902E6C44EF}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\PSIM\Core\Debug">
+      <UniqueIdentifier>{C331725E-2F93-4F6C-B800-961E2461862B}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\PSIM\Core\Input">
       <UniqueIdentifier>{4CD7D15E-B838-AF6C-41A6-F51EAD06E62B}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\PSIM\Core\Logging">
       <UniqueIdentifier>{230F3E43-8F7B-F93D-586F-919BC49A1BA6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\PSIM\Debug">
-      <UniqueIdentifier>{4B7E0E6D-374C-0273-20E0-72990C4DDED7}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\PSIM\Events">
       <UniqueIdentifier>{599A6812-C525-D6D6-CE36-59CB3A4132D7}</UniqueIdentifier>
@@ -89,6 +89,9 @@
     </ClInclude>
     <ClInclude Include="src\PSIM\Core\Core.h">
       <Filter>src\PSIM\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PSIM\Core\Debug\Instrumentor.h">
+      <Filter>src\PSIM\Core\Debug</Filter>
     </ClInclude>
     <ClInclude Include="src\PSIM\Core\Input\Input.h">
       <Filter>src\PSIM\Core\Input</Filter>
@@ -1241,9 +1244,6 @@
     </ClInclude>
     <ClInclude Include="vendor\tinyObjLoader\tinyObjLoader\tiny_obj_loader.h">
       <Filter>vendor\tinyObjLoader\tinyObjLoader</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PSIM\Core\Debug\Instrumentor.h">
-      <Filter>src\PSIM\Debug</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

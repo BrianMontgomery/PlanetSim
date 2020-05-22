@@ -60,6 +60,7 @@ project "PlanetSim"
 	includedirs
 	{
 		"src",
+		"src/Platform",
 		"src/PSIM",
 		"vendor/spdlog/include",
 		"%{IncludeDir.GLFW}",

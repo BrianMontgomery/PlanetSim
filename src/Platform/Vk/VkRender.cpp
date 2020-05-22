@@ -38,8 +38,8 @@ CONFIGURABLE VARIABLES - WHERE TO FIND
 #include <cstdint> // Necessary for UINT32_MAX
 
 //need full paths from solution for resources
-const std::string MODEL_PATH = "resources/models/chalet.obj";
-const char* TEXTURE_PATH = "resources/textures/chalet.jpg";
+const std::string MODEL_PATH = "assets/models/chalet.obj";
+const char* TEXTURE_PATH = "assets/textures/chalet.jpg";
 
 PFN_vkCreateDebugUtilsMessengerEXT pfnVkCreateDebugUtilsMessengerEXT;
 PFN_vkDestroyDebugUtilsMessengerEXT pfnVkDestroyDebugUtilsMessengerEXT;
@@ -575,7 +575,7 @@ vk::SurfaceFormatKHR VkRender::chooseSwapSurfaceFormat(const std::vector<vk::Sur
 {
 	//check for srgb
 	for (const auto& availableFormat : availableFormats) {
-		if (availableFormat.format == vk::Format::eB8G8R8A8Unorm && availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
+		if (availableFormat.format == vk::Format::eR8G8B8A8Srgb && availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
 			return availableFormat;
 		}
 	}
@@ -740,12 +740,12 @@ void VkRender::createSwapchainImageViews()
 
 	//create them
 	for (uint32_t i = 0; i < swapChainImages.size(); i++) {
-		swapChainImageViews[i] = createImageView(swapChainImages[i], swapChainImageFormat, vk::ImageAspectFlagBits::eColor);
+		swapChainImageViews[i] = createImageView(swapChainImages[i], swapChainImageFormat, vk::ImageAspectFlagBits::eColor, 1);
 	}
 	PSIM_CORE_INFO("Created swapchain image views");
 }
 
-vk::ImageView VkRender::createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags) {
+vk::ImageView VkRender::createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags, uint32_t mipLevels) {
 	//define image view
 	vk::ImageViewCreateInfo viewInfo = { {}, image, vk::ImageViewType::e2D, format, {}, {aspectFlags, 0, 1, 0, 1} };
 
@@ -793,8 +793,8 @@ void VkRender::createRenderPass()
 
 void VkRender::createGraphicsPipeline()
 {
-	auto vertShaderCode = readFileByteCode("src/Platform/Vk/Shaders/TriangleShaderVert.spv");
-	auto fragShaderCode = readFileByteCode("src/Platform/Vk/Shaders/TriangleShaderFrag.spv");
+	auto vertShaderCode = readFileByteCode("assets/shaders/TriangleShaderVert.spv");
+	auto fragShaderCode = readFileByteCode("assets/shaders/TriangleShaderFrag.spv");
 
 	vk::ShaderModule vertShaderModule = createShaderModule(vertShaderCode);
 	vk::ShaderModule fragShaderModule = createShaderModule(fragShaderCode);
@@ -971,9 +971,9 @@ void VkRender::createDepthResources()
 	vk::Format depthFormat = findDepthFormat();
 
 	//create depth resources
-	createImage(swapChainExtent.width, swapChainExtent.height, depthFormat, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eDepthStencilAttachment, 
+	createImage(swapChainExtent.width, swapChainExtent.height, 1, depthFormat, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eDepthStencilAttachment,
 		vk::MemoryPropertyFlagBits::eDeviceLocal, depthImage, depthImageMemory);
-	depthImageView = createImageView(depthImage, depthFormat, vk::ImageAspectFlagBits::eDepth);
+	depthImageView = createImageView(depthImage, depthFormat, vk::ImageAspectFlagBits::eDepth, 1);
 }
 
 vk::Format VkRender::findSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features)
@@ -992,6 +992,7 @@ vk::Format VkRender::findSupportedFormat(const std::vector<vk::Format>& candidat
 	}
 
 	PSIM_CORE_ERROR("failed to find supported format!");
+	return vk::Format::eUndefined;
 }
 
 vk::Format VkRender::findDepthFormat()
@@ -1017,6 +1018,7 @@ void VkRender::createTextureImage()
 	int texWidth, texHeight, texChannels;
 	stbi_uc* pixels = stbi_load(TEXTURE_PATH, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 	vk::DeviceSize imageSize = texWidth * texHeight * 4;
+	mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
 
 	PSIM_ASSERT(pixels, "Failed to load texture image!");
 
@@ -1035,23 +1037,24 @@ void VkRender::createTextureImage()
 	stbi_image_free(pixels);
 
 	//create image
-	createImage(texWidth, texHeight, vk::Format::eR8G8B8A8Unorm, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::MemoryPropertyFlagBits::eDeviceLocal, textureImage, textureImageMemory);
+	createImage(texWidth, texHeight, mipLevels, vk::Format::eR8G8B8A8Srgb, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::MemoryPropertyFlagBits::eDeviceLocal, textureImage, textureImageMemory);
 
 	//transition data format to optimal
-	transitionImageLayout(textureImage, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+	transitionImageLayout(textureImage, vk::Format::eR8G8B8A8Srgb, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, mipLevels);
 	copyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
-	transitionImageLayout(textureImage, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
-
+	
 	//free unneeded resources
 	PSIM_CORE_INFO("Created texture");
 	device.destroyBuffer(stagingBuffer, nullptr);
 	device.freeMemory(stagingBufferMemory, nullptr);
+
+	generateMipmaps(textureImage, vk::Format::eR8G8B8A8Srgb, texWidth, texHeight, mipLevels);
 }
 
-void VkRender::createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& imageMemory) 
+void VkRender::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& imageMemory) 
 {
 	//define an image 
-	vk::ImageCreateInfo imageInfo = { {}, vk::ImageType::e2D, format, vk::Extent3D { width, height, 1 }, 1, 1, vk::SampleCountFlagBits::e1, tiling, usage, vk::SharingMode::eExclusive };
+	vk::ImageCreateInfo imageInfo = { {}, vk::ImageType::e2D, format, vk::Extent3D { width, height, 1 }, mipLevels, 1, vk::SampleCountFlagBits::e1, tiling, usage, vk::SharingMode::eExclusive };
 
 	//create image
 	PSIM_ASSERT(device.createImage(&imageInfo, nullptr, &image) == vk::Result::eSuccess, "Failed to create image!");
@@ -1068,14 +1071,14 @@ void VkRender::createImage(uint32_t width, uint32_t height, vk::Format format, v
 	device.bindImageMemory(image, imageMemory, 0);
 }
 
-void VkRender::transitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout) 
+void VkRender::transitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout, uint32_t mipLevels)
 {
 	//set up fences and semaphores for when wanted
 	vk::CommandBuffer commandBuffer = beginSingleTimeCommands();
 
 	//define the barrier
 	vk::ImageMemoryBarrier barrier = { vk::AccessFlags(), vk::AccessFlags(), oldLayout, newLayout, VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED, image, 
-		vk::ImageSubresourceRange { vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 } };
+		vk::ImageSubresourceRange { vk::ImageAspectFlagBits::eColor, 0, mipLevels, 0, 1 } };
 
 	//set flags
 	vk::PipelineStageFlags sourceStage;
@@ -1121,7 +1124,7 @@ void VkRender::copyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t wi
 void VkRender::createTextureImageView()
 {
 	//create tex image view
-	textureImageView = createImageView(textureImage, vk::Format::eR8G8B8A8Unorm, vk::ImageAspectFlagBits::eColor);
+	textureImageView = createImageView(textureImage, vk::Format::eR8G8B8A8Srgb, vk::ImageAspectFlagBits::eColor, mipLevels);
 	PSIM_CORE_INFO("Created Texture image view");
 }
 
@@ -1129,9 +1132,70 @@ void VkRender::createTextureSampler()
 {
 	//define and create texture sampler
 	vk::SamplerCreateInfo samplerInfo = { {}, vk::Filter::eLinear, vk::Filter::eLinear, vk::SamplerMipmapMode::eLinear, vk::SamplerAddressMode::eRepeat, vk::SamplerAddressMode::eRepeat, 
-	vk::SamplerAddressMode::eRepeat, 0.0f, true, 16, false, vk::CompareOp::eAlways, 0.0f, 0.0f, vk::BorderColor::eIntOpaqueBlack, false };
+	vk::SamplerAddressMode::eRepeat, 0.0f, true, 16, false, vk::CompareOp::eAlways, 0.0f, static_cast<float>(mipLevels), vk::BorderColor::eIntOpaqueBlack, false };
 
 	PSIM_ASSERT(device.createSampler(&samplerInfo, nullptr, &textureSampler) == vk::Result::eSuccess, "Failed to create texture sampler!");
+}
+
+void VkRender::generateMipmaps(vk::Image image, vk::Format imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels)
+{
+	// Check if image format supports linear blitting
+	vk::FormatProperties formatProperties;
+	physicalDevice.getFormatProperties(imageFormat, &formatProperties);
+
+	if (!(formatProperties.optimalTilingFeatures & vk::FormatFeatureFlagBits::eSampledImageFilterLinear)) {
+		throw std::runtime_error("texture image format does not support linear blitting!");
+	}
+
+	vk::CommandBuffer commandBuffer = beginSingleTimeCommands();
+
+	vk::ImageMemoryBarrier barrier = { {}, {}, {}, {}, VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED, image, vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 ) };
+
+	int32_t mipWidth = texWidth;
+	int32_t mipHeight = texHeight;
+
+	for (uint32_t i = 1; i < mipLevels; i++) {
+		barrier.subresourceRange.baseMipLevel = i - 1;
+		barrier.oldLayout = vk::ImageLayout::eTransferDstOptimal;
+		barrier.newLayout = vk::ImageLayout::eTransferSrcOptimal;
+		barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+		barrier.dstAccessMask = vk::AccessFlagBits::eTransferRead;
+
+		commandBuffer.pipelineBarrier(vk::PipelineStageFlags{ vk::PipelineStageFlagBits::eTransfer }, vk::PipelineStageFlags{ vk::PipelineStageFlagBits::eTransfer },
+			vk::DependencyFlags(), 0, nullptr, 0, nullptr, 1, &barrier);
+
+		vk::ImageBlit blit = { vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, i - 1, 0, 1),
+		{}, vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, i, 0, 1), {} };
+		blit.srcOffsets[0] = vk::Offset3D( 0, 0, 0 );
+		blit.srcOffsets[1] = vk::Offset3D( mipWidth, mipHeight, 1 );
+		blit.dstOffsets[0] = vk::Offset3D( 0, 0, 0 );
+		blit.dstOffsets[1] = vk::Offset3D( mipWidth > 1 ? mipWidth / 2 : 1, mipHeight > 1 ? mipHeight / 2 : 1, 1 );
+
+		commandBuffer.blitImage( image, vk::ImageLayout::eTransferSrcOptimal, image, vk::ImageLayout::eTransferDstOptimal, 1, &blit, vk::Filter::eLinear);
+
+		barrier.oldLayout = vk::ImageLayout::eTransferSrcOptimal;
+		barrier.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+		barrier.srcAccessMask = vk::AccessFlagBits::eTransferRead;
+		barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+
+
+		commandBuffer.pipelineBarrier(vk::PipelineStageFlags{ vk::PipelineStageFlagBits::eTransfer }, vk::PipelineStageFlags{ vk::PipelineStageFlagBits::eFragmentShader },
+			vk::DependencyFlags(), 0, nullptr, 0, nullptr, 1, &barrier);
+
+		if (mipWidth > 1) mipWidth /= 2;
+		if (mipHeight > 1) mipHeight /= 2;
+	}
+
+	barrier.subresourceRange.baseMipLevel = mipLevels - 1;
+	barrier.oldLayout = vk::ImageLayout::eTransferDstOptimal;
+	barrier.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+	barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+
+	commandBuffer.pipelineBarrier(vk::PipelineStageFlags{ vk::PipelineStageFlagBits::eTransfer }, vk::PipelineStageFlags{ vk::PipelineStageFlagBits::eFragmentShader },
+		vk::DependencyFlags(), 0, nullptr, 0, nullptr, 1, &barrier);
+
+	endSingleTimeCommands(commandBuffer);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -1180,6 +1244,8 @@ void VkRender::loadModel()
 		}
 	}
 }
+
+
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -1266,6 +1332,7 @@ uint32_t VkRender::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags p
 	}
 
 	PSIM_CORE_ERROR("Failed to find suitable memory type!");
+	return 0;
 }
 
 vk::CommandBuffer VkRender::beginSingleTimeCommands()

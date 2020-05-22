@@ -103,6 +103,7 @@ private:
 	vk::DeviceMemory depthImageMemory;
 	vk::ImageView depthImageView;
 
+	uint32_t mipLevels;
 	vk::Image textureImage;
 	vk::DeviceMemory textureImageMemory;
 	vk::ImageView textureImageView;
@@ -190,7 +191,7 @@ private:
 	void cleanupSwapChain();
 
 	void createSwapchainImageViews();
-	vk::ImageView createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags);
+	vk::ImageView createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags, uint32_t mipLevels);
 
 	void createRenderPass();
 	void createGraphicsPipeline();
@@ -207,11 +208,12 @@ private:
 	bool hasStencilComponent(vk::Format format);
 
 	void createTextureImage();
-	void createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& imageMemory);
-	void transitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout);
+	void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& imageMemory);
+	void transitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout, uint32_t mipLevels);
 	void copyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height);
 	void createTextureImageView();
 	void createTextureSampler();
+	void generateMipmaps(vk::Image image, vk::Format imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
 
 	void loadModel();
 
