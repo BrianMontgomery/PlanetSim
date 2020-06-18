@@ -8,6 +8,11 @@ workspace "PlanetSim"
 		"Release",
 		"Dist"
 	}
+	flags
+	{
+		"MultiProcessorCompile"
+	}
+
 
 outputDir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
@@ -16,10 +21,12 @@ IncludeDir = {}
 IncludeDir["GLFW"] = "vendor/GLFW/include"
 IncludeDir["glm"] = "vendor/glm"
 IncludeDir["stb"] = "vendor/stb"
+IncludeDir["ImGui"] = "vendor/imgui"
 IncludeDir["tinyObjLoader"] = "vendor/tinyObjLoader"
 
 group "Dependencies"
 	include "vendor/GLFW"
+	include "vendor/imgui"
 
 group ""
 
@@ -39,11 +46,18 @@ project "PlanetSim"
 	{
 		"src/**.h",
 		"src/**.cpp",
-		"src/Shaders/**.spv",
 		"vendor/glm/glm/**.hpp",
 		"vendor/glm/glm/**.inl",
 		"vendor/stb/stb/**.h",
-		"vendor/tinyObjLoader/tinyObjLoader/**.h"
+		--basic tiny obj loader
+		"vendor/tinyObjLoader/tinyObjLoader/**.h",
+		--optimized tiny obj loader
+		"vendor/tinyObjLoader/experimental/**.h",
+		"vendor/tinyObjLoader/experimental/**.hpp",
+
+		"assets/shaders/**.spv",
+		"assets/models/**.obj",
+		"assets/textures/**.jpg"
 	}
 
 	defines
@@ -54,7 +68,9 @@ project "PlanetSim"
 		"GLM_FORCE_RADIANS",
 		"GLM_FORCE_DEPTH_ZERO_TO_ONE",
 		"GLM_ENABLE_EXPERIMENTAL",
-		"TINYOBJLOADER_IMPLEMENTATION"
+		--choose optimized or non-optimized tinyobj
+		--"TINYOBJLOADER_IMPLEMENTATION"
+		"TINYOBJ_LOADER_OPT_IMPLEMENTATION"
 	}
 
 	includedirs
@@ -66,19 +82,21 @@ project "PlanetSim"
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.stb}",
+		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.tinyObjLoader}",
 		
 		"C:/VulkanSDK/1.1.121.2/Include"
 	}
 
 	libdirs { 
-				"C:/VulkanSDK/1.1.121.2/Lib",
-				"vendor/glfw/bin/Debug-windows-x86_64/glfw"
+		"C:/VulkanSDK/1.1.121.2/Lib",
+		"vendor/glfw/bin/Debug-windows-x86_64/glfw"
 	}
 
 	links 
 	{ 
 		"GLFW",
+		"ImGui",
 		"vulkan-1.lib",
 		"glfw.lib"
 	}
@@ -88,6 +106,7 @@ project "PlanetSim"
 
 		defines
 		{
+			"_CRT_SECURE_NO_WARNINGS",
 			"PSIM_PLATFORM_WINDOWS",
 			"VK_USE_PLATFORM_WIN32_KHR"
 		}

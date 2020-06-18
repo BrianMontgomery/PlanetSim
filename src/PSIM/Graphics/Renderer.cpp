@@ -1,5 +1,5 @@
 #include "PSIMPCH.h"
-#include "Renderer.h"
+#include "Graphics/Renderer.h"
 
 
 Scope<Renderer::SceneData> Renderer::s_SceneData = CreateScope<Renderer::SceneData>();
@@ -19,11 +19,12 @@ void Renderer::Shutdown()
 //	Renderer2D::Shutdown();
 }
 
-/*void Renderer::OnWindowResize(uint32_t width, uint32_t height)
+void Renderer::OnWindowResize(uint32_t width, uint32_t height)
 {
-	RenderCommand::SetViewport(0, 0, width, height);
+	//RenderCommand::SetViewport(0, 0, width, height);
 }
 
+/*
 void Renderer::BeginScene(OrthographicCamera& camera)
 {
 	s_SceneData->ViewProjectionMatrix = camera.GetViewProjectionMatrix();

@@ -1,25 +1,30 @@
 #include "PSIMPCH.h"
 #include "VulkanContext.h"
+#include "Platform/Vk/FrameWork/VulkanFrameWork.h"
 
 #include <GLFW/glfw3.h>
 #include "vulkan/vulkan.hpp"
 
 VulkanContext::VulkanContext(GLFWwindow* windowHandle)
-	: m_WindowHandle(windowHandle)
+	: window(windowHandle)
 {
-	PSIM_ASSERT(windowHandle, "Window handle is null!")
+	PSIM_ASSERT(windowHandle, "Window handle is null!");
+	this->framework = framework->getFramework();
 }
 
 void VulkanContext::Init()
 {
 	PSIM_PROFILE_FUNCTION();
+	framework = VulkanFrameWork::getFramework();
+	//library initialization (glad loader in OpenGL)
+	framework->init(window);
 
-	glfwMakeContextCurrent(m_WindowHandle);
+	//version checking done at device level
 }
 
-void VulkanContext::SwapBuffers()
+void VulkanContext::drawFrame()
 {
 	PSIM_PROFILE_FUNCTION();
 
-	glfwSwapBuffers(m_WindowHandle);
+	framework->drawFrame();
 }

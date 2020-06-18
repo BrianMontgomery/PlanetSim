@@ -79,11 +79,13 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>PSIMPCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;VULKAN_HPP_NO_EXCEPTIONS;STB_IMAGE_IMPLEMENTATION;GLM_FORCE_RADIANS;GLM_FORCE_DEPTH_ZERO_TO_ONE;GLM_ENABLE_EXPERIMENTAL;TINYOBJLOADER_IMPLEMENTATION;PSIM_PLATFORM_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;PSIM_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;src\Platform;src\PSIM;vendor\spdlog\include;vendor\GLFW\include;vendor\glm;vendor\stb;vendor\tinyObjLoader;C:\VulkanSDK\1.1.121.2\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>VULKAN_HPP_NO_EXCEPTIONS;STB_IMAGE_IMPLEMENTATION;GLM_FORCE_RADIANS;GLM_FORCE_DEPTH_ZERO_TO_ONE;GLM_ENABLE_EXPERIMENTAL;TINYOBJ_LOADER_OPT_IMPLEMENTATION;_CRT_SECURE_NO_WARNINGS;PSIM_PLATFORM_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;PSIM_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src;src\Platform;src\PSIM;vendor\spdlog\include;vendor\GLFW\include;vendor\glm;vendor\stb;vendor\imgui;vendor\tinyObjLoader;C:\VulkanSDK\1.1.121.2\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -98,14 +100,15 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>PSIMPCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;VULKAN_HPP_NO_EXCEPTIONS;STB_IMAGE_IMPLEMENTATION;GLM_FORCE_RADIANS;GLM_FORCE_DEPTH_ZERO_TO_ONE;GLM_ENABLE_EXPERIMENTAL;TINYOBJLOADER_IMPLEMENTATION;PSIM_PLATFORM_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;PSIM_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;src\Platform;src\PSIM;vendor\spdlog\include;vendor\GLFW\include;vendor\glm;vendor\stb;vendor\tinyObjLoader;C:\VulkanSDK\1.1.121.2\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>VULKAN_HPP_NO_EXCEPTIONS;STB_IMAGE_IMPLEMENTATION;GLM_FORCE_RADIANS;GLM_FORCE_DEPTH_ZERO_TO_ONE;GLM_ENABLE_EXPERIMENTAL;TINYOBJ_LOADER_OPT_IMPLEMENTATION;_CRT_SECURE_NO_WARNINGS;PSIM_PLATFORM_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;PSIM_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src;src\Platform;src\PSIM;vendor\spdlog\include;vendor\GLFW\include;vendor\glm;vendor\stb;vendor\imgui;vendor\tinyObjLoader;C:\VulkanSDK\1.1.121.2\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -121,14 +124,15 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>PSIMPCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;VULKAN_HPP_NO_EXCEPTIONS;STB_IMAGE_IMPLEMENTATION;GLM_FORCE_RADIANS;GLM_FORCE_DEPTH_ZERO_TO_ONE;GLM_ENABLE_EXPERIMENTAL;TINYOBJLOADER_IMPLEMENTATION;PSIM_PLATFORM_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;PSIM_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;src\Platform;src\PSIM;vendor\spdlog\include;vendor\GLFW\include;vendor\glm;vendor\stb;vendor\tinyObjLoader;C:\VulkanSDK\1.1.121.2\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>VULKAN_HPP_NO_EXCEPTIONS;STB_IMAGE_IMPLEMENTATION;GLM_FORCE_RADIANS;GLM_FORCE_DEPTH_ZERO_TO_ONE;GLM_ENABLE_EXPERIMENTAL;TINYOBJ_LOADER_OPT_IMPLEMENTATION;_CRT_SECURE_NO_WARNINGS;PSIM_PLATFORM_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;PSIM_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src;src\Platform;src\PSIM;vendor\spdlog\include;vendor\GLFW\include;vendor\glm;vendor\stb;vendor\imgui;vendor\tinyObjLoader;C:\VulkanSDK\1.1.121.2\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -143,23 +147,29 @@
     <ClInclude Include="src\PSIM\Application\Application.h" />
     <ClInclude Include="src\PSIM\Core\Core.h" />
     <ClInclude Include="src\PSIM\Core\Debug\Instrumentor.h" />
+    <ClInclude Include="src\PSIM\Core\Debug\TimeStep.h" />
+    <ClInclude Include="src\PSIM\Core\Events\ApplicationEvents.h" />
+    <ClInclude Include="src\PSIM\Core\Events\Events.h" />
+    <ClInclude Include="src\PSIM\Core\Events\KeyEvents.h" />
+    <ClInclude Include="src\PSIM\Core\Events\MouseEvents.h" />
     <ClInclude Include="src\PSIM\Core\Input\Input.h" />
     <ClInclude Include="src\PSIM\Core\Input\KeyCodes.h" />
     <ClInclude Include="src\PSIM\Core\Input\MouseCodes.h" />
+    <ClInclude Include="src\PSIM\Core\Layers\LayerStack.h" />
+    <ClInclude Include="src\PSIM\Core\Layers\Layers.h" />
     <ClInclude Include="src\PSIM\Core\Logging\Log.h" />
     <ClInclude Include="src\PSIM\Core\WindowPrototype.h" />
-    <ClInclude Include="src\PSIM\Events\ApplicationEvents.h" />
-    <ClInclude Include="src\PSIM\Events\Events.h" />
-    <ClInclude Include="src\PSIM\Events\KeyEvents.h" />
-    <ClInclude Include="src\PSIM\Events\MouseEvents.h" />
     <ClInclude Include="src\PSIM\Graphics\Context\GraphicsContext.h" />
     <ClInclude Include="src\PSIM\Graphics\RenderAPI\RendererAPI.h" />
     <ClInclude Include="src\PSIM\Graphics\RenderAPI\RendererCommands.h" />
     <ClInclude Include="src\PSIM\Graphics\Renderer.h" />
+    <ClInclude Include="src\PSIM\imgui\ImGuiLayer.h" />
     <ClInclude Include="src\PSIMPCH.h" />
     <ClInclude Include="src\Platform\Vk\Context\VulkanContext.h" />
+    <ClInclude Include="src\Platform\Vk\FrameWork\VulkanFrameWork.h" />
+    <ClInclude Include="src\Platform\Vk\ImGui\VulkanImGui.h" />
     <ClInclude Include="src\Platform\Vk\RenderAPI\VulkanRendererAPI.h" />
-    <ClInclude Include="src\Platform\Vk\VkRender.h" />
+    <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="vendor\glm\glm\common.hpp" />
     <ClInclude Include="vendor\glm\glm\detail\_features.hpp" />
@@ -526,27 +536,54 @@
     <ClInclude Include="vendor\glm\glm\vec4.hpp" />
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp" />
     <ClInclude Include="vendor\stb\stb\stb_image.h" />
+    <ClInclude Include="vendor\tinyObjLoader\experimental\lfpAlloc\Allocator.hpp" />
+    <ClInclude Include="vendor\tinyObjLoader\experimental\lfpAlloc\ChunkList.hpp" />
+    <ClInclude Include="vendor\tinyObjLoader\experimental\lfpAlloc\Pool.hpp" />
+    <ClInclude Include="vendor\tinyObjLoader\experimental\lfpAlloc\PoolDispatcher.hpp" />
+    <ClInclude Include="vendor\tinyObjLoader\experimental\lfpAlloc\Utils.hpp" />
+    <ClInclude Include="vendor\tinyObjLoader\experimental\tinyobj_loader_opt.h" />
     <ClInclude Include="vendor\tinyObjLoader\tinyObjLoader\tiny_obj_loader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\PSIM\Application\Application.cpp" />
+    <ClCompile Include="src\PSIM\Core\Input\Input.cpp" />
+    <ClCompile Include="src\PSIM\Core\Layers\LayerStack.cpp" />
+    <ClCompile Include="src\PSIM\Core\Layers\Layers.cpp" />
     <ClCompile Include="src\PSIM\Core\Logging\Log.cpp" />
     <ClCompile Include="src\PSIM\Graphics\Context\GraphicsContext.cpp" />
     <ClCompile Include="src\PSIM\Graphics\RenderAPI\RendererAPI.cpp" />
     <ClCompile Include="src\PSIM\Graphics\RenderAPI\RendererCommands.cpp" />
     <ClCompile Include="src\PSIM\Graphics\Renderer.cpp" />
+    <ClCompile Include="src\PSIM\imgui\ImGuiBuild.cpp" />
+    <ClCompile Include="src\PSIM\imgui\ImGuiLayer.cpp" />
     <ClCompile Include="src\PSIMPCH.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\Platform\Vk\Context\VulkanContext.cpp" />
+    <ClCompile Include="src\Platform\Vk\FrameWork\VulkanFrameWork.cpp" />
+    <ClCompile Include="src\Platform\Vk\ImGui\VulkanImGui.cpp" />
     <ClCompile Include="src\Platform\Vk\RenderAPI\VulkanRendererAPI.cpp" />
-    <ClCompile Include="src\Platform\Vk\VkRender.cpp" />
+    <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\models\chalet.obj" />
+    <None Include="assets\shaders\ImGuiFrag.spv" />
+    <None Include="assets\shaders\ImGuiVert.spv" />
+    <None Include="assets\shaders\TriangleShaderFrag.spv" />
+    <None Include="assets\shaders\TriangleShaderVert.spv" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\textures\chalet.jpg" />
+    <Image Include="assets\textures\texture.jpg" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="vendor\GLFW\glfw.vcxproj">
       <Project>{9563977C-819A-980D-2A87-7E10169D140F}</Project>
+    </ProjectReference>
+    <ProjectReference Include="vendor\imgui\ImGui.vcxproj">
+      <Project>{C0FF640D-2C14-8DBE-F595-301E616989EF}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -16,7 +16,7 @@
 #ifdef PSIM_ENABLE_ASSERTS
 	#define PSIM_ASSERT(x, ...) { if(!(x)) { PSIM_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak(); } }
 #else
-	#define PSIM_ASSERT(x, ...)
+	#define PSIM_ASSERT(x, ...) { if(!(x)) { PSIM_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak(); } }
 #endif
 
 #define BIT(x) (1 << x)

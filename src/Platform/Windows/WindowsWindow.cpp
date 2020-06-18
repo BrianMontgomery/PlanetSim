@@ -2,16 +2,12 @@
 #include "WindowsWindow.h"
 
 #include "Graphics/Renderer.h"
-#include "Platform/Vk/Context/VulkanContext.h"
 
 #include "Core/Input/Input.h"
 
-#include "Events/ApplicationEvents.h"
-#include "Events/MouseEvents.h"
-#include "Events/KeyEvents.h"
-
-
-
+#include "Core/Events/ApplicationEvents.h"
+#include "Core/Events/MouseEvents.h"
+#include "Core/Events/KeyEvents.h"
 
 static uint8_t s_GLFWWindowCount = 0;
 
@@ -22,6 +18,7 @@ static void GLFWErrorCallback(int error, const char* description)
 
 Scope<WindowPrototype> WindowPrototype::Create(const WindowProps& props)
 {
+	PSIM_PROFILE_FUNCTION();
 	return CreateScope<WindowsWindow>(props);
 }
 
@@ -43,9 +40,9 @@ void WindowsWindow::Init(const WindowProps& props)
 {
 	PSIM_PROFILE_FUNCTION();
 
-	m_Data.Title = props.Title;
-	m_Data.Width = props.Width;
-	m_Data.Height = props.Height;
+	windowData.Title = props.Title;
+	windowData.Width = props.Width;
+	windowData.Height = props.Height;
 
 	PSIM_CORE_INFO("Creating window {0} ({1}, {2})", props.Title, props.Width, props.Height);
 
@@ -59,22 +56,24 @@ void WindowsWindow::Init(const WindowProps& props)
 
 	{
 		PSIM_PROFILE_SCOPE("glfwCreateWindow");
-#if defined(PSIM_DEBUG)
 		if (Renderer::GetAPI() == RendererAPI::API::Vulkan)
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+#if defined(PSIM_DEBUG)
+		if (Renderer::GetAPI() == RendererAPI::API::OpenGL)
+			glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif
-		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
+		window = glfwCreateWindow((int)props.Width, (int)props.Height, windowData.Title.c_str(), nullptr, nullptr);
 		++s_GLFWWindowCount;
 	}
 
-	m_Context = GraphicsContext::Create(m_Window);
+	m_Context = GraphicsContext::Create(window);
 	m_Context->Init();
 
-	glfwSetWindowUserPointer(m_Window, &m_Data);
+	glfwSetWindowUserPointer(window, &windowData);
 	SetVSync(true);
 
 	// Set GLFW callbacks
-	glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
+	glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int width, int height)
 	{
 		WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 		data.Width = width;
@@ -84,14 +83,14 @@ void WindowsWindow::Init(const WindowProps& props)
 		data.EventCallback(event);
 	});
 
-	glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
+	glfwSetWindowCloseCallback(window, [](GLFWwindow* window)
 	{
 		WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 		WindowCloseEvent event;
 		data.EventCallback(event);
 	});
 
-	glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+	glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
 		WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
@@ -118,7 +117,7 @@ void WindowsWindow::Init(const WindowProps& props)
 		}
 	});
 
-	glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int keycode)
+	glfwSetCharCallback(window, [](GLFWwindow* window, unsigned int keycode)
 	{
 		WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
@@ -126,7 +125,7 @@ void WindowsWindow::Init(const WindowProps& props)
 		data.EventCallback(event);
 	});
 
-	glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
+	glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods)
 	{
 		WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
@@ -147,7 +146,7 @@ void WindowsWindow::Init(const WindowProps& props)
 		}
 	});
 
-	glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset)
+	glfwSetScrollCallback(window, [](GLFWwindow* window, double xOffset, double yOffset)
 	{
 		WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
@@ -155,7 +154,7 @@ void WindowsWindow::Init(const WindowProps& props)
 		data.EventCallback(event);
 	});
 
-	glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xPos, double yPos)
+	glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xPos, double yPos)
 	{
 		WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
@@ -168,7 +167,7 @@ void WindowsWindow::Shutdown()
 {
 	PSIM_PROFILE_FUNCTION();
 
-	glfwDestroyWindow(m_Window);
+	glfwDestroyWindow(window);
 	--s_GLFWWindowCount;
 
 	if (s_GLFWWindowCount == 0)
@@ -182,22 +181,23 @@ void WindowsWindow::OnUpdate()
 	PSIM_PROFILE_FUNCTION();
 
 	glfwPollEvents();
-	m_Context->SwapBuffers();
+	m_Context->drawFrame();
 }
 
 void WindowsWindow::SetVSync(bool enabled)
 {
 	PSIM_PROFILE_FUNCTION();
 
+	/*
 	if (enabled)
 		glfwSwapInterval(1);
 	else
 		glfwSwapInterval(0);
-
-	m_Data.VSync = enabled;
+	*/
+	windowData.VSync = enabled;
 }
 
 bool WindowsWindow::IsVSync() const
 {
-	return m_Data.VSync;
+	return windowData.VSync;
 }

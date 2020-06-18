@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Graphics/Context/GraphicsContext.h"
+#include "Platform/Vk/FrameWork/VulkanFrameWork.h"
 
 struct GLFWwindow;
 
@@ -10,7 +11,12 @@ public:
 	VulkanContext(GLFWwindow* windowHandle);
 
 	virtual void Init() override;
-	virtual void SwapBuffers() override;
+	virtual void drawFrame() override;
+
+	virtual void SwapBuffers() override {};
+
+
 private:
-	GLFWwindow* m_WindowHandle;
+	GLFWwindow* window;
+	VulkanFrameWork* framework;
 };
