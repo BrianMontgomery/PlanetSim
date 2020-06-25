@@ -22,7 +22,7 @@ int main()
 	app->Run();
 	PSIM_PROFILE_END_SESSION();
 
-	PSIM_PROFILE_BEGIN_SESSION("Startup", "HazelProfile-Shutdown.json");
+	PSIM_PROFILE_BEGIN_SESSION("Shutdown", "HazelProfile-Shutdown.json");
 	//delete app
 	delete app;
 

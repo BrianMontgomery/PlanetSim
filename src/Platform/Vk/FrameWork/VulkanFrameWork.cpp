@@ -589,7 +589,7 @@ vk::SurfaceFormatKHR VulkanFrameWork::chooseSwapSurfaceFormat(const std::vector<
 {
 	//check for srgb
 	for (const auto& availableFormat : availableFormats) {
-		if (availableFormat.format == vk::Format::eR8G8B8A8Srgb && availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
+		if (availableFormat.format == vk::Format::eB8G8R8A8Srgb && availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
 			return availableFormat;
 		}
 	}
@@ -861,10 +861,10 @@ void VulkanFrameWork::createGraphicsPipeline()
 	//MultiSampling Info
 	vk::PipelineMultisampleStateCreateInfo multisampling = { {}, msaaSamples, true, 0.2f, nullptr, false, false };
 
-	vk::PipelineDepthStencilStateCreateInfo depthStencil = { {}, true, true, vk::CompareOp::eLess, false, false };
+	vk::PipelineDepthStencilStateCreateInfo depthStencil = { {}, true, true, vk::CompareOp::eLessOrEqual, false, false };
 
 	//Color Blending Info
-	vk::PipelineColorBlendAttachmentState colorBlendAttachment = { true, vk::BlendFactor::eSrcAlpha, vk::BlendFactor::eOneMinusSrcAlpha, vk::BlendOp::eAdd, vk::BlendFactor::eOne,
+	vk::PipelineColorBlendAttachmentState colorBlendAttachment = { true, vk::BlendFactor::eSrcAlpha, vk::BlendFactor::eOneMinusSrcAlpha, vk::BlendOp::eAdd, vk::BlendFactor::eOneMinusSrcAlpha,
 	vk::BlendFactor::eZero, vk::BlendOp::eAdd, vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA };
 
 	//Color Blend State Info
@@ -953,7 +953,7 @@ vk::CommandPool VulkanFrameWork::createCommandPool(vk::CommandPoolCreateFlags fl
 	QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);
 
 	//create a command pool
-	vk::CommandPoolCreateInfo poolInfo = { {}, queueFamilyIndices.graphicsFamily.value() };
+	vk::CommandPoolCreateInfo poolInfo = { vk::CommandPoolCreateFlagBits::eResetCommandBuffer, queueFamilyIndices.graphicsFamily.value() };
 
 	vk::CommandPool tempPool;
 	PSIM_ASSERT(device.createCommandPool(&poolInfo, nullptr, &tempPool) == vk::Result::eSuccess, "Failed to create command pool!");
@@ -1584,9 +1584,10 @@ void VulkanFrameWork::createDescriptorPool()
 {
 	PSIM_PROFILE_FUNCTION();
 	//set both descriptor pool sizes
-	std::array<vk::DescriptorPoolSize, 2> poolSizes = {};
+	std::array<vk::DescriptorPoolSize, 3> poolSizes = {};
 	poolSizes[0] = { vk::DescriptorType::eUniformBuffer, static_cast<uint32_t>(swapChainImages.size()) };
-	poolSizes[1] = { vk::DescriptorType::eCombinedImageSampler, static_cast<uint32_t>(swapChainImages.size() + 1) };
+	poolSizes[1] = { vk::DescriptorType::eCombinedImageSampler, static_cast<uint32_t>(swapChainImages.size()) };
+	poolSizes[2] = { vk::DescriptorType::eCombinedImageSampler, static_cast<uint32_t>(swapChainImages.size()) };
 
 	//create descriptor pool
 	vk::DescriptorPoolCreateInfo poolInfo = { {}, static_cast<uint32_t>(swapChainImages.size() + 1), static_cast<uint32_t>(poolSizes.size()), poolSizes.data() };
@@ -1633,6 +1634,9 @@ void VulkanFrameWork::createDescriptorSets()
 void VulkanFrameWork::drawFrame()
 {
 	PSIM_PROFILE_FUNCTION();
+
+	//record CommandBuffers
+
 	//ensure that all previous draws are completed
 	device.waitForFences(1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -1651,11 +1655,6 @@ void VulkanFrameWork::drawFrame()
 
 	//update to next frame
 	updateUniformBuffer(imageIndex);
-
-	if (bool(imagesInFlight[imageIndex]) != false) {
-		device.waitForFences(1, &imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
-	}
-	imagesInFlight[imageIndex] = inFlightFences[currentFrame];
 
 	//setup frame submission info
 
@@ -1697,7 +1696,6 @@ void VulkanFrameWork::createSyncObjects()
 	imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
 	renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
 	inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
-	imagesInFlight.resize(swapChainImages.size());
 
 	//reset sync objects info
 	vk::SemaphoreCreateInfo semaphoreInfo = {};
@@ -1712,4 +1710,40 @@ void VulkanFrameWork::createSyncObjects()
 	}
 
 	PSIM_CORE_INFO("Sync Objects Created");
+}
+
+
+//these two must be called together, sometimes things go between
+void VulkanFrameWork::commandBufferRecordBegin(int bufNum)
+{
+	//define buffers
+	vk::CommandBufferBeginInfo beginInfo = { vk::CommandBufferUsageFlagBits::eSimultaneousUse };
+
+	PSIM_ASSERT(commandBuffers[bufNum].begin(&beginInfo) == vk::Result::eSuccess, "Failed to begin recording command buffer!");
+
+	clearValues[1].setDepthStencil(vk::ClearDepthStencilValue({ 1.0f, 0 }));
+
+	vk::RenderPassBeginInfo renderPassInfo = { renderPass, swapChainFramebuffers[bufNum], vk::Rect2D { { 0, 0 }, swapChainExtent }, static_cast<uint32_t>(clearValues.size()), clearValues.data() };
+
+	//use command buffers
+	commandBuffers[bufNum].beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
+	//bind pipeline
+	commandBuffers[bufNum].bindPipeline(vk::PipelineBindPoint::eGraphics, graphicsPipeline);
+
+	vk::Buffer vertexBuffers[] = { vertexBuffer };
+	vk::DeviceSize offsets[] = { 0 };
+
+	commandBuffers[bufNum].bindVertexBuffers(0, 1, vertexBuffers, offsets);
+	commandBuffers[bufNum].bindIndexBuffer(indexBuffer, 0, vk::IndexType::eUint32);
+	commandBuffers[bufNum].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout, 0, 1, &descriptorSets[bufNum], 0, nullptr);
+
+	//draw from pipeline
+	commandBuffers[bufNum].drawIndexed(static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+}
+
+void VulkanFrameWork::commandBufferRecordEnd(int bufNum)
+{
+	commandBuffers[bufNum].endRenderPass();
+
+	PSIM_ASSERT(commandBuffers[bufNum].end() == vk::Result::eSuccess, "Failed to record command buffer!");
 }

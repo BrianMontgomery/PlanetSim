@@ -26,5 +26,9 @@ void VulkanContext::drawFrame()
 {
 	PSIM_PROFILE_FUNCTION();
 
+	for (size_t i = 0; i < framework->commandBuffers.size(); i++) {
+		framework->commandBufferRecordBegin(i);
+		framework->commandBufferRecordEnd(i);
+	}
 	framework->drawFrame();
 }

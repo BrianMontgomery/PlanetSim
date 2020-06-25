@@ -85,7 +85,7 @@ private:
 	vk::SurfaceKHR surface = nullptr;
 
 	vk::PhysicalDevice physicalDevice = nullptr;
-	vk::SampleCountFlagBits msaaSamples = vk::SampleCountFlagBits::e1;
+	vk::SampleCountFlagBits msaaSamples = vk::SampleCountFlagBits::e8;
 
 	vk::Device device;
 
@@ -250,6 +250,9 @@ private:
 	void createDescriptorSets();
 
 	void createSyncObjects();
+
+	void commandBufferRecordBegin(int bufNum);
+	void commandBufferRecordEnd(int bufNum);
 	//--------------------------------------------------------------------------------------------------------------------------------
 
 private:
@@ -260,5 +263,8 @@ private:
 
 #ifdef PSIM_DEBUG
 	friend class VulkanImGui;
+#endif
+#ifndef PSIM_DEBUG
+	friend class VulkanContext;
 #endif
 };

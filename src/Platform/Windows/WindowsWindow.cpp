@@ -181,7 +181,10 @@ void WindowsWindow::OnUpdate()
 	PSIM_PROFILE_FUNCTION();
 
 	glfwPollEvents();
+#ifndef PSIM_DEBUG
+	//done in ImGui in DEBUG
 	m_Context->drawFrame();
+#endif
 }
 
 void WindowsWindow::SetVSync(bool enabled)

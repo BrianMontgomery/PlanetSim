@@ -4,7 +4,9 @@
 #include "Core/Events/ApplicationEvents.h"
 #include "Core/WindowPrototype.h"
 #include "Core/Layers/LayerStack.h"
+#ifdef PSIM_DEBUG
 #include "imgui/ImGuiLayer.h"
+#endif
 
 class Application
 {
@@ -29,7 +31,9 @@ private:
 
 private:
 	std::unique_ptr<WindowPrototype> m_Window;
+#ifdef PSIM_DEBUG
 	ImGuiLayer* m_ImGuiLayer;
+#endif
 	bool m_Running = true;
 	bool m_Minimized = false;
 	LayerStack m_LayerStack;

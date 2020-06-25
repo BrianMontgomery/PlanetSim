@@ -24,8 +24,10 @@ Application::Application()
 	//init the renderer
 	Renderer::Init();
 
+#ifdef PSIM_DEBUG
 	m_ImGuiLayer = new ImGuiLayer();
 	PushOverlay(m_ImGuiLayer);
+#endif
 }
 
 Application::~Application()
@@ -90,7 +92,7 @@ void Application::Run()
 					layer->OnUpdate(timestep);
 			}
 
-			
+#ifdef PSIM_DEBUG
 			m_ImGuiLayer->Begin();
 			{
 				PSIM_PROFILE_SCOPE("LayerStack OnImGuiRender");
@@ -98,10 +100,11 @@ void Application::Run()
 					layer->OnImGuiRender();
 			}
 			m_ImGuiLayer->End();
+#endif
 			
 		}
 
-		m_Window->OnUpdate();
+		m_Window->OnUpdate();		//has drawFrame()
 	}
 }
 
