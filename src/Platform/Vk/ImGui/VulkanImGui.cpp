@@ -49,7 +49,7 @@ void VulkanImGui::ImGuiOnAttach()
 
 	VulkanFrameWork::QueueFamilyIndices imGuiIndices = framework->findQueueFamilies(framework->physicalDevice);
 
-	ImGui_ImplGlfw_InitForVulkan(window, true);
+	ImGui_ImplGlfw_InitForVulkan(window, false);
 	ImGui_ImplVulkan_InitInfo init_info = {};
 	init_info.Instance = (VkInstance)framework->instance;
 	init_info.PhysicalDevice = (VkPhysicalDevice)framework->physicalDevice;
@@ -81,12 +81,19 @@ void VulkanImGui::ImGuiOnDetach()
 	ImGui::DestroyContext();
 }
 
+void VulkanImGui::ImGuiOnImGuiRender()
+{
+	ImGuiBody();
+}
+
+/*
 void VulkanImGui::ImGuiOnEvent(Event& e)
 {
 	ImGuiIO& io = ImGui::GetIO();
 	e.Handled |= e.IsInCategory(EventCategoryMouse) & io.WantCaptureMouse;
 	e.Handled |= e.IsInCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
 }
+*/
 
 void VulkanImGui::ImGuiBegin()
 {
@@ -102,8 +109,6 @@ void VulkanImGui::ImGuiBegin()
 void VulkanImGui::ImGuiEnd()
 {
 	PSIM_PROFILE_FUNCTION();
-
-	ImGui::End();
 
 	ImGuiIO& io = ImGui::GetIO();
 	Application& app = Application::Get();
@@ -134,10 +139,8 @@ void VulkanImGui::ImGuiEnd()
 
 	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 	{
-		GLFWwindow* backup_current_context = glfwGetCurrentContext();
 		ImGui::UpdatePlatformWindows();
 		ImGui::RenderPlatformWindowsDefault();
-		glfwMakeContextCurrent(backup_current_context);
 	}
 }
 
@@ -154,17 +157,15 @@ void VulkanImGui::ImGuiSetupWindow()
 		ImGui::SetNextWindowSize(WindowSize, ImGuiCond_::ImGuiCond_FirstUseEver);
 		ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_::ImGuiCond_FirstUseEver);
 		ImGui::NewFrame();
-
-
-		ImGuiBody();
 	}
 }
 
 void VulkanImGui::ImGuiBody()
 {
 	// render your GUI
-	ImGui::Begin("Demo window");
-	ImGui::Button("Hello!");
+	bool show_demo_window = true;
+	ImGui::ShowDemoWindow(&show_demo_window);
+
 }
 #endif
 

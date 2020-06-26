@@ -264,7 +264,5 @@ private:
 #ifdef PSIM_DEBUG
 	friend class VulkanImGui;
 #endif
-#ifndef PSIM_DEBUG
 	friend class VulkanContext;
-#endif
 };

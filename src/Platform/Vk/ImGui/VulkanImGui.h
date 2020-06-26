@@ -13,8 +13,8 @@ public:
 	virtual void ImGuiOnAttach() override;
 	virtual void ImGuiOnDetach() override;
 	virtual void ImGuiOnUpdate(Timestep ts) override {};
-	virtual void ImGuiOnImGuiRender() override {};
-	virtual void ImGuiOnEvent(Event& e) override;
+	virtual void ImGuiOnImGuiRender() override;
+	virtual void ImGuiOnEvent(Event& e) override {};
 
 	virtual void ImGuiBegin() override;
 	virtual void ImGuiEnd() override;
