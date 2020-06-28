@@ -56,7 +56,7 @@ void VulkanImGui::ImGuiOnAttach()
 	init_info.Device = (VkDevice)framework->device;
 	init_info.QueueFamily = imGuiIndices.graphicsFamily.value();
 	init_info.Queue = (VkQueue)framework->presentQueue;
-	init_info.PipelineCache = VK_NULL_HANDLE;
+	init_info.PipelineCache = framework->pipelineCache;
 	init_info.DescriptorPool = (VkDescriptorPool)framework->descriptorPool;
 	init_info.Allocator = NULL;
 	init_info.MinImageCount = 2;
@@ -86,14 +86,14 @@ void VulkanImGui::ImGuiOnImGuiRender()
 	ImGuiBody();
 }
 
-/*
+
 void VulkanImGui::ImGuiOnEvent(Event& e)
 {
 	ImGuiIO& io = ImGui::GetIO();
 	e.Handled |= e.IsInCategory(EventCategoryMouse) & io.WantCaptureMouse;
 	e.Handled |= e.IsInCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
 }
-*/
+
 
 void VulkanImGui::ImGuiBegin()
 {

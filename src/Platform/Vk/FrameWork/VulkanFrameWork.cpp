@@ -162,6 +162,8 @@ void VulkanFrameWork::initVulkan()
 	createSwapchainImageViews();
 	createRenderPass();
 	createDescriptorSetLayout();
+	createPipelineCache();
+	retrievePipelineCache();
 	createGraphicsPipeline();
 	createColorResources();
 	createDepthResources();
@@ -209,6 +211,9 @@ void VulkanFrameWork::cleanUp()
 	device.destroyBuffer(vertexBuffer, nullptr);
 	device.freeMemory(vertexBufferMemory, nullptr);
 	PSIM_CORE_INFO("Vertex Buffer Destroyed");
+
+	device.destroyPipelineCache(pipelineCache, nullptr);
+	PSIM_CORE_INFO("Pipeline Cache Destroyed");
 
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 		device.destroySemaphore(renderFinishedSemaphores[i], nullptr);
@@ -885,7 +890,7 @@ void VulkanFrameWork::createGraphicsPipeline()
 	vk::GraphicsPipelineCreateInfo pipelineInfo = { {}, 2, shaderStages, &vertexInputInfo, &inputAssembly, nullptr, &viewportState, &rasterizer, &multisampling, &depthStencil,
 	&colorBlending, nullptr, pipelineLayout, renderPass, 0 };
 
-	PSIM_ASSERT(device.createGraphicsPipelines(vk::PipelineCache(), 1, &pipelineInfo, nullptr, &graphicsPipeline) == vk::Result::eSuccess, "Failed to create graphics pipeline!");
+	PSIM_ASSERT(device.createGraphicsPipelines(pipelineCache, 1, &pipelineInfo, nullptr, &graphicsPipeline) == vk::Result::eSuccess, "Failed to create graphics pipeline!");
 	PSIM_CORE_INFO("Created Graphics Pipeline");
 
 	//cleanup
@@ -906,6 +911,20 @@ vk::ShaderModule VulkanFrameWork::createShaderModule(const std::vector<char>& co
 	return shaderModule;
 }
 
+void VulkanFrameWork::createPipelineCache()
+{
+	vk::PipelineCacheCreateInfo pipelineCacheCreateInfo = {};
+	PSIM_ASSERT(device.createPipelineCache(&pipelineCacheCreateInfo, nullptr, &pipelineCache) == vk::Result::eSuccess, "Failed to create pipeline cache!");
+
+	return;
+}
+
+void VulkanFrameWork::retrievePipelineCache()
+{
+	
+
+	return;
+}
 //--------------------------------------------------------------------------------------------------------------------------------
 
 

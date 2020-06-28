@@ -104,6 +104,8 @@ private:
 		
 	vk::PipelineLayout pipelineLayout;
 	vk::Pipeline graphicsPipeline;
+	
+	vk::PipelineCache pipelineCache;
 
 	std::vector<vk::Framebuffer> swapChainFramebuffers;
 
@@ -212,6 +214,9 @@ private:
 	void createGraphicsPipeline();
 	vk::ShaderModule createShaderModule(const std::vector<char>& code);
 	static std::vector<char> readFileByteCode(const std::string& filename);
+
+	void createPipelineCache();
+	void retrievePipelineCache();
 
 	void createFramebuffers();
 
