@@ -7,3 +7,9 @@
 [submodule "vendor/glfw"]
 	path = vendor/glfw
 	url = https://github.com/glfw/glfw
+[submodule "vendor/vendor/imgui"]
+	path = vendor/vendor/imgui
+	url = https://github.com/BrianMontgomery/imgui
+[submodule "imgui"]
+	path = imgui
+	url = https://github.com/BrianMontgomery/imgui
