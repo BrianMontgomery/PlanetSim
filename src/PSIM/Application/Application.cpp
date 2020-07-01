@@ -101,7 +101,6 @@ void Application::Run()
 			}
 			m_ImGuiLayer->End();
 #endif
-			
 		}
 
 		m_Window->OnUpdate();		//has drawFrame()

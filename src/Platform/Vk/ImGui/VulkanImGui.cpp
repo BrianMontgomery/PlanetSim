@@ -21,9 +21,9 @@ void VulkanImGui::ImGuiOnAttach()
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
 	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
-	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
+	//io.ConfigFlags |= ImGuiConfigFlags_DpiEnableScaleViewports;
 
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
@@ -99,6 +99,15 @@ void VulkanImGui::ImGuiBegin()
 {
 	PSIM_PROFILE_FUNCTION();
 
+	ImGuiIO& io = ImGui::GetIO(); 
+	Application& app = Application::Get();
+	
+	if (ImGuiResizeFlag)
+	{
+		reinitializeImGui();
+		ImGuiResizeFlag = false;
+	}
+
 	if (!isImGuiWindowCreated)
 	{
 		ImGuiSetupWindow();
@@ -109,10 +118,6 @@ void VulkanImGui::ImGuiBegin()
 void VulkanImGui::ImGuiEnd()
 {
 	PSIM_PROFILE_FUNCTION();
-
-	ImGuiIO& io = ImGui::GetIO();
-	Application& app = Application::Get();
-	io.DisplaySize = ImVec2((float)app.GetWindow().GetWidth(), (float)app.GetWindow().GetHeight());
 	
 	// Rendering
 	ImGui::Render();
@@ -133,7 +138,16 @@ void VulkanImGui::ImGuiEnd()
 		framework->commandBufferRecordEnd(i);
 	}
 
+	if (framework->framebufferResized == true)
+	{
+		ImGuiResizeFlag = true;
+	}
+
 	framework->drawFrame();
+
+	ImGuiIO& io = ImGui::GetIO();
+	Application& app = Application::Get();
+	io.DisplaySize = ImVec2((float)app.GetWindow().GetWidth(), (float)app.GetWindow().GetHeight());
 
 	isImGuiWindowCreated = false;
 
@@ -166,6 +180,38 @@ void VulkanImGui::ImGuiBody()
 	bool show_demo_window = true;
 	ImGui::ShowDemoWindow(&show_demo_window);
 
+}
+
+void VulkanImGui::reinitializeImGui()
+{
+	framework->device.waitIdle();
+	ImGui_ImplVulkan_Shutdown();
+
+	VulkanFrameWork::QueueFamilyIndices imGuiIndices = framework->findQueueFamilies(framework->physicalDevice);
+
+	Application& app = Application::Get();
+	GLFWwindow* window = static_cast<GLFWwindow*>(app.GetWindow().GetNativeWindow());
+
+	ImGui_ImplGlfw_InitForVulkan(window, false);
+	ImGui_ImplVulkan_InitInfo init_info = {};
+	init_info.Instance = (VkInstance)framework->instance;
+	init_info.PhysicalDevice = (VkPhysicalDevice)framework->physicalDevice;
+	init_info.Device = (VkDevice)framework->device;
+	init_info.QueueFamily = imGuiIndices.graphicsFamily.value();
+	init_info.Queue = (VkQueue)framework->presentQueue;
+	init_info.PipelineCache = framework->pipelineCache;
+	init_info.DescriptorPool = (VkDescriptorPool)framework->descriptorPool;
+	init_info.Allocator = NULL;
+	init_info.MinImageCount = 2;
+	init_info.ImageCount = static_cast<uint32_t>(framework->swapChainImages.size());
+	init_info.CheckVkResultFn = NULL;
+	init_info.MSAASamples = (VkSampleCountFlagBits)framework->msaaSamples;
+	ImGui_ImplVulkan_Init(&init_info, (VkRenderPass)framework->renderPass);
+
+	vk::CommandBuffer commandBuffer = framework->beginSingleTimeCommands();
+	ImGui_ImplVulkan_CreateFontsTexture((VkCommandBuffer)commandBuffer);
+	framework->endSingleTimeCommands(commandBuffer);
+	ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 #endif
 

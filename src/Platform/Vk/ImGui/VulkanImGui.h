@@ -20,6 +20,8 @@ public:
 	virtual void ImGuiBegin() override;
 	virtual void ImGuiEnd() override;
 
+	void reinitializeImGui();
+
 private:
 	VulkanFrameWork* framework;
 
@@ -27,5 +29,7 @@ private:
 
 	void ImGuiSetupWindow();
 	void ImGuiBody();
+
+	bool ImGuiResizeFlag = false;
 };
 

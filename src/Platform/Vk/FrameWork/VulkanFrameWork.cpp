@@ -73,10 +73,10 @@ namespace std {
 static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
 {
 	//get new size of window
-	auto app = reinterpret_cast<VulkanFrameWork*>(glfwGetWindowUserPointer(window));
+	VulkanFrameWork* framework = VulkanFrameWork::getFramework();
 
 	//tell app resize has happened
-	app->framebufferResized = true;
+	framework->framebufferResized = true;
 }
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
@@ -153,6 +153,8 @@ void VulkanFrameWork::initVulkan()
 {
 	PSIM_PROFILE_FUNCTION();
 	//all of the functions necessary to create an initial vulkan context
+	glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
+
 	createInstance();
 	setupDebugMessenger();
 	createSurface();

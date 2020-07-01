@@ -85,7 +85,7 @@ private:
 	vk::SurfaceKHR surface = nullptr;
 
 	vk::PhysicalDevice physicalDevice = nullptr;
-	vk::SampleCountFlagBits msaaSamples = vk::SampleCountFlagBits::e8;
+	vk::SampleCountFlagBits msaaSamples = vk::SampleCountFlagBits::e1;
 
 	vk::Device device;
 
@@ -141,6 +141,7 @@ private:
 
 	const int MAX_FRAMES_IN_FLIGHT = 2;
 	size_t currentFrame = 0;
+	uint32_t drawFrameImageIndex;
 	std::vector<vk::Semaphore> imageAvailableSemaphores;
 	std::vector<vk::Semaphore> renderFinishedSemaphores;
 	std::vector<vk::Fence> inFlightFences;
@@ -253,6 +254,9 @@ private:
 	void updateUniformBuffer(uint32_t currentImage);
 	void createDescriptorPool();
 	void createDescriptorSets();
+
+#ifdef PSIM_DEBUG
+#endif
 
 	void createSyncObjects();
 
