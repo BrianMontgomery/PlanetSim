@@ -1,5 +1,5 @@
 workspace "PlanetSim"
-	architecture "x64"
+	architecture "x86_64"
 	startproject "PlanetSim"
 
 	configurations
@@ -25,13 +25,14 @@ IncludeDir["ImGui"] = "vendor/imgui"
 IncludeDir["tinyObjLoader"] = "vendor/tinyObjLoader"
 
 group "Dependencies"
-	include "vendor/GLFW"
+	include "./vendor/GLFW"
 	include "vendor/imgui"
 
 group ""
 
-project "PlanetSim"
-	kind "ConsoleApp"
+project "PlanetSimEngine"
+	location "PlanetSimEngine"
+	kind "StaticLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "on"
@@ -40,12 +41,12 @@ project "PlanetSim"
 	objdir ("bin-int/" .. outputDir .. "/%{prj.name}")
 
 	pchheader "PSIMPCH.h"
-	pchsource "src/PSIMPCH.cpp"
+	pchsource "%{prj.name}/src/PSIMPCH.cpp"
 
 	files
 	{
-		"src/**.h",
-		"src/**.cpp",
+		"%{prj.name}/src/**.h",
+		"%{prj.name}/src/**.cpp",
 		"vendor/glm/glm/**.hpp",
 		"vendor/glm/glm/**.inl",
 		"vendor/stb/stb/**.h",
@@ -53,11 +54,7 @@ project "PlanetSim"
 		"vendor/tinyObjLoader/tinyObjLoader/**.h",
 		--optimized tiny obj loader
 		"vendor/tinyObjLoader/experimental/**.h",
-		"vendor/tinyObjLoader/experimental/**.hpp",
-
-		"assets/shaders/**.spv",
-		"assets/models/**.obj",
-		"assets/textures/**.jpg"
+		"vendor/tinyObjLoader/experimental/**.hpp"
 	}
 
 	defines
@@ -75,9 +72,9 @@ project "PlanetSim"
 
 	includedirs
 	{
-		"src",
-		"src/Platform",
-		"src/PSIM",
+		"%{prj.name}/src",
+		"%{prj.name}/src/Platform",
+		"%{prj.name}/src/PSIM",
 		"vendor/spdlog/include",
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.glm}",
@@ -107,10 +104,62 @@ project "PlanetSim"
 		defines
 		{
 			"_CRT_SECURE_NO_WARNINGS",
-			"PSIM_PLATFORM_WINDOWS",
 			"VK_USE_PLATFORM_WIN32_KHR"
 		}
 
+	filter "configurations:Debug"
+		defines "PSIM_DEBUG"
+		runtime "Debug"
+		symbols "on"
+
+	filter "configurations:Release"
+		defines "PSIM_RELEASE"
+		runtime "Release"
+		optimize "on"
+
+	filter "configurations:Dist"
+		defines "PSIM_DIST"
+		runtime "Release"
+		optimize "on"
+
+
+--App
+project "PlanetSim"
+	location "PlanetSim"
+	kind "ConsoleApp"
+	language "C++"
+	cppdialect "C++17"
+	staticruntime "on"
+
+	targetdir ("bin/" .. outputDir .. "/%{prj.name}")
+	objdir ("bin-int/" .. outputDir .. "/%{prj.name}")
+
+	files
+	{
+		"%{prj.name}/src/**.h",
+		"%{prj.name}/src/**.cpp",
+
+		"assets/shaders/**.spv",
+		"assets/models/**.obj",
+		"assets/textures/**.jpg"
+	}
+
+	includedirs
+	{
+		"vendor/spdlog/include",
+		"PlanetSimEngine/src",
+		"vendor",
+		"%{IncludeDir.glm}"
+	}
+
+	links
+	{
+		"PlanetSimEngine"
+	}
+
+	filter "system:windows"
+		systemversion "latest"
+		
 	filter "configurations:Debug"
 		defines "PSIM_DEBUG"
 		runtime "Debug"

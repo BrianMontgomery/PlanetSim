@@ -159,12 +159,15 @@
     <ClInclude Include="src\PSIM\Core\Layers\Layers.h" />
     <ClInclude Include="src\PSIM\Core\Logging\Log.h" />
     <ClInclude Include="src\PSIM\Core\WindowPrototype.h" />
+    <ClInclude Include="src\PSIM\Graphics\Camera\Camera.h" />
+    <ClInclude Include="src\PSIM\Graphics\Camera\CameraController.h" />
     <ClInclude Include="src\PSIM\Graphics\Context\GraphicsContext.h" />
     <ClInclude Include="src\PSIM\Graphics\RenderAPI\RendererAPI.h" />
     <ClInclude Include="src\PSIM\Graphics\RenderAPI\RendererCommands.h" />
     <ClInclude Include="src\PSIM\Graphics\Renderer.h" />
     <ClInclude Include="src\PSIM\imgui\ImGuiLayer.h" />
     <ClInclude Include="src\PSIMPCH.h" />
+    <ClInclude Include="src\Platform\Vk\Camera\VulkanCamera.h" />
     <ClInclude Include="src\Platform\Vk\Context\VulkanContext.h" />
     <ClInclude Include="src\Platform\Vk\FrameWork\VulkanFrameWork.h" />
     <ClInclude Include="src\Platform\Vk\ImGui\VulkanImGui.h" />
@@ -545,11 +548,14 @@
     <ClInclude Include="vendor\tinyObjLoader\tinyObjLoader\tiny_obj_loader.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\PlanetSimEngine.h" />
     <ClCompile Include="src\PSIM\Application\Application.cpp" />
     <ClCompile Include="src\PSIM\Core\Input\Input.cpp" />
     <ClCompile Include="src\PSIM\Core\Layers\LayerStack.cpp" />
     <ClCompile Include="src\PSIM\Core\Layers\Layers.cpp" />
     <ClCompile Include="src\PSIM\Core\Logging\Log.cpp" />
+    <ClCompile Include="src\PSIM\Graphics\Camera\Camera.cpp" />
+    <ClCompile Include="src\PSIM\Graphics\Camera\CameraController.cpp" />
     <ClCompile Include="src\PSIM\Graphics\Context\GraphicsContext.cpp" />
     <ClCompile Include="src\PSIM\Graphics\RenderAPI\RendererAPI.cpp" />
     <ClCompile Include="src\PSIM\Graphics\RenderAPI\RendererCommands.cpp" />
@@ -559,6 +565,7 @@
     <ClCompile Include="src\PSIMPCH.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\Platform\Vk\Camera\VulkanCamera.cpp" />
     <ClCompile Include="src\Platform\Vk\Context\VulkanContext.cpp" />
     <ClCompile Include="src\Platform\Vk\FrameWork\VulkanFrameWork.cpp" />
     <ClCompile Include="src\Platform\Vk\ImGui\VulkanImGui.cpp" />
