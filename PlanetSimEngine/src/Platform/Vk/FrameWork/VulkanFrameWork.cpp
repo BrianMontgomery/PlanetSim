@@ -42,8 +42,8 @@ CONFIGURABLE VARIABLES - WHERE TO FIND
 VulkanFrameWork* VulkanFrameWork::m_framework = nullptr;
 
 //need full paths from solution for resources
-const std::string MODEL_PATH = "assets/models/chalet.obj";
-const char* TEXTURE_PATH = "assets/textures/chalet.jpg";
+const std::string MODEL_PATH = "C:\dev\PlanetSim\assets\models\chalet.obj";
+const char* TEXTURE_PATH = "C:\dev\PlanetSim\assets\textures\chalet.jpg";
 
 PFN_vkCreateDebugUtilsMessengerEXT pfnVkCreateDebugUtilsMessengerEXT;
 PFN_vkDestroyDebugUtilsMessengerEXT pfnVkDestroyDebugUtilsMessengerEXT;
@@ -831,8 +831,8 @@ void VulkanFrameWork::createRenderPass()
 void VulkanFrameWork::createGraphicsPipeline()
 {
 	PSIM_PROFILE_FUNCTION();
-	auto vertShaderCode = readFileByteCode("assets/shaders/TriangleShaderVert.spv");
-	auto fragShaderCode = readFileByteCode("assets/shaders/TriangleShaderFrag.spv");
+	auto vertShaderCode = readFileByteCode("C:\dev\PlanetSim\assets\shaders\TriangleShaderVert.spv");
+	auto fragShaderCode = readFileByteCode("C:\dev\PlanetSim\assets\shaders\TriangleShaderFrag.spv");
 
 	vk::ShaderModule vertShaderModule = createShaderModule(vertShaderCode);
 	vk::ShaderModule fragShaderModule = createShaderModule(fragShaderCode);
