@@ -42,8 +42,8 @@ CONFIGURABLE VARIABLES - WHERE TO FIND
 VulkanFrameWork* VulkanFrameWork::m_framework = nullptr;
 
 //need full paths from solution for resources
-const std::string MODEL_PATH = "C:\dev\PlanetSim\assets\models\chalet.obj";
-const char* TEXTURE_PATH = "C:\dev\PlanetSim\assets\textures\chalet.jpg";
+const std::string MODEL_PATH = "C:\\dev\\PlanetSim\\assets\\models\\chalet.obj";
+const char* TEXTURE_PATH = "C:\\dev\\PlanetSim\\assets\\textures\\chalet.jpg";
 
 PFN_vkCreateDebugUtilsMessengerEXT pfnVkCreateDebugUtilsMessengerEXT;
 PFN_vkDestroyDebugUtilsMessengerEXT pfnVkDestroyDebugUtilsMessengerEXT;
@@ -831,8 +831,8 @@ void VulkanFrameWork::createRenderPass()
 void VulkanFrameWork::createGraphicsPipeline()
 {
 	PSIM_PROFILE_FUNCTION();
-	auto vertShaderCode = readFileByteCode("C:\dev\PlanetSim\assets\shaders\TriangleShaderVert.spv");
-	auto fragShaderCode = readFileByteCode("C:\dev\PlanetSim\assets\shaders\TriangleShaderFrag.spv");
+	auto vertShaderCode = readFileByteCode("C:\\dev\\PlanetSim\\assets\\shaders\\TriangleShaderVert.spv");
+	auto fragShaderCode = readFileByteCode("C:\\dev\\PlanetSim\\assets\\shaders\\TriangleShaderFrag.spv");
 
 	vk::ShaderModule vertShaderModule = createShaderModule(vertShaderCode);
 	vk::ShaderModule fragShaderModule = createShaderModule(fragShaderCode);
@@ -1417,27 +1417,7 @@ void VulkanFrameWork::loadModel()
 //--------------------------------------------------------------------------------------------------------------------------------
 void VulkanFrameWork::createVertexBuffer()
 {
-	PSIM_PROFILE_FUNCTION();
-	//get vertex buffer size
-	vk::DeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
-
-	//create buffer
-	vk::Buffer stagingBuffer;
-	vk::DeviceMemory stagingBufferMemory;
-	createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, stagingBuffer, stagingBufferMemory);
-
-	//fill buffer
-	void* data;
-	device.mapMemory(stagingBufferMemory, vk::DeviceSize(), bufferSize, vk::MemoryMapFlags(), &data);
-	memcpy(data, vertices.data(), (size_t)bufferSize);
-	device.unmapMemory(stagingBufferMemory);
-
-	createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer, vk::MemoryPropertyFlagBits::eDeviceLocal, vertexBuffer, vertexBufferMemory);
-
-	copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
-
-	device.destroyBuffer(stagingBuffer, nullptr);
-	device.freeMemory(stagingBufferMemory, nullptr);
+	
 }
 
 void VulkanFrameWork::createIndexBuffer()
@@ -1589,10 +1569,10 @@ void VulkanFrameWork::updateUniformBuffer(uint32_t currentImage)
 
 	//set uniform bufferobject settings
 	UniformBufferObject ubo = {};
-	ubo.model = glm::mat4(1.0f);
-	ubo.model = glm::translate(ubo.model, glm::vec3(0.0f, 0.0f, 0.0f));
-	ubo.model = glm::rotate(ubo.model, glm::radians(0.0f), glm::vec3(1.0f, 0.3f, 0.5f));
-	ubo.viewProj = VPMatrix;
+	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.view = viewMatrix;
+	ubo.proj = projMatrix;
+	ubo.proj[1][1] *= -1;
 
 	//store the uniformbuffer
 	void* data;

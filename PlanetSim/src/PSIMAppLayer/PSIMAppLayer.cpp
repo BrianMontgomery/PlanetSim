@@ -134,7 +134,8 @@ void PSIMAppLayer::OnUpdate(Timestep ts)
 
 	// Render
 	RenderCommands::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
-	RenderCommands::SetViewProjectionMatrix(m_CameraController.GetCamera().getViewProjectionMatrix());
+	RenderCommands::SetViewMatrix(m_CameraController.GetCamera().getViewMatrix());
+	RenderCommands::SetProjectionMatrix(m_CameraController.GetCamera().getProjectionMatrix());
 	RenderCommands::Clear();
 
 	Renderer::BeginScene(m_CameraController.GetCamera());

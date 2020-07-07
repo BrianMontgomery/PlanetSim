@@ -54,7 +54,11 @@ project "PlanetSimEngine"
 		"vendor/tinyObjLoader/tinyObjLoader/**.h",
 		--optimized tiny obj loader
 		"vendor/tinyObjLoader/experimental/**.h",
-		"vendor/tinyObjLoader/experimental/**.hpp"
+		"vendor/tinyObjLoader/experimental/**.hpp",
+
+		"assets/shaders/**.spv",
+		"assets/models/**.obj",
+		"assets/textures/**.jpg"
 	}
 
 	defines
@@ -148,6 +152,7 @@ project "PlanetSim"
 	{
 		"vendor/spdlog/include",
 		"PlanetSimEngine/src",
+		"PlanetSim/src",
 		"vendor",
 		"%{IncludeDir.glm}"
 	}

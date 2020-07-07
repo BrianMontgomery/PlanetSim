@@ -22,6 +22,18 @@ public:
 		s_RendererAPI->SetClearColor(color);
 	}
 
+	inline static void SetViewMatrix(const glm::mat4& viewMatrix)
+	{
+		PSIM_PROFILE_FUNCTION();
+		s_RendererAPI->SetViewMatrix(viewMatrix);
+	}
+
+	inline static void SetProjectionMatrix(const glm::mat4& projectionMatrix)
+	{
+		PSIM_PROFILE_FUNCTION();
+		s_RendererAPI->SetProjectionMatrix(projectionMatrix);
+	}
+
 
 	inline static void Clear()
 	{

@@ -24,12 +24,20 @@ void VulkanRendererAPI::Init()
 }
 
 
-void VulkanRendererAPI::SetViewProjectionMatrix(glm::mat4 viewProjectionMatrix)
+void VulkanRendererAPI::SetViewMatrix(glm::mat4 viewMatrix)
 {
 	PSIM_PROFILE_FUNCTION();
 
 	VulkanFrameWork* framework = VulkanFrameWork::getFramework();
-	framework->setVPMatrix(viewProjectionMatrix);
+	framework->setViewMatrix(viewMatrix);
+}
+
+void VulkanRendererAPI::SetProjectionMatrix(glm::mat4 projectionMatrix)
+{
+	PSIM_PROFILE_FUNCTION();
+
+	VulkanFrameWork* framework = VulkanFrameWork::getFramework();
+	framework->setProjectionMatrix(projectionMatrix);
 }
 
 void VulkanRendererAPI::SetClearColor(const glm::vec4& color)

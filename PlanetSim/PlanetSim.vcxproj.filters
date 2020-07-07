@@ -16,10 +16,21 @@
     <Filter Include="src">
       <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\PSIMAppLayer">
+      <UniqueIdentifier>{53AC5ADA-3FA5-792C-68D7-5EB1542F5938}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\PSIMAppLayer\PSIMAppLayer.h">
+      <Filter>src\PSIMAppLayer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\PSIMApp.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PSIMAppLayer\PSIMAppLayer.cpp">
+      <Filter>src\PSIMAppLayer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

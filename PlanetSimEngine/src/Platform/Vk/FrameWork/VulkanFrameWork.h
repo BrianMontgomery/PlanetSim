@@ -68,7 +68,8 @@ public:
 	//main vulkan funcs
 	void init(GLFWwindow* window);
 	void drawFrame();
-	void setVPMatrix(glm::mat4 VPM) { VPMatrix = VPM; }
+	void setViewMatrix(glm::mat4 VM) { viewMatrix = VM; }
+	void setProjectionMatrix(glm::mat4 PM) { projMatrix = PM; }
 	void setClearColor(glm::vec4 color) { clearColor = color; }
 
 	//bool mainLoop();
@@ -78,7 +79,8 @@ public:
 private:
 	//private vars for vulkan
 	//--------------------------------------------------------------------------------------------------------------------------------
-	glm::mat4 VPMatrix;
+	glm::mat4 viewMatrix;
+	glm::mat4 projMatrix;
 	glm::vec4 clearColor;
 
 	GLFWwindow* window;
@@ -176,7 +178,8 @@ private:
 
 	struct UniformBufferObject {
 		alignas(16) glm::mat4 model;
-		alignas(16) glm::mat4 viewProj;
+		alignas(16) glm::mat4 view;
+		alignas(16) glm::mat4 proj;
 	};
 
 	//--------------------------------------------------------------------------------------------------------------------------------

@@ -37,7 +37,7 @@ void VulkanImGui::ImGuiOnAttach()
 		style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 	}
 
-	io.Fonts->AddFontFromFileTTF("C:\dev\PlanetSim\assets\fonts\Roboto-Medium.ttf", 16.0f);
+	io.Fonts->AddFontFromFileTTF("C:\\dev\\PlanetSim\\assets\\fonts\\Roboto-Medium.ttf", 16.0f);
 	io.DisplaySize = ImVec2(framework->swapChainExtent.width, framework->swapChainExtent.height);
 	io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
 

@@ -7,6 +7,11 @@
 CameraController::CameraController(float aspectRatio, bool rotation)
 	: m_AspectRatio(aspectRatio), m_Camera(fov), m_Rotation(rotation)
 {
+	m_Camera.setUp(cameraUp);
+	m_Camera.setPosition(cameraPos);
+	m_Camera.setProjection(fov);
+	m_Camera.setFront(cameraFront);
+
 }
 
 void CameraController::OnUpdate(Timestep ts)
@@ -29,6 +34,15 @@ void CameraController::OnUpdate(Timestep ts)
 	else if (Input::IsKeyPressed(PSIM_KEY_S))
 	{
 		cameraPos -= cameraFront * (m_CameraTranslationSpeed * ts);
+	}
+
+	if (Input::IsKeyPressed(PSIM_KEY_SPACE))
+	{
+		cameraPos.y += cameraUp.y * ts;
+	}
+	else if (Input::IsKeyPressed(PSIM_KEY_LEFT_SHIFT))
+	{
+		cameraPos.y -= cameraUp.y * ts;
 	}
 
 	m_Camera.setPosition(cameraPos);
@@ -95,7 +109,9 @@ bool CameraController::OnMouseMoved(MouseMovedEvent& e)
 	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
 	front.y = sin(glm::radians(pitch));
 	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-	cameraFront = glm::normalize(front);
+	cameraFront = front;
+
+	m_Camera.setFront(cameraFront);
 
 	return false;
 }
