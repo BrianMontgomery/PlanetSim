@@ -9,70 +9,82 @@
 #include <glm/gtx/hash.hpp>
 
 #include "Graphics/Camera/Camera.h"
+#include "Platform/Vk/Components/VulkanBuffer.h"
+#include "Platform/Vk/Components/VulkanVertexArray.h"
 
 //non-core std-lib
 #include <array>
 #include <optional>
 
-
 class VulkanFrameWork
 {
+	//singleton
+	//--------------------------------------------------------------------------------------------------------------------------------
 public:
-	static VulkanFrameWork *getFramework() {
-		if (!m_framework)
-			m_framework = new VulkanFrameWork;
-		return m_framework;
-	}
+	static VulkanFrameWork *getFramework();
+protected: 
+	VulkanFrameWork();
+	virtual ~VulkanFrameWork();
 
-	//public var for vulkan
+	friend class VulkanFrameWorkDestroyer;
+
+private:
+	static VulkanFrameWork *m_framework;
+	static VulkanFrameWorkDestroyer destroyer;
+
 	//--------------------------------------------------------------------------------------------------------------------------------
+
+	//nonsinglton
+	//--------------------------------------------------------------------------------------------------------------------------------
+public:
 	bool framebufferResized = false;
-
-	//--------------------------------------------------------------------------------------------------------------------------------
 
 
 	//public structs for vulkan
 	//--------------------------------------------------------------------------------------------------------------------------------
-	struct Vertex {
-		glm::vec3 pos;
-		glm::vec3 color;
-		glm::vec2 texCoord;
 
-		static vk::VertexInputBindingDescription getBindingDescription() {
-			vk::VertexInputBindingDescription bindingDescription = { 0, sizeof(Vertex), vk::VertexInputRate::eVertex };
+	struct QueueFamilyIndices {
+		std::optional<uint32_t> graphicsFamily;
+		std::optional<uint32_t> presentFamily;
 
-			return bindingDescription;
-		}
-
-		static std::array<vk::VertexInputAttributeDescription, 3> getAttributeDescriptions() {
-			std::array<vk::VertexInputAttributeDescription, 3> attributeDescriptions = {};
-
-			attributeDescriptions[0] = { 0, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, pos) };
-			attributeDescriptions[1] = { 1, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, color) };
-			attributeDescriptions[2] = { 2, 0, vk::Format::eR32G32Sfloat, offsetof(Vertex, texCoord) };
-			return attributeDescriptions;
-		}
-
-		bool operator==(const Vertex& other) const {
-			return pos == other.pos && color == other.color && texCoord == other.texCoord;
+		bool isComplete() {
+			return (graphicsFamily.has_value() && presentFamily.has_value());
 		}
 	};
 
 	//--------------------------------------------------------------------------------------------------------------------------------
 
 
-	//public funcs for vulkan
-	//--------------------------------------------------------------------------------------------------------------------------------
-	~VulkanFrameWork();
-
 	//main vulkan funcs
 	void init(GLFWwindow* window);
+	void initVulkan();
 	void drawFrame();
 	void setViewMatrix(glm::mat4 VM) { viewMatrix = VM; }
 	void setProjectionMatrix(glm::mat4 PM) { projMatrix = PM; }
 	void setClearColor(glm::vec4 color) { clearColor = color; }
+	void setMSAASamples(int sampleCount);
 
-	//bool mainLoop();
+	//public vulkan funcs
+	uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
+	void commandBufferRecordBegin(int bufNum);
+	void commandBufferRecordEnd(int bufNum);
+	QueueFamilyIndices findQueueFamilies(vk::PhysicalDevice device);
+	vk::CommandBuffer beginSingleTimeCommands();
+	void endSingleTimeCommands(vk::CommandBuffer commandBuffer);
+
+	//public vulkan getters
+	vk::Device getDevice() { return device; }
+	std::vector<vk::CommandBuffer>* getCommandBuffers() { return &commandBuffers; }
+	int getCommandBuffersSize() { return commandBuffers.size(); }
+	vk::Extent2D getSwapChainExtent() { return swapChainExtent; }
+	vk::PhysicalDevice getPhysicalDevice() { return physicalDevice; }
+	vk::Instance getInstance() { return instance; }
+	vk::Queue getPresentQueue() { return presentQueue; }
+	vk::PipelineCache getPipelineCache() { return pipelineCache; }
+	vk::DescriptorPool getDescriptorPool() { return descriptorPool; }
+	std::vector<vk::Image>* getSwapChainImages() { return &swapChainImages; }
+	vk::SampleCountFlagBits getMSAASamples() { return msaaSamples; }
+	vk::RenderPass getRenderPass() { return renderPass; }
 
 	//--------------------------------------------------------------------------------------------------------------------------------
 
@@ -84,6 +96,8 @@ private:
 	glm::vec4 clearColor;
 
 	GLFWwindow* window;
+	VulkanBufferList bufferList;
+
 	vk::Instance instance;
 	vk::DebugUtilsMessengerEXT debugUtilsMessenger;
 
@@ -112,6 +126,8 @@ private:
 		
 	vk::PipelineLayout pipelineLayout;
 	vk::Pipeline graphicsPipeline;
+	vk::VertexInputBindingDescription bindingDescription;
+	std::vector<vk::VertexInputAttributeDescription> attributeDescriptions;
 	
 	vk::PipelineCache pipelineCache;
 
@@ -134,16 +150,10 @@ private:
 	vk::ImageView textureImageView;
 	vk::Sampler textureSampler;
 
-	std::vector<Vertex> vertices;
-	std::vector<uint32_t> indices;
-	vk::Buffer vertexBuffer;
-	vk::DeviceMemory vertexBufferMemory;
-	vk::Buffer indexBuffer;
-	vk::DeviceMemory indexBufferMemory;
+	Ref<VertexArray> vertexArray;
 
 	vk::DescriptorSetLayout descriptorSetLayout;
-	std::vector<vk::Buffer> uniformBuffers;
-	std::vector<vk::DeviceMemory> uniformBuffersMemory;
+	std::vector<VulkanBuffer> uniformBuffers;
 	vk::DescriptorPool descriptorPool;
 	std::vector<vk::DescriptorSet> descriptorSets;
 
@@ -159,15 +169,6 @@ private:
 
 	//private structs for vulkan
 	//--------------------------------------------------------------------------------------------------------------------------------
-	struct QueueFamilyIndices {
-		std::optional<uint32_t> graphicsFamily;
-		std::optional<uint32_t> presentFamily;
-
-		bool isComplete() {
-			return (graphicsFamily.has_value() && presentFamily.has_value());
-		}
-	};
-
 	struct SwapChainSupportDetails {
 		SwapChainSupportDetails(vk::SurfaceCapabilitiesKHR surfaceCapabilites, std::vector<vk::SurfaceFormatKHR> surfaceFormats, std::vector<vk::PresentModeKHR> surfacePresentModes)
 			: capabilities(surfaceCapabilites), formats(surfaceFormats), presentModes(surfacePresentModes) {}
@@ -186,7 +187,6 @@ private:
 
 	//private funcs for vulkan
 	//--------------------------------------------------------------------------------------------------------------------------------
-	void initVulkan();
 	void cleanUp();
 
 	void createInstance();
@@ -203,8 +203,6 @@ private:
 	int rateDevice(vk::PhysicalDevice device);
 	bool checkDeviceExtensionSupport(vk::PhysicalDevice device);
 	vk::SampleCountFlagBits getMaxUsableSampleCount();
-
-	QueueFamilyIndices findQueueFamilies(vk::PhysicalDevice device);
 
 	void createLogicalDevice();
 
@@ -246,40 +244,35 @@ private:
 	void createTextureImageView();
 	void createTextureSampler();
 	void generateMipmaps(vk::Image image, vk::Format imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
-
-	void loadModel();
-
-	void createVertexBuffer();
-	void createIndexBuffer();
-	void createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Buffer& buffer, vk::DeviceMemory& bufferMemory);
-	uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
-	vk::CommandBuffer beginSingleTimeCommands();
-	void endSingleTimeCommands(vk::CommandBuffer commandBuffer);
-	void copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size);
-
+	
 	void createDescriptorSetLayout();
 	void createUniformBuffers();
 	void updateUniformBuffer(uint32_t currentImage);
 	void createDescriptorPool();
 	void createDescriptorSets();
 
-#ifdef PSIM_DEBUG
-#endif
-
 	void createSyncObjects();
-
-	void commandBufferRecordBegin(int bufNum);
-	void commandBufferRecordEnd(int bufNum);
 	//--------------------------------------------------------------------------------------------------------------------------------
+};
+
+class VulkanFrameWorkDestroyer
+{
+public:
+	VulkanFrameWorkDestroyer(VulkanFrameWork * = 0);
+	~VulkanFrameWorkDestroyer() { delete _singleton; }
+	void SetSingleton(VulkanFrameWork *s) { _singleton = s; }
 
 private:
-	//singleton funcs
-	VulkanFrameWork();
+	VulkanFrameWork *_singleton;
+};
 
-	static VulkanFrameWork *m_framework;
-
-#ifdef PSIM_DEBUG
-	friend class VulkanImGui;
-#endif
-	friend class VulkanContext;
+class RendererID {
+protected:
+	static uint32_t nextID;
+public:
+	uint32_t id;
+	RendererID();
+	RendererID(const RendererID& orig);
+	RendererID& operator=(const RendererID& orig);
+	uint32_t getID() { return id; }
 };

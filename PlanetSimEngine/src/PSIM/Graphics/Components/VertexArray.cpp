@@ -9,7 +9,7 @@ Ref<VertexArray> VertexArray::Create()
 	switch (Renderer::GetAPI())
 	{
 	case RendererAPI::API::None:    PSIM_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-	case RendererAPI::API::OpenGL:    PSIM_ASSERT(false, "RendererAPI::OpenGL is currently not supported!"); return nullptr;
+	case RendererAPI::API::OpenGL:  PSIM_ASSERT(false, "RendererAPI::OpenGL is currently not supported!"); return nullptr;
 	case RendererAPI::API::Vulkan:  return CreateRef<VulkanVertexArray>();
 	}
 

@@ -21,11 +21,12 @@
 #include "PSIM/Graphics/Renderer.h"
 #include "PSIM/Graphics/RenderAPI/RendererCommands.h"
 		  
-//#include "Graphics/Buffer.h"
+#include "PSIM/Graphics/Components/Buffer.h"
+#include "PSIM//Graphics/Asset/Model.h"
 //#include "Graphics/Shader.h"
 //#include "Graphics/Framebuffer.h"
 //#include "Graphics/Texture.h"
-//#include "Graphics/VertexArray.h"
+#include "PSIM/Graphics/Components/VertexArray.h"
 		  
 #include "PSIM/Graphics/Camera/Camera.h"
 // -----------------------------------

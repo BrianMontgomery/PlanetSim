@@ -38,7 +38,7 @@ void VulkanImGui::ImGuiOnAttach()
 	}
 
 	io.Fonts->AddFontFromFileTTF("C:\\dev\\PlanetSim\\assets\\fonts\\Roboto-Medium.ttf", 16.0f);
-	io.DisplaySize = ImVec2(framework->swapChainExtent.width, framework->swapChainExtent.height);
+	io.DisplaySize = ImVec2(framework->getSwapChainExtent().width, framework->getSwapChainExtent().height);
 	io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
 
 	Application& app = Application::Get();
@@ -47,23 +47,23 @@ void VulkanImGui::ImGuiOnAttach()
 	// Setup Platform/Renderer bindings
 	ImGui_ImplGlfw_InitForVulkan(window, true);
 
-	VulkanFrameWork::QueueFamilyIndices imGuiIndices = framework->findQueueFamilies(framework->physicalDevice);
+	VulkanFrameWork::QueueFamilyIndices imGuiIndices = framework->findQueueFamilies(framework->getPhysicalDevice());
 
 	ImGui_ImplGlfw_InitForVulkan(window, false);
 	ImGui_ImplVulkan_InitInfo init_info = {};
-	init_info.Instance = (VkInstance)framework->instance;
-	init_info.PhysicalDevice = (VkPhysicalDevice)framework->physicalDevice;
-	init_info.Device = (VkDevice)framework->device;
+	init_info.Instance = ((VkInstance)framework->getInstance());
+	init_info.PhysicalDevice = (VkPhysicalDevice)framework->getPhysicalDevice();
+	init_info.Device = (VkDevice)framework->getDevice();
 	init_info.QueueFamily = imGuiIndices.graphicsFamily.value();
-	init_info.Queue = (VkQueue)framework->presentQueue;
-	init_info.PipelineCache = framework->pipelineCache;
-	init_info.DescriptorPool = (VkDescriptorPool)framework->descriptorPool;
+	init_info.Queue = (VkQueue)framework->getPresentQueue();
+	init_info.PipelineCache = framework->getPipelineCache();
+	init_info.DescriptorPool = (VkDescriptorPool)framework->getDescriptorPool();
 	init_info.Allocator = NULL;
 	init_info.MinImageCount = 2;
-	init_info.ImageCount = static_cast<uint32_t>(framework->swapChainImages.size());
+	init_info.ImageCount = static_cast<uint32_t>(framework->getSwapChainImages()->size());
 	init_info.CheckVkResultFn = NULL;
-	init_info.MSAASamples = (VkSampleCountFlagBits)framework->msaaSamples;
-	ImGui_ImplVulkan_Init(&init_info, (VkRenderPass)framework->renderPass);
+	init_info.MSAASamples = (VkSampleCountFlagBits)framework->getMSAASamples();
+	ImGui_ImplVulkan_Init(&init_info, (VkRenderPass)framework->getRenderPass());
 
 	vk::CommandBuffer commandBuffer = framework->beginSingleTimeCommands();
 	ImGui_ImplVulkan_CreateFontsTexture((VkCommandBuffer)commandBuffer);
@@ -75,7 +75,7 @@ void VulkanImGui::ImGuiOnDetach()
 {
 	PSIM_PROFILE_FUNCTION();
 
-	framework->device.waitIdle(); 
+	framework->getDevice().waitIdle(); 
 	ImGui_ImplVulkan_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
@@ -122,16 +122,16 @@ void VulkanImGui::ImGuiEnd()
 	// Rendering
 	ImGui::Render();
 
-	framework->device.waitIdle();
+	framework->getDevice().waitIdle();
 
-	for (size_t i = 0; i < framework->commandBuffers.size(); i++) {
+	for (size_t i = 0; i < framework->getCommandBuffers()->size(); i++) {
 		
 		framework->commandBufferRecordBegin(i);
 
 #ifdef PSIM_DEBUG
 		if (isImGuiWindowCreated)
 		{
-			ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), (VkCommandBuffer)framework->commandBuffers[i]);
+			ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), (VkCommandBuffer)(*framework->getCommandBuffers())[i]);
 		}
 #endif
 
@@ -167,7 +167,7 @@ void VulkanImGui::ImGuiSetupWindow()
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 
-		auto WindowSize = ImVec2((float)framework->swapChainExtent.width, (float)framework->swapChainExtent.height);
+		auto WindowSize = ImVec2((float)framework->getSwapChainExtent().width, (float)framework->getSwapChainExtent().height);
 		ImGui::SetNextWindowSize(WindowSize, ImGuiCond_::ImGuiCond_FirstUseEver);
 		ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_::ImGuiCond_FirstUseEver);
 		ImGui::NewFrame();
@@ -184,29 +184,29 @@ void VulkanImGui::ImGuiBody()
 
 void VulkanImGui::reinitializeImGui()
 {
-	framework->device.waitIdle();
+	framework->getDevice().waitIdle();
 	ImGui_ImplVulkan_Shutdown();
 
-	VulkanFrameWork::QueueFamilyIndices imGuiIndices = framework->findQueueFamilies(framework->physicalDevice);
+	VulkanFrameWork::QueueFamilyIndices imGuiIndices = framework->findQueueFamilies(framework->getPhysicalDevice());
 
 	Application& app = Application::Get();
 	GLFWwindow* window = static_cast<GLFWwindow*>(app.GetWindow().GetNativeWindow());
 
 	ImGui_ImplGlfw_InitForVulkan(window, false);
 	ImGui_ImplVulkan_InitInfo init_info = {};
-	init_info.Instance = (VkInstance)framework->instance;
-	init_info.PhysicalDevice = (VkPhysicalDevice)framework->physicalDevice;
-	init_info.Device = (VkDevice)framework->device;
+	init_info.Instance = (VkInstance)framework->getInstance();
+	init_info.PhysicalDevice = (VkPhysicalDevice)framework->getPhysicalDevice();
+	init_info.Device = (VkDevice)framework->getDevice();
 	init_info.QueueFamily = imGuiIndices.graphicsFamily.value();
-	init_info.Queue = (VkQueue)framework->presentQueue;
-	init_info.PipelineCache = framework->pipelineCache;
-	init_info.DescriptorPool = (VkDescriptorPool)framework->descriptorPool;
+	init_info.Queue = (VkQueue)framework->getPresentQueue();
+	init_info.PipelineCache = framework->getPipelineCache();
+	init_info.DescriptorPool = (VkDescriptorPool)framework->getDescriptorPool();
 	init_info.Allocator = NULL;
 	init_info.MinImageCount = 2;
-	init_info.ImageCount = static_cast<uint32_t>(framework->swapChainImages.size());
+	init_info.ImageCount = static_cast<uint32_t>(framework->getSwapChainImages()->size());
 	init_info.CheckVkResultFn = NULL;
-	init_info.MSAASamples = (VkSampleCountFlagBits)framework->msaaSamples;
-	ImGui_ImplVulkan_Init(&init_info, (VkRenderPass)framework->renderPass);
+	init_info.MSAASamples = (VkSampleCountFlagBits)framework->getMSAASamples();
+	ImGui_ImplVulkan_Init(&init_info, (VkRenderPass)framework->getRenderPass());
 
 	vk::CommandBuffer commandBuffer = framework->beginSingleTimeCommands();
 	ImGui_ImplVulkan_CreateFontsTexture((VkCommandBuffer)commandBuffer);

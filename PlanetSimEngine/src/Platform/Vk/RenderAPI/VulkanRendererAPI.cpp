@@ -9,6 +9,7 @@ void VulkanRendererAPI::Init()
 {
 	PSIM_PROFILE_FUNCTION();
 
+	//turn to init after the app has some resources loaded
 #ifdef PSIM_DEBUG
 	//glEnable(GL_DEBUG_OUTPUT);
 	//glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);

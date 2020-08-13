@@ -31,7 +31,7 @@ struct BufferElement
 	std::string Name;
 	ShaderDataType Type;
 	uint32_t Size;
-	size_t Offset;
+	uint32_t Offset;
 	bool Normalized;
 
 	BufferElement() = default;
@@ -84,7 +84,7 @@ public:
 private:
 	void CalculateOffsetsAndStride()
 	{
-		size_t offset = 0;
+		uint32_t offset = 0;
 		m_Stride = 0;
 		for (auto& element : m_Elements)
 		{
@@ -111,6 +111,8 @@ public:
 	virtual const BufferLayout& GetLayout() const = 0;
 	virtual void SetLayout(const BufferLayout& layout) = 0;
 
+	virtual uint32_t getID() const = 0;
+
 	static Ref<VertexBuffer> Create(uint32_t size);
 	static Ref<VertexBuffer> Create(float* vertices, uint32_t size);
 };
@@ -125,6 +127,8 @@ public:
 	virtual void Unbind() const = 0;
 
 	virtual uint32_t GetCount() const = 0;
+
+	virtual uint32_t getID() const = 0;
 
 	static Ref<IndexBuffer> Create(uint32_t* indices, uint32_t count);
 };

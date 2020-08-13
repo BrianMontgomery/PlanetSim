@@ -85,6 +85,9 @@
     <Filter Include="src\PSIM\Graphics">
       <UniqueIdentifier>{F5275CEA-613E-5A80-AAB5-E5A1160B2B08}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\PSIM\Graphics\Asset">
+      <UniqueIdentifier>{4440957C-B077-DD13-B981-41372538040D}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\PSIM\Graphics\Camera">
       <UniqueIdentifier>{CD969E12-B9BB-ED92-E206-D322CE8AECB0}</UniqueIdentifier>
     </Filter>
@@ -1290,6 +1293,12 @@
     <ClInclude Include="src\PSIM\Core\WindowPrototype.h">
       <Filter>src\PSIM\Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\PSIM\Graphics\Asset\Model.h">
+      <Filter>src\PSIM\Graphics\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PSIM\Graphics\Asset\Texture.h">
+      <Filter>src\PSIM\Graphics\Asset</Filter>
+    </ClInclude>
     <ClInclude Include="src\PSIM\Graphics\Camera\Camera.h">
       <Filter>src\PSIM\Graphics\Camera</Filter>
     </ClInclude>
@@ -1363,6 +1372,12 @@
     </ClCompile>
     <ClCompile Include="src\PSIM\Core\Logging\Log.cpp">
       <Filter>src\PSIM\Core\Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PSIM\Graphics\Asset\Model.cpp">
+      <Filter>src\PSIM\Graphics\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PSIM\Graphics\Asset\Texture.cpp">
+      <Filter>src\PSIM\Graphics\Asset</Filter>
     </ClCompile>
     <ClCompile Include="src\PSIM\Graphics\Camera\Camera.cpp">
       <Filter>src\PSIM\Graphics\Camera</Filter>

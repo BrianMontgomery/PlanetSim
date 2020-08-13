@@ -17,10 +17,11 @@ public:
 private:
 	//ShaderLibrary m_ShaderLibrary;
 	//Ref<Shader> m_Shader;
-	//Ref<VertexArray> m_VertexArray;
+	Ref<VertexArray> m_VertexArray;
+	ModelLibrary m_ModelLibrary;
 
 	//Ref<Shader> m_FlatColorShader;
-	//Ref<VertexArray> m_SquareVA;
+	Ref<VertexArray> m_SquareVA;
 
 	//Ref<Texture2D> m_Texture, m_ChernoLogoTexture;
 

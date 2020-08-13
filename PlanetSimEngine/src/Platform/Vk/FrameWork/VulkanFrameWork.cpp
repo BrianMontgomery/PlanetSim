@@ -25,11 +25,8 @@ CONFIGURABLE VARIABLES - WHERE TO FIND
 #include "VulkanFrameWork.h"
 
 //vendor files
-#ifdef TINYOBJLOADER_IMPLEMENTATION
-	#include <tinyObjLoader/tiny_obj_loader.h>
-#elif TINYOBJ_LOADER_OPT_IMPLEMENTATION
-	#include <experimental/tinyobj_loader_opt.h>
-#endif
+
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <stb/stb_image.h>
 
@@ -40,6 +37,8 @@ CONFIGURABLE VARIABLES - WHERE TO FIND
 #include <cstdint> // Necessary for UINT32_MAX
 
 VulkanFrameWork* VulkanFrameWork::m_framework = nullptr;
+VulkanFrameWorkDestroyer VulkanFrameWork::destroyer;
+uint32_t RendererID::nextID = 0;
 
 //need full paths from solution for resources
 const std::string MODEL_PATH = "C:\\dev\\PlanetSim\\assets\\models\\chalet.obj";
@@ -77,16 +76,6 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityF
 	return VK_FALSE;
 }
 
-
-//GLOBAL namespaces
-namespace std {
-	template<> struct hash<VulkanFrameWork::Vertex> {
-		size_t operator()(VulkanFrameWork::Vertex const& vertex) const {
-			return ((hash<glm::vec3>()(vertex.pos) ^ (hash<glm::vec3>()(vertex.color) << 1)) >> 1) ^ (hash<glm::vec2>()(vertex.texCoord) << 1);
-		}
-	};
-}
-
 //static funcs
 //--------------------------------------------------------------------------------------------------------------------------------
 static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
@@ -119,8 +108,23 @@ std::vector<char> VulkanFrameWork::readFileByteCode(const std::string& filename)
 	return buffer;
 }
 
+//Singleton Funcs
 //--------------------------------------------------------------------------------------------------------------------------------
 
+
+VulkanFrameWorkDestroyer::VulkanFrameWorkDestroyer(VulkanFrameWork *s)
+{
+	_singleton = s;
+}
+
+VulkanFrameWork* VulkanFrameWork::getFramework() {
+	if (!m_framework)
+	{
+		m_framework = new VulkanFrameWork;
+		destroyer.SetSingleton(m_framework);
+	}
+	return m_framework;
+}
 
 //VulkanFrameWork Funcs
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -164,19 +168,45 @@ void VulkanFrameWork::initVulkan()
 	createSwapchainImageViews();
 	createRenderPass();
 	createDescriptorSetLayout();
+	commandPool = createCommandPool({});
+
+	//init buffer list
+	{
+		VulkanBufferList::init();
+	}
+
+	//default Vertex Array
+	{
+		vertexArray = VertexArray::Create();
+
+		float vertices[3 * 7] = {
+			-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
+			 0.5f, -0.5f, 0.0f, 0.2f, 0.3f, 0.8f, 1.0f,
+			 0.0f,  0.5f, 0.0f, 0.8f, 0.8f, 0.2f, 1.0f
+		};
+		Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(vertices, sizeof(vertices));
+		BufferLayout layout = {
+			{ ShaderDataType::Float3, "a_Position" },
+			{ ShaderDataType::Float4, "a_Color" }
+		};
+		vertexBuffer->SetLayout(layout);
+		vertexArray->AddVertexBuffer(vertexBuffer);
+
+		uint32_t indices[3] = { 0, 1, 2 };
+		Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
+		vertexArray->SetIndexBuffer(indexBuffer);
+	}
+
 	createPipelineCache();
 	retrievePipelineCache();
 	createGraphicsPipeline();
 	createColorResources();
 	createDepthResources();
 	createFramebuffers();
-	commandPool = createCommandPool({});
 	createTextureImage();
 	createTextureImageView();
 	createTextureSampler();
-	loadModel();
-	createVertexBuffer();
-	createIndexBuffer();
+
 	createUniformBuffers();
 	createDescriptorPool();
 	createDescriptorSets();
@@ -206,14 +236,6 @@ void VulkanFrameWork::cleanUp()
 
 	device.destroyDescriptorSetLayout(descriptorSetLayout, nullptr);
 
-	device.destroyBuffer(indexBuffer, nullptr);
-	device.freeMemory(indexBufferMemory, nullptr);
-	PSIM_CORE_INFO("Index Buffer Destroyed");
-
-	device.destroyBuffer(vertexBuffer, nullptr);
-	device.freeMemory(vertexBufferMemory, nullptr);
-	PSIM_CORE_INFO("Vertex Buffer Destroyed");
-
 	device.destroyPipelineCache(pipelineCache, nullptr);
 	PSIM_CORE_INFO("Pipeline Cache Destroyed");
 
@@ -226,6 +248,8 @@ void VulkanFrameWork::cleanUp()
 
 	device.destroyCommandPool(commandPool, nullptr);
 	PSIM_CORE_INFO("Command Pool deleted");
+
+	vertexArray->cleanUp();
 
 	device.destroy(nullptr);
 	PSIM_CORE_INFO("Device deleted");
@@ -748,8 +772,7 @@ void VulkanFrameWork::cleanupSwapChain()
 	PSIM_CORE_INFO("Swapchain cleaned up");
 
 	for (size_t i = 0; i < swapChainImages.size(); i++) {
-		device.destroyBuffer(uniformBuffers[i], nullptr);
-		device.freeMemory(uniformBuffersMemory[i], nullptr);
+		uniformBuffers[i].destroyBuffer();
 	}
 	PSIM_CORE_INFO("Uniform Buffers cleaned up");
 
@@ -775,7 +798,7 @@ void VulkanFrameWork::createSwapchainImageViews()
 	PSIM_CORE_INFO("Created swapchain image views");
 }
 
-vk::ImageView VulkanFrameWork::createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags, uint32_t mipLevels) 
+vk::ImageView VulkanFrameWork::createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags, uint32_t mipLevels)
 {
 	PSIM_PROFILE_FUNCTION();
 	//define image view
@@ -846,9 +869,9 @@ void VulkanFrameWork::createGraphicsPipeline()
 	vk::PipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
 
 	//Vertex Input Stage Info
-	auto bindingDescription = Vertex::getBindingDescription();
-	auto attributeDescriptions = Vertex::getAttributeDescriptions();
-	vk::PipelineVertexInputStateCreateInfo vertexInputInfo = { {}, 1, &bindingDescription, static_cast<uint32_t>(attributeDescriptions.size()), attributeDescriptions.data() };
+	bindingDescription = *(static_cast<vk::VertexInputBindingDescription*>(vertexArray->getBindingDescription()));
+	attributeDescriptions = *(static_cast<std::vector<vk::VertexInputAttributeDescription>*>(vertexArray->getAttributeDescriptions()));
+	vk::PipelineVertexInputStateCreateInfo vertexInputInfo = { {}, 1, &(bindingDescription), static_cast<uint32_t>(attributeDescriptions.size()), attributeDescriptions.data() };
 
 	//Input Assembly Stage Info
 	vk::PipelineInputAssemblyStateCreateInfo inputAssembly = { {}, vk::PrimitiveTopology::eTriangleList, false };
@@ -923,7 +946,7 @@ void VulkanFrameWork::createPipelineCache()
 
 void VulkanFrameWork::retrievePipelineCache()
 {
-	
+
 
 	return;
 }
@@ -953,7 +976,7 @@ void VulkanFrameWork::createFramebuffers()
 	PSIM_CORE_INFO("Framebuffers created");
 }
 
-void VulkanFrameWork::createColorResources() 
+void VulkanFrameWork::createColorResources()
 {
 	PSIM_PROFILE_FUNCTION();
 	vk::Format colorFormat = swapChainImageFormat;
@@ -1011,19 +1034,29 @@ void VulkanFrameWork::createCommandBuffers()
 		//bind pipeline
 		commandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, graphicsPipeline);
 
-		vk::Buffer vertexBuffers[] = { vertexBuffer };
+		//get vertex Buffers
+		std::vector<vk::Buffer> vertexBuffers = *static_cast<std::vector<vk::Buffer>*>(vertexArray->getVertexBuffersBuffers());
+		vk::Buffer* bufferArray = new vk::Buffer[vertexBuffers.size()];
+		for (int i = 0; i < vertexBuffers.size(); i++)
+		{
+			bufferArray[i] = vertexBuffers[i];
+		}
+
 		vk::DeviceSize offsets[] = { 0 };
 
-		commandBuffers[i].bindVertexBuffers(0, 1, vertexBuffers, offsets);
-		commandBuffers[i].bindIndexBuffer(indexBuffer, 0, vk::IndexType::eUint32);
+		//bind buffers
+		commandBuffers[i].bindVertexBuffers((uint32_t)0, (uint32_t)(vertexBuffers.size()), &(*bufferArray), offsets);
+		commandBuffers[i].bindIndexBuffer(*static_cast<vk::Buffer*>(vertexArray->getIndexBufferBuffer()), 0, vk::IndexType::eUint32);
 		commandBuffers[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout, 0, 1, &descriptorSets[i], 0, nullptr);
 
 		//draw from pipeline
-		commandBuffers[i].drawIndexed(static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+		commandBuffers[i].drawIndexed(static_cast<uint32_t>(vertexArray->GetIndexBuffer()->GetCount()), 1, 0, 0, 0);
 
 		commandBuffers[i].endRenderPass();
 
 		PSIM_ASSERT(commandBuffers[i].end() == vk::Result::eSuccess, "Failed to record command buffer!");
+
+		delete[] bufferArray;
 	}
 	PSIM_CORE_INFO("Command buffers created");
 }
@@ -1093,15 +1126,13 @@ void VulkanFrameWork::createTextureImage()
 	PSIM_ASSERT(pixels, "Failed to load texture image!");
 
 	//designate a buffer for the texture
-	vk::Buffer stagingBuffer;
-	vk::DeviceMemory stagingBufferMemory;
-	createBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, stagingBuffer, stagingBufferMemory);
+	VulkanBufferList::getBaseBuffer()->createBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
 
 	//transfer texture data to new buffer
 	void* data;
-	vkMapMemory(device, stagingBufferMemory, 0, imageSize, 0, &data);
+	vkMapMemory(device, VulkanBufferList::getBaseBuffer()->getBufferMemory(), 0, imageSize, 0, &data);
 	memcpy(data, pixels, static_cast<size_t>(imageSize));
-	vkUnmapMemory(device, stagingBufferMemory);
+	vkUnmapMemory(device, VulkanBufferList::getBaseBuffer()->getBufferMemory());
 
 	//unload image
 	stbi_image_free(pixels);
@@ -1111,12 +1142,10 @@ void VulkanFrameWork::createTextureImage()
 
 	//transition data format to optimal
 	transitionImageLayout(textureImage, vk::Format::eR8G8B8A8Srgb, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, mipLevels);
-	copyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
+	copyBufferToImage(VulkanBufferList::getBaseBuffer()->getBuffer(), textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
 
 	//free unneeded resources
 	PSIM_CORE_INFO("Created texture");
-	device.destroyBuffer(stagingBuffer, nullptr);
-	device.freeMemory(stagingBufferMemory, nullptr);
 
 	generateMipmaps(textureImage, vk::Format::eR8G8B8A8Srgb, texWidth, texHeight, mipLevels);
 }
@@ -1277,193 +1306,8 @@ void VulkanFrameWork::generateMipmaps(vk::Image image, vk::Format imageFormat, i
 //--------------------------------------------------------------------------------------------------------------------------------
 
 
-//Model Loading Funcs
-//--------------------------------------------------------------------------------------------------------------------------------
-#ifdef TINYOBJLOADER_IMPLEMENTATION
-void VulkanFrameWork::loadModel()
-{
-	PSIM_PROFILE_FUNCTION();
-	tinyobj::attrib_t attrib;
-	std::vector<tinyobj::shape_t> shapes;
-	std::vector<tinyobj::material_t> materials;
-	{
-		PSIM_PROFILE_SCOPE("Model File Read");
-		std::string warn, err;
-
-		//load model
-		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, MODEL_PATH.c_str())) {
-			PSIM_CORE_ERROR(warn + err);
-		}
-	}
-
-	//ensure that each vertex is unique and parsed according to obj rulesu
-	{
-		PSIM_PROFILE_SCOPE("Parse Model Load Data");
-		std::unordered_map<Vertex, uint32_t> uniqueVertices = {};
-
-		for (const auto& shape : shapes) {
-			for (const auto& index : shape.mesh.indices) {
-				Vertex vertex = {};
-
-				vertex.pos = {
-					attrib.vertices[3 * index.vertex_index + 0],
-					attrib.vertices[3 * index.vertex_index + 1],
-					attrib.vertices[3 * index.vertex_index + 2]
-				};
-
-				vertex.texCoord = {
-					attrib.texcoords[2 * index.texcoord_index + 0],
-					1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
-				};
-
-				vertex.color = { 1.0f, 1.0f, 1.0f };
-
-				if (uniqueVertices.count(vertex) == 0) {
-					uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-					vertices.push_back(vertex);
-				}
-
-				indices.push_back(uniqueVertices[vertex]);
-			}
-		}
-	}
-}
-
-#elif TINYOBJ_LOADER_OPT_IMPLEMENTATION
-void VulkanFrameWork::loadModel()
-{
-	PSIM_PROFILE_FUNCTION();
-	tinyobj_opt::attrib_t attrib;
-	std::vector<tinyobj_opt::shape_t> shapes;
-	std::vector<tinyobj_opt::material_t> materials;
-	{
-		PSIM_PROFILE_SCOPE("Model File Read");
-		//load model
-		size_t data_len = 0;
-		const char* data = nullptr;
-
-#ifdef _WIN32
-		HANDLE file = CreateFileA(MODEL_PATH.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, NULL);
-		assert(file != INVALID_HANDLE_VALUE);
-
-		HANDLE fileMapping = CreateFileMapping(file, NULL, PAGE_READONLY, 0, 0, NULL);
-		assert(fileMapping != INVALID_HANDLE_VALUE);
-
-		LPVOID fileMapView = MapViewOfFile(fileMapping, FILE_MAP_READ, 0, 0, 0);
-		auto fileMapViewChar = (const char*)fileMapView;
-		assert(fileMapView != NULL);
-
-		LARGE_INTEGER fileSize;
-		fileSize.QuadPart = 0;
-		GetFileSizeEx(file, &fileSize);
-
-		data_len = static_cast<size_t>(fileSize.QuadPart);
-		data = fileMapViewChar;
-#endif
-		PSIM_ASSERT(data != nullptr, "failed to load file\n");
-
-		tinyobj_opt::LoadOption option;
-		option.req_num_threads = 4;
-		option.verbose = true;
-		bool ret = tinyobj_opt::parseObj(&attrib, &shapes, &materials, data, data_len, option);
-	}
-
-	{
-		PSIM_PROFILE_SCOPE("Parse Model Load Data");
-		//ensure that each vertex is unique and parsed according to obj rulesu
-		std::unordered_map<Vertex, uint32_t> uniqueVertices = {};
-
-		size_t face_offset = 0;
-		for (size_t v = 0; v < attrib.face_num_verts.size(); v++) {
-			PSIM_ASSERT(attrib.face_num_verts[v] % 3 == 0, "Not all faces are triangles"); // assume all triangle face.
-			for (size_t f = 0; f < attrib.face_num_verts[v]; f++) {
-				tinyobj_opt::index_t index = attrib.indices[face_offset + f];
-				//std::cout << index << std::endl;
-
-				Vertex vertex = {};
-
-				vertex.pos = {
-					attrib.vertices[3 * index.vertex_index + 0],
-					attrib.vertices[3 * index.vertex_index + 1],
-					attrib.vertices[3 * index.vertex_index + 2]
-				};
-
-				vertex.texCoord = {
-					attrib.texcoords[2 * index.texcoord_index + 0],
-					1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
-				};
-
-				vertex.color = { 1.0f, 1.0f, 1.0f };
-
-				if (uniqueVertices.count(vertex) == 0) {
-					uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-					vertices.push_back(vertex);
-				}
-
-				indices.push_back(uniqueVertices[vertex]);
-			}
-			face_offset += attrib.face_num_verts[v];
-		}
-	}
-}
-#endif
-
-
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-
 //Vertex Buffer Funcs
 //--------------------------------------------------------------------------------------------------------------------------------
-void VulkanFrameWork::createVertexBuffer()
-{
-	
-}
-
-void VulkanFrameWork::createIndexBuffer()
-{
-	PSIM_PROFILE_FUNCTION();
-	//get buffer size
-	vk::DeviceSize bufferSize = sizeof(indices[0]) * indices.size();
-
-	//create buffer
-	vk::Buffer stagingBuffer;
-	vk::DeviceMemory stagingBufferMemory;
-	createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, stagingBuffer, stagingBufferMemory);
-
-	//fill buffer
-	void* data;
-	device.mapMemory(stagingBufferMemory, vk::DeviceSize(), bufferSize, vk::MemoryMapFlags(), &data);
-	memcpy(data, indices.data(), (size_t)bufferSize);
-	device.unmapMemory(stagingBufferMemory);
-
-	createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer, vk::MemoryPropertyFlagBits::eDeviceLocal, indexBuffer, indexBufferMemory);
-
-	copyBuffer(stagingBuffer, indexBuffer, bufferSize);
-
-	device.destroyBuffer(stagingBuffer, nullptr);
-	device.freeMemory(stagingBufferMemory, nullptr);
-}
-
-void VulkanFrameWork::createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Buffer& buffer, vk::DeviceMemory& bufferMemory)
-{
-	PSIM_PROFILE_FUNCTION();
-	//define and create buffer
-	vk::BufferCreateInfo bufferInfo = { {}, size, usage,vk::SharingMode::eExclusive };
-
-
-	PSIM_ASSERT(device.createBuffer(&bufferInfo, nullptr, &buffer) == vk::Result::eSuccess, "Failed to create buffer!");
-
-	//allocate buffer memory
-	vk::MemoryRequirements memRequirements;
-	device.getBufferMemoryRequirements(buffer, &memRequirements);
-
-	vk::MemoryAllocateInfo allocInfo = { memRequirements.size, findMemoryType(memRequirements.memoryTypeBits, properties) };
-
-	PSIM_ASSERT(device.allocateMemory(&allocInfo, nullptr, &bufferMemory) == vk::Result::eSuccess, "Failed to allocate buffer memory!");
-
-	device.bindBufferMemory(buffer, bufferMemory, 0);
-}
 
 uint32_t VulkanFrameWork::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties)
 {
@@ -1512,18 +1356,6 @@ void VulkanFrameWork::endSingleTimeCommands(vk::CommandBuffer commandBuffer)
 	device.freeCommandBuffers(commandPool, 1, &commandBuffer);
 }
 
-void VulkanFrameWork::copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size)
-{
-	PSIM_PROFILE_FUNCTION();
-	//copy one buffer to another
-	vk::CommandBuffer commandBuffer = beginSingleTimeCommands();
-
-	vk::BufferCopy copyRegion = { 0, 0, size };
-	commandBuffer.copyBuffer(srcBuffer, dstBuffer, 1, &copyRegion);
-
-	endSingleTimeCommands(commandBuffer);
-}
-
 //--------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -1550,11 +1382,10 @@ void VulkanFrameWork::createUniformBuffers()
 	vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
 
 	uniformBuffers.resize(swapChainImages.size());
-	uniformBuffersMemory.resize(swapChainImages.size());
 
 	//create buffers
 	for (size_t i = 0; i < swapChainImages.size(); i++) {
-		createBuffer(bufferSize, vk::BufferUsageFlagBits::eUniformBuffer, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, uniformBuffers[i], uniformBuffersMemory[i]);
+		uniformBuffers[i].createBuffer(bufferSize, vk::BufferUsageFlagBits::eUniformBuffer, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
 	}
 }
 
@@ -1576,9 +1407,9 @@ void VulkanFrameWork::updateUniformBuffer(uint32_t currentImage)
 
 	//store the uniformbuffer
 	void* data;
-	device.mapMemory(uniformBuffersMemory[currentImage], vk::DeviceSize(), sizeof(ubo), vk::MemoryMapFlags(), &data);
+	device.mapMemory(uniformBuffers[currentImage].getBufferMemory(), vk::DeviceSize(), sizeof(ubo), vk::MemoryMapFlags(), &data);
 	memcpy(data, &ubo, sizeof(ubo));
-	device.unmapMemory(uniformBuffersMemory[currentImage]);
+	device.unmapMemory(uniformBuffers[currentImage].getBufferMemory());
 }
 
 void VulkanFrameWork::createDescriptorPool()
@@ -1611,7 +1442,7 @@ void VulkanFrameWork::createDescriptorSets()
 	//create descriptor sets
 	for (size_t i = 0; i < swapChainImages.size(); i++) {
 		//get buffer info
-		vk::DescriptorBufferInfo bufferInfo = { uniformBuffers[i], 0, sizeof(UniformBufferObject) };
+		vk::DescriptorBufferInfo bufferInfo = { uniformBuffers[i].getBuffer(), 0, sizeof(UniformBufferObject) };
 
 		//get image info
 		vk::DescriptorImageInfo imageInfo = { textureSampler, textureImageView, vk::ImageLayout::eShaderReadOnlyOptimal };
@@ -1731,15 +1562,25 @@ void VulkanFrameWork::commandBufferRecordBegin(int bufNum)
 	//bind pipeline
 	commandBuffers[bufNum].bindPipeline(vk::PipelineBindPoint::eGraphics, graphicsPipeline);
 
-	vk::Buffer vertexBuffers[] = { vertexBuffer };
+	//get vertex Buffers
+	std::vector<vk::Buffer> vertexBuffers = *static_cast<std::vector<vk::Buffer>*>(vertexArray->getVertexBuffersBuffers());
+	vk::Buffer* bufferArray = new vk::Buffer[vertexBuffers.size()];
+	for (int i = 0; i < vertexBuffers.size(); i++)
+	{
+		bufferArray[i] = vertexBuffers[i];
+	}
+
 	vk::DeviceSize offsets[] = { 0 };
 
-	commandBuffers[bufNum].bindVertexBuffers(0, 1, vertexBuffers, offsets);
-	commandBuffers[bufNum].bindIndexBuffer(indexBuffer, 0, vk::IndexType::eUint32);
+	//bind buffers
+	commandBuffers[bufNum].bindVertexBuffers((uint32_t)0, (uint32_t)(vertexBuffers.size()), bufferArray, offsets);
+	commandBuffers[bufNum].bindIndexBuffer(*static_cast<vk::Buffer*>(vertexArray->getIndexBufferBuffer()), 0, vk::IndexType::eUint32);
 	commandBuffers[bufNum].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout, 0, 1, &descriptorSets[bufNum], 0, nullptr);
 
 	//draw from pipeline
-	commandBuffers[bufNum].drawIndexed(static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+	commandBuffers[bufNum].drawIndexed(static_cast<uint32_t>(vertexArray->GetIndexBuffer()->GetCount()), 1, 0, 0, 0);
+
+	delete[] bufferArray;
 }
 
 void VulkanFrameWork::commandBufferRecordEnd(int bufNum)
@@ -1747,4 +1588,23 @@ void VulkanFrameWork::commandBufferRecordEnd(int bufNum)
 	commandBuffers[bufNum].endRenderPass();
 
 	PSIM_ASSERT(commandBuffers[bufNum].end() == vk::Result::eSuccess, "Failed to record command buffer!");
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+
+//RendererID
+//--------------------------------------------------------------------------------------------------------------------------------
+
+RendererID::RendererID() {
+	id = ++nextID;
+}
+
+RendererID::RendererID(const RendererID& orig) {
+	id = orig.id;
+}
+
+RendererID& RendererID::operator=(const RendererID& orig) {
+	id = orig.id;
+	return(*this);
 }

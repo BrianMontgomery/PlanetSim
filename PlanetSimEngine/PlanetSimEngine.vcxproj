@@ -535,6 +535,8 @@
     <ClInclude Include="src\PSIM\Core\Layers\Layers.h" />
     <ClInclude Include="src\PSIM\Core\Logging\Log.h" />
     <ClInclude Include="src\PSIM\Core\WindowPrototype.h" />
+    <ClInclude Include="src\PSIM\Graphics\Asset\Model.h" />
+    <ClInclude Include="src\PSIM\Graphics\Asset\Texture.h" />
     <ClInclude Include="src\PSIM\Graphics\Camera\Camera.h" />
     <ClInclude Include="src\PSIM\Graphics\Camera\CameraController.h" />
     <ClInclude Include="src\PSIM\Graphics\Components\Buffer.h" />
@@ -561,6 +563,8 @@
     <ClCompile Include="src\PSIM\Core\Layers\LayerStack.cpp" />
     <ClCompile Include="src\PSIM\Core\Layers\Layers.cpp" />
     <ClCompile Include="src\PSIM\Core\Logging\Log.cpp" />
+    <ClCompile Include="src\PSIM\Graphics\Asset\Model.cpp" />
+    <ClCompile Include="src\PSIM\Graphics\Asset\Texture.cpp" />
     <ClCompile Include="src\PSIM\Graphics\Camera\Camera.cpp" />
     <ClCompile Include="src\PSIM\Graphics\Camera\CameraController.cpp" />
     <ClCompile Include="src\PSIM\Graphics\Components\Buffer.cpp" />

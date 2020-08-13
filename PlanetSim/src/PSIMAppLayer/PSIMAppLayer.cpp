@@ -8,27 +8,30 @@
 PSIMAppLayer::PSIMAppLayer()
 	: Layers("PSIMAppLayer"), m_CameraController(1280.0f / 720.0f)
 {
-	/*m_VertexArray = Hazel::VertexArray::Create();
+	std::cout << "hello";
+	m_VertexArray = VertexArray::Create();
 
-	float vertices[3 * 7] = {
-		-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
-		 0.5f, -0.5f, 0.0f, 0.2f, 0.3f, 0.8f, 1.0f,
-		 0.0f,  0.5f, 0.0f, 0.8f, 0.8f, 0.2f, 1.0f
+	std::cout << "hello";
+	Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(0);
+	BufferLayout layout = {
+		{ ShaderDataType::Float3, "a_Position" },
+		{ ShaderDataType::Float3, "a_Color" },
+		{ ShaderDataType::Float2, "a_TexCoord" }
 	};
-
-	Hazel::Ref<Hazel::VertexBuffer> vertexBuffer = Hazel::VertexBuffer::Create(vertices, sizeof(vertices));
-	Hazel::BufferLayout layout = {
-		{ Hazel::ShaderDataType::Float3, "a_Position" },
-		{ Hazel::ShaderDataType::Float4, "a_Color" }
-	};
+	std::cout << "hello";
 	vertexBuffer->SetLayout(layout);
+
+	std::cout << "hello";
+	m_ModelLibrary.Load("C:\\dev\\PlanetSim\\assets\\models\\chalet.obj", false, true, false, false, vertexBuffer->GetLayout().GetStride());
+	vertexBuffer->SetData(static_cast<void*>(m_ModelLibrary.Get("chalet")->Data.data()), m_ModelLibrary.Get("chalet")->Data.size());
+
 	m_VertexArray->AddVertexBuffer(vertexBuffer);
 
 	uint32_t indices[3] = { 0, 1, 2 };
-	Hazel::Ref<Hazel::IndexBuffer> indexBuffer = Hazel::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
+	Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
 	m_VertexArray->SetIndexBuffer(indexBuffer);
 
-	m_SquareVA = Hazel::VertexArray::Create();
+	m_SquareVA = VertexArray::Create();
 
 	float squareVertices[5 * 4] = {
 		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
@@ -37,18 +40,18 @@ PSIMAppLayer::PSIMAppLayer()
 		-0.5f,  0.5f, 0.0f, 0.0f, 1.0f
 	};
 
-	Hazel::Ref<Hazel::VertexBuffer> squareVB = Hazel::VertexBuffer::Create(squareVertices, sizeof(squareVertices));
+	Ref<VertexBuffer> squareVB = VertexBuffer::Create(squareVertices, sizeof(squareVertices));
 	squareVB->SetLayout({
-		{ Hazel::ShaderDataType::Float3, "a_Position" },
-		{ Hazel::ShaderDataType::Float2, "a_TexCoord" }
+		{ ShaderDataType::Float3, "a_Position" },
+		{ ShaderDataType::Float2, "a_TexCoord" }
 		});
 	m_SquareVA->AddVertexBuffer(squareVB);
 
 	uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
-	Hazel::Ref<Hazel::IndexBuffer> squareIB = Hazel::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t));
+	Ref<IndexBuffer> squareIB = IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t));
 	m_SquareVA->SetIndexBuffer(squareIB);
 
-	std::string vertexSrc = R"(
+	/*std::string vertexSrc = R"(
 			#version 330 core
 			
 			layout(location = 0) in vec3 a_Position;
@@ -78,7 +81,7 @@ PSIMAppLayer::PSIMAppLayer()
 			}
 		)";
 
-	m_Shader = Hazel::Shader::Create("VertexPosColor", vertexSrc, fragmentSrc);
+	m_Shader = Shader::Create("VertexPosColor", vertexSrc, fragmentSrc);
 
 	std::string flatColorShaderVertexSrc = R"(
 			#version 330 core
@@ -107,12 +110,12 @@ PSIMAppLayer::PSIMAppLayer()
 			}
 		)";
 
-	m_FlatColorShader = Hazel::Shader::Create("FlatColor", flatColorShaderVertexSrc, flatColorShaderFragmentSrc);
+	m_FlatColorShader = Shader::Create("FlatColor", flatColorShaderVertexSrc, flatColorShaderFragmentSrc);
 
 	auto textureShader = m_ShaderLibrary.Load("assets/shaders/Texture.glsl");
 
-	m_Texture = Hazel::Texture2D::Create("assets/textures/Checkerboard.png");
-	m_ChernoLogoTexture = Hazel::Texture2D::Create("assets/textures/ChernoLogo.png");
+	m_Texture = Texture2D::Create("assets/textures/Checkerboard.png");
+	m_ChernoLogoTexture = Texture2D::Create("assets/textures/ChernoLogo.png");
 
 	textureShader->Bind();
 	textureShader->SetInt("u_Texture", 0);

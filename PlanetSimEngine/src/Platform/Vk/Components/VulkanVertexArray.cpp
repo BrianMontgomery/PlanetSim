@@ -1,53 +1,30 @@
 #include "PSIMPCH.h"
 #include "VulkanVertexArray.h"
+#include "Platform/Vk/FrameWork/VulkanFrameWork.h"
 
-static GLenum ShaderDataTypeToOpenGLBaseType(ShaderDataType type)
-{
-	switch (type)
-	{
-	case ShaderDataType::Float:    return GL_FLOAT;
-	case ShaderDataType::Float2:   return GL_FLOAT;
-	case ShaderDataType::Float3:   return GL_FLOAT;
-	case ShaderDataType::Float4:   return GL_FLOAT;
-	case ShaderDataType::Mat3:     return GL_FLOAT;
-	case ShaderDataType::Mat4:     return GL_FLOAT;
-	case ShaderDataType::Int:      return GL_INT;
-	case ShaderDataType::Int2:     return GL_INT;
-	case ShaderDataType::Int3:     return GL_INT;
-	case ShaderDataType::Int4:     return GL_INT;
-	case ShaderDataType::Bool:     return GL_BOOL;
-	}
-
-	PSIM_ASSERT(false, "Unknown ShaderDataType!");
-	return 0;
-}
 
 VulkanVertexArray::VulkanVertexArray()
 {
 	PSIM_PROFILE_FUNCTION();
-
-	glCreateVertexArrays(1, &m_RendererID);
 }
 
 VulkanVertexArray::~VulkanVertexArray()
 {
 	PSIM_PROFILE_FUNCTION();
-
-	glDeleteVertexArrays(1, &m_RendererID);
 }
 
 void VulkanVertexArray::Bind() const
 {
 	PSIM_PROFILE_FUNCTION();
 
-	glBindVertexArray(m_RendererID);
+	//glBindVertexArray(m_RendererID);
 }
 
 void VulkanVertexArray::Unbind() const
 {
 	PSIM_PROFILE_FUNCTION();
 
-	glBindVertexArray(0);
+	//glBindVertexArray(0);
 }
 
 void VulkanVertexArray::AddVertexBuffer(const Ref<VertexBuffer>& vertexBuffer)
@@ -56,66 +33,120 @@ void VulkanVertexArray::AddVertexBuffer(const Ref<VertexBuffer>& vertexBuffer)
 
 	PSIM_ASSERT(vertexBuffer->GetLayout().GetElements().size(), "Vertex Buffer has no layout!");
 
-	glBindVertexArray(m_RendererID);
-	vertexBuffer->Bind();
-
-	const auto& layout = vertexBuffer->GetLayout();
-	for (const auto& element : layout)
-	{
-		switch (element.Type)
-		{
-		case ShaderDataType::Float:
-		case ShaderDataType::Float2:
-		case ShaderDataType::Float3:
-		case ShaderDataType::Float4:
-		case ShaderDataType::Int:
-		case ShaderDataType::Int2:
-		case ShaderDataType::Int3:
-		case ShaderDataType::Int4:
-		case ShaderDataType::Bool:
-		{
-			glEnableVertexAttribArray(m_VertexBufferIndex);
-			glVertexAttribPointer(m_VertexBufferIndex,
-				element.GetComponentCount(),
-				ShaderDataTypeToOpenGLBaseType(element.Type),
-				element.Normalized ? GL_TRUE : GL_FALSE,
-				layout.GetStride(),
-				(const void*)element.Offset);
-			m_VertexBufferIndex++;
-			break;
-		}
-		case ShaderDataType::Mat3:
-		case ShaderDataType::Mat4:
-		{
-			uint8_t count = element.GetComponentCount();
-			for (uint8_t i = 0; i < count; i++)
-			{
-				glEnableVertexAttribArray(m_VertexBufferIndex);
-				glVertexAttribPointer(m_VertexBufferIndex,
-					count,
-					ShaderDataTypeToOpenGLBaseType(element.Type),
-					element.Normalized ? GL_TRUE : GL_FALSE,
-					layout.GetStride(),
-					(const void*)(sizeof(float) * count * i));
-				glVertexAttribDivisor(m_VertexBufferIndex, 1);
-				m_VertexBufferIndex++;
-			}
-			break;
-		}
-		default:
-			PSIM_ASSERT(false, "Unknown ShaderDataType!");
-		}
-	}
-
-	m_VertexBuffers.push_back(vertexBuffer);
+	m_VertexBuffer.push_back(vertexBuffer);
 }
 
 void VulkanVertexArray::SetIndexBuffer(const Ref<IndexBuffer>& indexBuffer)
 {
 	PSIM_PROFILE_FUNCTION();
 
-	glBindVertexArray(m_RendererID);
-	indexBuffer->Bind();
-
 	m_IndexBuffer = indexBuffer;
+}
+
+//vk::VertexInputBindingDescription
+void* VulkanVertexArray::getBindingDescription()
+{
+	//get stride
+	uint32_t stride = 0;
+	for (int i = 0; i < m_VertexBuffer.size(); i++)
+	{
+		stride += m_VertexBuffer[i]->GetLayout().GetStride();
+	}
+
+	//create binding description
+	bindingDescription = { 0, stride, vk::VertexInputRate::eVertex };
+
+	return &bindingDescription;
+}
+
+//std::vector<vk::VertexInputAttributeDescription>
+void* VulkanVertexArray::getAttributeDescriptions()
+{
+	attributeDescriptions.clear();
+	for (int h = 0; h < m_VertexBuffer.size(); h++)
+	{
+		for (int i = 0; i < m_VertexBuffer[h]->GetLayout().GetElements().size(); i++)
+		{
+			uint32_t j = i;
+			switch (m_VertexBuffer[h]->GetLayout().GetElements()[i].Type)
+			{
+			case ShaderDataType::Float:
+				attributeDescriptions.push_back({ j, 0, vk::Format::eR32Sfloat, (m_VertexBuffer[h]->GetLayout().GetElements())[i].Offset });
+				break;
+			case ShaderDataType::Float2:
+				attributeDescriptions.push_back({ j, 0, vk::Format::eR32G32Sfloat, (m_VertexBuffer[h]->GetLayout().GetElements())[i].Offset });
+				break;
+			case ShaderDataType::Float3:
+				attributeDescriptions.push_back({ j, 0, vk::Format::eR32G32B32Sfloat, (m_VertexBuffer[h]->GetLayout().GetElements())[i].Offset });
+				break;
+			case ShaderDataType::Float4:
+				attributeDescriptions.push_back({ j, 0, vk::Format::eR32G32B32A32Sfloat, (m_VertexBuffer[h]->GetLayout().GetElements())[i].Offset });
+				break;
+			case ShaderDataType::Mat3:
+				attributeDescriptions.push_back({ j, 0, vk::Format::eR32G32B32Sfloat, (m_VertexBuffer[h]->GetLayout().GetElements())[i].Offset });
+				attributeDescriptions.push_back({ j + 1, 0, vk::Format::eR32G32B32Sfloat, (m_VertexBuffer[h]->GetLayout().GetElements())[i].Offset });
+				attributeDescriptions.push_back({ j + 2, 0, vk::Format::eR32G32B32Sfloat, (m_VertexBuffer[h]->GetLayout().GetElements())[i].Offset });
+				i += 2;
+				break;
+			case ShaderDataType::Mat4:
+				attributeDescriptions.push_back({ j, 0, vk::Format::eR32G32B32A32Sfloat, (m_VertexBuffer[h]->GetLayout().GetElements())[i].Offset });
+				attributeDescriptions.push_back({ j + 1, 0, vk::Format::eR32G32B32A32Sfloat, (m_VertexBuffer[h]->GetLayout().GetElements())[i].Offset });
+				attributeDescriptions.push_back({ j + 2, 0, vk::Format::eR32G32B32A32Sfloat, (m_VertexBuffer[h]->GetLayout().GetElements())[i].Offset });
+				attributeDescriptions.push_back({ j + 3, 0, vk::Format::eR32G32B32A32Sfloat, (m_VertexBuffer[h]->GetLayout().GetElements())[i].Offset });
+				i += 3;
+				break;
+			case ShaderDataType::Int:
+				attributeDescriptions.push_back({ j, 0, vk::Format::eR32Sint, (m_VertexBuffer[h]->GetLayout().GetElements())[i].Offset });
+				break;
+			case ShaderDataType::Int2:
+				attributeDescriptions.push_back({ j, 0, vk::Format::eR32G32Sint, (m_VertexBuffer[h]->GetLayout().GetElements())[i].Offset });
+				break;
+			case ShaderDataType::Int3:
+				attributeDescriptions.push_back({ j, 0, vk::Format::eR32G32B32Sint, (m_VertexBuffer[h]->GetLayout().GetElements())[i].Offset });
+				break;
+			case ShaderDataType::Int4:
+				attributeDescriptions.push_back({ j, 0, vk::Format::eR32G32B32A32Sint, (m_VertexBuffer[h]->GetLayout().GetElements())[i].Offset });
+				break;
+			case ShaderDataType::Bool:
+				attributeDescriptions.push_back({ j, 0, vk::Format::eR32Uint, (m_VertexBuffer[h]->GetLayout().GetElements())[i].Offset });
+				break;
+			}
+		}
+	}
+	return &attributeDescriptions;
+}
+
+//std::vector<vk::Buffer>
+void* VulkanVertexArray::getVertexBuffersBuffers()
+{
+	if (vBuffBuffers.empty() ) {
+		vBuffBuffers = {};
+	}
+	else {
+		vBuffBuffers.clear();
+	}
+
+	for (int i = 0; i < m_VertexBuffer.size(); i++)
+	{
+		vBuffBuffers.push_back(VulkanBufferList::get(m_VertexBuffer[i]->getID())->getBuffer());
+	}
+
+	return &vBuffBuffers;
+}
+
+//vk::Buffer
+void* VulkanVertexArray::getIndexBufferBuffer()
+{
+	return &(VulkanBufferList::get(m_IndexBuffer->getID())->getBuffer());
+}
+
+void VulkanVertexArray::cleanUp()
+{
+	PSIM_PROFILE_FUNCTION();
+	VulkanFrameWork* framework = VulkanFrameWork::getFramework();
+
+	for (int i = 0; i < vBuffBuffers.size(); i++)
+	{
+		framework->getDevice().destroyBuffer(vBuffBuffers[i], nullptr);
+	}
 }

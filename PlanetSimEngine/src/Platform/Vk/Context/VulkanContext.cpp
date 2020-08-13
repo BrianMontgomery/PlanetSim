@@ -16,17 +16,16 @@ void VulkanContext::Init()
 {
 	PSIM_PROFILE_FUNCTION();
 	framework = VulkanFrameWork::getFramework();
-	//library initialization (glad loader in OpenGL)
-	framework->init(window);
 
-	//version checking done at device level
+	//TODO: turn to preinit
+	framework->init(window);
 }
 
 void VulkanContext::drawFrame()
 {
 	PSIM_PROFILE_FUNCTION();
 
-	for (size_t i = 0; i < framework->commandBuffers.size(); i++) {
+	for (size_t i = 0; i < framework->getCommandBuffersSize(); i++) {
 		framework->commandBufferRecordBegin(i);
 		framework->commandBufferRecordEnd(i);
 	}
