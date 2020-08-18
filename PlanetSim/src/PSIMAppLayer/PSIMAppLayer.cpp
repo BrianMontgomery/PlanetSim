@@ -8,48 +8,22 @@
 PSIMAppLayer::PSIMAppLayer()
 	: Layers("PSIMAppLayer"), m_CameraController(1280.0f / 720.0f)
 {
-	std::cout << "hello";
-	m_VertexArray = VertexArray::Create();
+	/*m_VertexArray = VertexArray::Create();
 
-	std::cout << "hello";
-	Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(0);
 	BufferLayout layout = {
 		{ ShaderDataType::Float3, "a_Position" },
 		{ ShaderDataType::Float3, "a_Color" },
 		{ ShaderDataType::Float2, "a_TexCoord" }
 	};
-	std::cout << "hello";
-	vertexBuffer->SetLayout(layout);
 
-	std::cout << "hello";
-	m_ModelLibrary.Load("C:\\dev\\PlanetSim\\assets\\models\\chalet.obj", false, true, false, false, vertexBuffer->GetLayout().GetStride());
-	vertexBuffer->SetData(static_cast<void*>(m_ModelLibrary.Get("chalet")->Data.data()), m_ModelLibrary.Get("chalet")->Data.size());
+	m_ModelLibrary.Load("C:\\dev\\PlanetSim\\assets\\models\\chalet.obj", false, true, false, false, layout.GetStride());
+
+	Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(static_cast<float*>(m_ModelLibrary.Get("chalet")->Data.data()), m_ModelLibrary.Get("chalet")->Data.size());
+	vertexBuffer->SetLayout(layout);
+	Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(m_ModelLibrary.Get("chalet")->indices.data(), sizeof(m_ModelLibrary.Get("chalet")->indices.size()) / sizeof(uint32_t));
 
 	m_VertexArray->AddVertexBuffer(vertexBuffer);
-
-	uint32_t indices[3] = { 0, 1, 2 };
-	Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
-	m_VertexArray->SetIndexBuffer(indexBuffer);
-
-	m_SquareVA = VertexArray::Create();
-
-	float squareVertices[5 * 4] = {
-		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-		 0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
-		-0.5f,  0.5f, 0.0f, 0.0f, 1.0f
-	};
-
-	Ref<VertexBuffer> squareVB = VertexBuffer::Create(squareVertices, sizeof(squareVertices));
-	squareVB->SetLayout({
-		{ ShaderDataType::Float3, "a_Position" },
-		{ ShaderDataType::Float2, "a_TexCoord" }
-		});
-	m_SquareVA->AddVertexBuffer(squareVB);
-
-	uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
-	Ref<IndexBuffer> squareIB = IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t));
-	m_SquareVA->SetIndexBuffer(squareIB);
+	m_VertexArray->SetIndexBuffer(indexBuffer);*/
 
 	/*std::string vertexSrc = R"(
 			#version 330 core

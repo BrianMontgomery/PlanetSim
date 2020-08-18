@@ -17,12 +17,12 @@ public:
 	vk::Buffer getBuffer() { return buffer; }
 	vk::DeviceMemory getBufferMemory() { return bufferMemory; }
 
-	uint32_t getID() { return m_RendererID; }
+	uint32_t getID() { return m_ID; }
 
 	static Ref<VulkanBuffer> Create();
 
 private:
-	uint32_t m_RendererID;
+	uint32_t m_ID;
 	vk::Buffer buffer;
 	vk::DeviceMemory bufferMemory;
 };
@@ -33,14 +33,17 @@ public:
 	VulkanBufferList();
 	~VulkanBufferList();
 
-	static void init();
-	static void add(Ref<VulkanBuffer> buffer);
-	static Ref<VulkanBuffer> get(uint32_t ID);
-	static void remove(uint32_t ID);
-	static Ref<VulkanBuffer> getBaseBuffer();
+	void init();
+	void add(Ref<VulkanBuffer> buffer);
+	Ref<VulkanBuffer> get(uint32_t ID);
+	uint32_t getNextID();
+	void remove(uint32_t ID);
+	Ref<VulkanBuffer> getBaseBuffer();
+	
+	void cleanup();
 private:
-	static std::map<uint32_t, Ref<VulkanBuffer>> bufferList;
-	static uint32_t baseBufferID;
+	std::map<uint32_t, Ref<VulkanBuffer>> bufferList;
+	uint32_t baseBufferID;
 };
 
 class VulkanVertexBuffer : public VertexBuffer

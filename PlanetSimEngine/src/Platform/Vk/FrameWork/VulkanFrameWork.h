@@ -12,6 +12,8 @@
 #include "Platform/Vk/Components/VulkanBuffer.h"
 #include "Platform/Vk/Components/VulkanVertexArray.h"
 
+#include "PSIM/Graphics/Asset/Model.h"
+
 //non-core std-lib
 #include <array>
 #include <optional>
@@ -74,6 +76,7 @@ public:
 
 	//public vulkan getters
 	vk::Device getDevice() { return device; }
+	VulkanBufferList* getBufferList() { return &bufferList; }
 	std::vector<vk::CommandBuffer>* getCommandBuffers() { return &commandBuffers; }
 	int getCommandBuffersSize() { return commandBuffers.size(); }
 	vk::Extent2D getSwapChainExtent() { return swapChainExtent; }
@@ -94,6 +97,8 @@ private:
 	glm::mat4 viewMatrix;
 	glm::mat4 projMatrix;
 	glm::vec4 clearColor;
+
+	ModelLibrary m_StartingModelLibrary;
 
 	GLFWwindow* window;
 	VulkanBufferList bufferList;
@@ -126,8 +131,6 @@ private:
 		
 	vk::PipelineLayout pipelineLayout;
 	vk::Pipeline graphicsPipeline;
-	vk::VertexInputBindingDescription bindingDescription;
-	std::vector<vk::VertexInputAttributeDescription> attributeDescriptions;
 	
 	vk::PipelineCache pipelineCache;
 
@@ -264,15 +267,4 @@ public:
 
 private:
 	VulkanFrameWork *_singleton;
-};
-
-class RendererID {
-protected:
-	static uint32_t nextID;
-public:
-	uint32_t id;
-	RendererID();
-	RendererID(const RendererID& orig);
-	RendererID& operator=(const RendererID& orig);
-	uint32_t getID() { return id; }
 };

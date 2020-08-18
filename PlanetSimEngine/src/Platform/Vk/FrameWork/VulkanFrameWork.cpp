@@ -38,7 +38,6 @@ CONFIGURABLE VARIABLES - WHERE TO FIND
 
 VulkanFrameWork* VulkanFrameWork::m_framework = nullptr;
 VulkanFrameWorkDestroyer VulkanFrameWork::destroyer;
-uint32_t RendererID::nextID = 0;
 
 //need full paths from solution for resources
 const std::string MODEL_PATH = "C:\\dev\\PlanetSim\\assets\\models\\chalet.obj";
@@ -172,28 +171,27 @@ void VulkanFrameWork::initVulkan()
 
 	//init buffer list
 	{
-		VulkanBufferList::init();
+		bufferList.init();
 	}
 
 	//default Vertex Array
 	{
 		vertexArray = VertexArray::Create();
 
-		float vertices[3 * 7] = {
-			-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
-			 0.5f, -0.5f, 0.0f, 0.2f, 0.3f, 0.8f, 1.0f,
-			 0.0f,  0.5f, 0.0f, 0.8f, 0.8f, 0.2f, 1.0f
-		};
-		Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(vertices, sizeof(vertices));
 		BufferLayout layout = {
 			{ ShaderDataType::Float3, "a_Position" },
-			{ ShaderDataType::Float4, "a_Color" }
+			{ ShaderDataType::Float2, "a_TexCoord" },
+			{ ShaderDataType::Float3, "a_Color" }
 		};
-		vertexBuffer->SetLayout(layout);
-		vertexArray->AddVertexBuffer(vertexBuffer);
 
-		uint32_t indices[3] = { 0, 1, 2 };
-		Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
+		std::cout << layout.GetStride() << std::endl;
+		m_StartingModelLibrary.Load("C:\\dev\\PlanetSim\\assets\\models\\chalet.obj", false, true, false, false);
+
+		Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(static_cast<float*>(m_StartingModelLibrary.Get("chalet")->Data.data()), m_StartingModelLibrary.Get("chalet")->Data.size());
+		vertexBuffer->SetLayout(layout);
+		Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(m_StartingModelLibrary.Get("chalet")->indices.data(), m_StartingModelLibrary.Get("chalet")->indices.size());
+
+		vertexArray->AddVertexBuffer(vertexBuffer);
 		vertexArray->SetIndexBuffer(indexBuffer);
 	}
 
@@ -250,6 +248,8 @@ void VulkanFrameWork::cleanUp()
 	PSIM_CORE_INFO("Command Pool deleted");
 
 	vertexArray->cleanUp();
+
+	bufferList.cleanup();
 
 	device.destroy(nullptr);
 	PSIM_CORE_INFO("Device deleted");
@@ -869,8 +869,8 @@ void VulkanFrameWork::createGraphicsPipeline()
 	vk::PipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
 
 	//Vertex Input Stage Info
-	bindingDescription = *(static_cast<vk::VertexInputBindingDescription*>(vertexArray->getBindingDescription()));
-	attributeDescriptions = *(static_cast<std::vector<vk::VertexInputAttributeDescription>*>(vertexArray->getAttributeDescriptions()));
+	auto bindingDescription = *(static_cast<vk::VertexInputBindingDescription*>(vertexArray->getBindingDescription()));
+	auto attributeDescriptions = *(static_cast<std::vector<vk::VertexInputAttributeDescription>*>(vertexArray->getAttributeDescriptions()));
 	vk::PipelineVertexInputStateCreateInfo vertexInputInfo = { {}, 1, &(bindingDescription), static_cast<uint32_t>(attributeDescriptions.size()), attributeDescriptions.data() };
 
 	//Input Assembly Stage Info
@@ -1020,7 +1020,7 @@ void VulkanFrameWork::createCommandBuffers()
 	//define and use command buffers
 	for (size_t i = 0; i < commandBuffers.size(); i++) {
 		//define buffers
-		vk::CommandBufferBeginInfo beginInfo = {};
+		vk::CommandBufferBeginInfo beginInfo = { vk::CommandBufferUsageFlags(), nullptr };
 
 		PSIM_ASSERT(commandBuffers[i].begin(&beginInfo) == vk::Result::eSuccess, "Failed to begin recording command buffer!");
 
@@ -1042,11 +1042,14 @@ void VulkanFrameWork::createCommandBuffers()
 			bufferArray[i] = vertexBuffers[i];
 		}
 
+		vk::Buffer* indexBufferArray = new vk::Buffer[1];
+		indexBufferArray[0] = *static_cast<vk::Buffer*>(vertexArray->getIndexBufferBuffer());
+
 		vk::DeviceSize offsets[] = { 0 };
 
 		//bind buffers
 		commandBuffers[i].bindVertexBuffers((uint32_t)0, (uint32_t)(vertexBuffers.size()), &(*bufferArray), offsets);
-		commandBuffers[i].bindIndexBuffer(*static_cast<vk::Buffer*>(vertexArray->getIndexBufferBuffer()), 0, vk::IndexType::eUint32);
+		commandBuffers[i].bindIndexBuffer(*indexBufferArray, 0, vk::IndexType::eUint32); 
 		commandBuffers[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout, 0, 1, &descriptorSets[i], 0, nullptr);
 
 		//draw from pipeline
@@ -1057,6 +1060,8 @@ void VulkanFrameWork::createCommandBuffers()
 		PSIM_ASSERT(commandBuffers[i].end() == vk::Result::eSuccess, "Failed to record command buffer!");
 
 		delete[] bufferArray;
+		delete[] indexBufferArray;
+
 	}
 	PSIM_CORE_INFO("Command buffers created");
 }
@@ -1126,13 +1131,13 @@ void VulkanFrameWork::createTextureImage()
 	PSIM_ASSERT(pixels, "Failed to load texture image!");
 
 	//designate a buffer for the texture
-	VulkanBufferList::getBaseBuffer()->createBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
+	bufferList.getBaseBuffer()->createBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
 
 	//transfer texture data to new buffer
 	void* data;
-	vkMapMemory(device, VulkanBufferList::getBaseBuffer()->getBufferMemory(), 0, imageSize, 0, &data);
+	vkMapMemory(device, bufferList.getBaseBuffer()->getBufferMemory(), 0, imageSize, 0, &data);
 	memcpy(data, pixels, static_cast<size_t>(imageSize));
-	vkUnmapMemory(device, VulkanBufferList::getBaseBuffer()->getBufferMemory());
+	vkUnmapMemory(device, bufferList.getBaseBuffer()->getBufferMemory());
 
 	//unload image
 	stbi_image_free(pixels);
@@ -1142,7 +1147,7 @@ void VulkanFrameWork::createTextureImage()
 
 	//transition data format to optimal
 	transitionImageLayout(textureImage, vk::Format::eR8G8B8A8Srgb, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, mipLevels);
-	copyBufferToImage(VulkanBufferList::getBaseBuffer()->getBuffer(), textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
+	copyBufferToImage(bufferList.getBaseBuffer()->getBuffer(), textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
 
 	//free unneeded resources
 	PSIM_CORE_INFO("Created texture");
@@ -1564,23 +1569,27 @@ void VulkanFrameWork::commandBufferRecordBegin(int bufNum)
 
 	//get vertex Buffers
 	std::vector<vk::Buffer> vertexBuffers = *static_cast<std::vector<vk::Buffer>*>(vertexArray->getVertexBuffersBuffers());
-	vk::Buffer* bufferArray = new vk::Buffer[vertexBuffers.size()];
+	vk::Buffer* vertexBufferArray = new vk::Buffer[vertexBuffers.size()];
 	for (int i = 0; i < vertexBuffers.size(); i++)
 	{
-		bufferArray[i] = vertexBuffers[i];
+		vertexBufferArray[i] = vertexBuffers[i];
 	}
+
+	vk::Buffer* indexBufferArray = new vk::Buffer[1];
+	indexBufferArray[0] = *static_cast<vk::Buffer*>(vertexArray->getIndexBufferBuffer());
 
 	vk::DeviceSize offsets[] = { 0 };
 
 	//bind buffers
-	commandBuffers[bufNum].bindVertexBuffers((uint32_t)0, (uint32_t)(vertexBuffers.size()), bufferArray, offsets);
-	commandBuffers[bufNum].bindIndexBuffer(*static_cast<vk::Buffer*>(vertexArray->getIndexBufferBuffer()), 0, vk::IndexType::eUint32);
+	commandBuffers[bufNum].bindVertexBuffers((uint32_t)0, (uint32_t)(vertexBuffers.size()), vertexBufferArray, offsets);
+	commandBuffers[bufNum].bindIndexBuffer(*indexBufferArray, 0, vk::IndexType::eUint32);
 	commandBuffers[bufNum].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout, 0, 1, &descriptorSets[bufNum], 0, nullptr);
 
 	//draw from pipeline
 	commandBuffers[bufNum].drawIndexed(static_cast<uint32_t>(vertexArray->GetIndexBuffer()->GetCount()), 1, 0, 0, 0);
 
-	delete[] bufferArray;
+	delete[] vertexBufferArray;
+	delete[] indexBufferArray;
 }
 
 void VulkanFrameWork::commandBufferRecordEnd(int bufNum)
@@ -1591,20 +1600,3 @@ void VulkanFrameWork::commandBufferRecordEnd(int bufNum)
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
-
-
-//RendererID
-//--------------------------------------------------------------------------------------------------------------------------------
-
-RendererID::RendererID() {
-	id = ++nextID;
-}
-
-RendererID::RendererID(const RendererID& orig) {
-	id = orig.id;
-}
-
-RendererID& RendererID::operator=(const RendererID& orig) {
-	id = orig.id;
-	return(*this);
-}

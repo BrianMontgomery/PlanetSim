@@ -6,18 +6,26 @@
 #elif TINYOBJ_LOADER_OPT_IMPLEMENTATION
 #include <experimental/tinyobj_loader_opt.h>
 #endif
-#include <glm/glm.hpp>
+#include <glm/gtx/hash.hpp>
 
-Ref<Mesh> Mesh::Create(const std::string& filepath, bool load_normals, bool load_texcoords, bool generate_tangent_space_vectors, bool unify, uint32_t vertex_stride)
-{
-	return CreateRef<Mesh>(filepath, load_normals, load_texcoords, generate_tangent_space_vectors, unify, vertex_stride);
+namespace std {
+	template<> struct hash<Mesh::HashVertex> {
+		size_t operator()(Mesh::HashVertex const& vertex) const {
+			return (((((hash<glm::vec3>()(vertex.pos) ^ (hash<glm::vec3>()(vertex.color) << 1)) >> 1) ^ (hash<glm::vec3>()(vertex.color) << 1)) >> 1) >> 1) ^ (hash<glm::vec2>()(vertex.texCoord) << 1);
+		}
+	};
 }
 
-Mesh::Mesh(const std::string& filepath, bool load_normals, bool load_texcoords, bool generate_tangent_space_vectors, bool unify, uint32_t vertex_stride)
+Ref<Mesh> Mesh::Create(const std::string& filepath, bool load_normals, bool load_texcoords, bool generate_tangent_space_vectors, bool unify)
+{
+	return CreateRef<Mesh>(filepath, load_normals, load_texcoords, generate_tangent_space_vectors, unify);
+}
+
+Mesh::Mesh(const std::string& filepath, bool load_normals, bool load_texcoords, bool generate_tangent_space_vectors, bool unify)
 {
 	PSIM_PROFILE_FUNCTION();
 
-	Load(filepath.c_str(), load_normals, load_texcoords, generate_tangent_space_vectors, unify, vertex_stride);
+	Load(filepath.c_str(), load_normals, load_texcoords, generate_tangent_space_vectors, unify);
 
 	// Extract name from filepath
 	auto lastSlash = filepath.find_last_of("/\\");
@@ -32,7 +40,7 @@ Mesh::~Mesh()
 	PSIM_PROFILE_FUNCTION();
 }
 
-bool Mesh::Load(char const * filename, bool load_normals, bool load_texcoords, bool generate_tangent_space_vectors, bool unify, uint32_t vertex_stride)
+bool Mesh::Load(char const * filename, bool load_normals, bool load_texcoords, bool generate_tangent_space_vectors, bool unify)
 {
 	PSIM_PROFILE_FUNCTION();
 	// Load model
@@ -104,14 +112,15 @@ bool Mesh::Load(char const * filename, bool load_normals, bool load_texcoords, b
 	std::unordered_map<HashVertexWithTanSpaceVec, uint32_t> uniqueVertices = {};
 #else
 	std::unordered_map<HashVertex, uint32_t> uniqueVertices = {};
+	Data = {};
 #endif
 
-	uint32_t offset = 0;
+	uint32_t face_offset = 0;
 	for (auto & shape : shapes) {
-		uint32_t part_offset = offset;
+		uint32_t part_offset = face_offset;
 
 #ifdef TINYOBJLOADER_IMPLEMENTATION
-		for (auto & index : shape.indices) {
+		for (auto & index : shape.mesh.indices) {
 
 #if generate_tangent_space_vectors == true
 			HashVertexWithTanSpaceVec vertex = {};
@@ -119,10 +128,11 @@ bool Mesh::Load(char const * filename, bool load_normals, bool load_texcoords, b
 			HashVertex vertex = {};
 #endif
 
-			Data.emplace_back(attribs.vertices[3 * index.vertex_index + 0]);
-			Data.emplace_back(attribs.vertices[3 * index.vertex_index + 1]);
-			Data.emplace_back(attribs.vertices[3 * index.vertex_index + 2]);
-			++offset;
+			vertex.pos = {
+					attribs.vertices[3 * index.vertex_index + 0],
+					attribs.vertices[3 * index.vertex_index + 1],
+					attribs.vertices[3 * index.vertex_index + 2]
+			};
 
 			if (load_normals) {
 				if (attribs.normals.size() == 0) {
@@ -130,10 +140,15 @@ bool Mesh::Load(char const * filename, bool load_normals, bool load_texcoords, b
 					return false;
 				}
 				else {
-					Data.emplace_back(attribs.normals[3 * index.normal_index + 0]);
-					Data.emplace_back(attribs.normals[3 * index.normal_index + 1]);
-					Data.emplace_back(attribs.normals[3 * index.normal_index + 2]);
+					vertex.normal = {
+						attribs.normals[3 * index.normal_index + 0],
+						attribs.normals[3 * index.normal_index + 1],
+						attribs.normals[3 * index.normal_index + 2]
+					};
 				}
+			}
+			else {
+				vertex.normal = { 0.0f, 0.0f, 0.0f };
 			}
 
 			if (load_texcoords) {
@@ -142,14 +157,16 @@ bool Mesh::Load(char const * filename, bool load_normals, bool load_texcoords, b
 					return false;
 				}
 				else {
-					Data.emplace_back(attribs.texcoords[2 * index.texcoord_index + 0]);
-					Data.emplace_back(attribs.texcoords[2 * index.texcoord_index + 1]);
+					vertex.texCoord = {
+							attribs.texcoords[2 * index.texcoord_index + 0],
+							1.0f - attribs.texcoords[2 * index.texcoord_index + 1]
+					};
 				}
 			}
 
 			if (generate_tangent_space_vectors) {
 				// Insert temporary tangent space vectors data
-				GenerateTangentSpaceVectors(mesh);
+				GenerateTangentSpaceVectors();
 			}
 
 			if (unify) {
@@ -172,6 +189,42 @@ bool Mesh::Load(char const * filename, bool load_normals, bool load_texcoords, b
 					max_z = attribs.vertices[3 * index.vertex_index + 2];
 				}
 			}
+
+			vertex.color = { 1.0f, 1.0f, 1.0f };
+
+			if (uniqueVertices.count(vertex) == 0) {
+				uniqueVertices[vertex] = static_cast<uint32_t>(Data.size());
+				Data.push_back(vertex.pos[0]);
+				Data.push_back(vertex.pos[1]);
+				Data.push_back(vertex.pos[2]);
+
+				if (load_normals) {
+					Data.push_back(vertex.normal[0]);
+					Data.push_back(vertex.normal[1]);
+					Data.push_back(vertex.normal[2]);
+				}
+
+				if (load_texcoords) {
+					Data.push_back(vertex.texCoord[0]);
+					Data.push_back(vertex.texCoord[1]);
+				}
+
+				Data.push_back(vertex.color[0]);
+				Data.push_back(vertex.color[1]);
+				Data.push_back(vertex.color[2]);
+
+#if generate_tangent_space_vectors == true
+				Data.push_back(vertex.tanSpaceVecP1[0]);
+				Data.push_back(vertex.tanSpaceVecP1[1]);
+				Data.push_back(vertex.tanSpaceVecP1[2]);
+
+				Data.push_back(vertex.tanSpaceVecP2[0]);
+				Data.push_back(vertex.tanSpaceVecP2[1]);
+				Data.push_back(vertex.tanSpaceVecP2[2]);
+#endif
+			}
+
+			indices.push_back(uniqueVertices[vertex]-1);
 		}
 #elif TINYOBJ_LOADER_OPT_IMPLEMENTATION
 		for (size_t v = 0; v < attribs.face_num_verts.size(); v++) {
@@ -183,11 +236,13 @@ bool Mesh::Load(char const * filename, bool load_normals, bool load_texcoords, b
 				HashVertex vertex = {};
 #endif
 
-				tinyobj_opt::index_t index = attribs.indices[offset + f];
+				tinyobj_opt::index_t index = attribs.indices[face_offset + f];
 
-				Data.emplace_back(attribs.vertices[3 * index.vertex_index + 0]);
-				Data.emplace_back(attribs.vertices[3 * index.vertex_index + 1]);
-				Data.emplace_back(attribs.vertices[3 * index.vertex_index + 2]);
+				vertex.pos = {
+					attribs.vertices[3 * index.vertex_index + 0],
+					attribs.vertices[3 * index.vertex_index + 1],
+					attribs.vertices[3 * index.vertex_index + 2]
+				};
 
 				if (load_normals) {
 					if (attribs.normals.size() == 0) {
@@ -195,10 +250,15 @@ bool Mesh::Load(char const * filename, bool load_normals, bool load_texcoords, b
 						return false;
 					}
 					else {
-						Data.emplace_back(attribs.normals[3 * index.normal_index + 0]);
-						Data.emplace_back(attribs.normals[3 * index.normal_index + 1]);
-						Data.emplace_back(attribs.normals[3 * index.normal_index + 2]);
+						vertex.normal = {
+							attribs.normals[3 * index.normal_index + 0],
+							attribs.normals[3 * index.normal_index + 1],
+							attribs.normals[3 * index.normal_index + 2]
+						};
 					}
+				}
+				else {
+					vertex.normal = { 0.0f, 0.0f, 0.0f };
 				}
 
 				if (load_texcoords) {
@@ -207,17 +267,26 @@ bool Mesh::Load(char const * filename, bool load_normals, bool load_texcoords, b
 						return false;
 					}
 					else {
-						Data.emplace_back(attribs.texcoords[2 * index.texcoord_index + 0]);
-						Data.emplace_back(attribs.texcoords[2 * index.texcoord_index + 1]);
+						vertex.texCoord = {
+							attribs.texcoords[2 * index.texcoord_index + 0],
+							1.0f - attribs.texcoords[2 * index.texcoord_index + 1]
+						};
 					}
 				}
 
-				if (generate_tangent_space_vectors) {
+#if generate_tangent_space_vectors == true
 					// Insert temporary tangent space vectors data
-					for (int i = 0; i < 6; ++i) {
-						Data.emplace_back(0.0f);
-					}
-				}
+					vertex.tanSpaceVecP1 = {
+							0.0f,
+							0.0f,
+							0.0f
+					};
+					vertex.tanSpaceVecP2 = {
+							0.0f,
+							0.0f,
+							0.0f
+					};
+#endif
 
 				if (unify) {
 					if (attribs.vertices[3 * index.vertex_index + 0] < min_x) {
@@ -239,21 +308,53 @@ bool Mesh::Load(char const * filename, bool load_normals, bool load_texcoords, b
 						max_z = attribs.vertices[3 * index.vertex_index + 2];
 					}
 				}
+
+				vertex.color = { 1.0f, 1.0f, 1.0f };
+
+				if (uniqueVertices.count(vertex) == 0) {
+					uniqueVertices[vertex] = static_cast<uint32_t>(Data.size()/8);
+					Data.push_back(vertex.pos[0]);
+					Data.push_back(vertex.pos[1]);
+					Data.push_back(vertex.pos[2]);
+
+					if (load_normals) {
+						Data.push_back(vertex.normal[0]);
+						Data.push_back(vertex.normal[1]);
+						Data.push_back(vertex.normal[2]);
+					}
+
+					Data.push_back(vertex.texCoord[0]);
+					Data.push_back(vertex.texCoord[1]);
+
+					Data.push_back(vertex.color[0]);
+					Data.push_back(vertex.color[1]);
+					Data.push_back(vertex.color[2]);
+
+#if generate_tangent_space_vectors == true
+					Data.push_back(vertex.tanSpaceVecP1[0]);
+					Data.push_back(vertex.tanSpaceVecP1[1]);
+					Data.push_back(vertex.tanSpaceVecP1[2]);
+
+					Data.push_back(vertex.tanSpaceVecP2[0]);
+					Data.push_back(vertex.tanSpaceVecP2[1]);
+					Data.push_back(vertex.tanSpaceVecP2[2]);
+#endif
+				}
+
+				indices.push_back(uniqueVertices[vertex]);
 			}
-			offset += 3;
+			face_offset += attribs.face_num_verts[v];
 		}
 #endif
 
-		uint32_t part_vertex_count = offset - part_offset;
+		uint32_t part_vertex_count = face_offset - part_offset;
 		if (0 < part_vertex_count) {
 			Parts.push_back({ part_offset, part_vertex_count });
 		}
 	}
 
-	uint32_t stride = 3 + (load_normals ? 3 : 0) + (load_texcoords ? 2 : 0) + (generate_tangent_space_vectors ? 6 : 0);
-	if (vertex_stride) {
-		vertex_stride = stride * sizeof(float);
-	}
+	uint32_t stride = 3 + 3 + (load_normals ? 3 : 0) + (load_texcoords ? 2 : 0) + (generate_tangent_space_vectors ? 6 : 0);
+		std::cout << stride * sizeof(float) << std::endl;
 
 	if (generate_tangent_space_vectors) {
 		GenerateTangentSpaceVectors();
@@ -360,21 +461,21 @@ void ModelLibrary::Add(const std::string& name, const Ref<Mesh>& mesh)
 
 }
 
-void ModelLibrary::Add(const Ref<Mesh>& shader)
+void ModelLibrary::Add(const Ref<Mesh>& mesh)
 {
-	auto& name = shader->GetName();
-	Add(name, shader);
+	auto& name = mesh->GetName();
+	Add(name, mesh);
 }
-Ref<Mesh> ModelLibrary::Load(const std::string& filepath, bool load_normals, bool load_texcoords, bool generate_tangent_space_vectors, bool unify, uint32_t vertex_stride)
+Ref<Mesh> ModelLibrary::Load(const std::string& filepath, bool load_normals, bool load_texcoords, bool generate_tangent_space_vectors, bool unify)
 {
-	auto mesh = Mesh::Create(filepath, load_normals, load_texcoords, generate_tangent_space_vectors, unify, vertex_stride);
+	auto mesh = Mesh::Create(filepath, load_normals, load_texcoords, generate_tangent_space_vectors, unify);
 	Add(mesh);
 	return mesh;
 }
 
-Ref<Mesh> ModelLibrary::Load(const std::string& name, const std::string& filepath, bool load_normals, bool load_texcoords, bool generate_tangent_space_vectors, bool unify, uint32_t vertex_stride)
+Ref<Mesh> ModelLibrary::Load(const std::string& name, const std::string& filepath, bool load_normals, bool load_texcoords, bool generate_tangent_space_vectors, bool unify)
 {
-	auto mesh = Mesh::Create(filepath, load_normals, load_texcoords, generate_tangent_space_vectors, unify, vertex_stride);
+	auto mesh = Mesh::Create(filepath, load_normals, load_texcoords, generate_tangent_space_vectors, unify);
 	Add(name, mesh);
 	return mesh;
 }

@@ -3,9 +3,6 @@
 
 #include "Platform/Vk/FrameWork/VulkanFrameWork.h"
 
-std::map<uint32_t, Ref<VulkanBuffer>> VulkanBufferList::bufferList = {};
-uint32_t VulkanBufferList::baseBufferID = 0;
-
 /////////////////////////////////////////////////////////////////////////////
 // VertexBuffer /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
@@ -16,12 +13,12 @@ VulkanVertexBuffer::VulkanVertexBuffer(uint32_t size)
 	VulkanFrameWork* framework = VulkanFrameWork::getFramework();
 
 	//get vertex buffer size
-	vk::DeviceSize bufferSize = sizeof(m_Layout.GetStride() * size);
+	vk::DeviceSize bufferSize = sizeof(m_Layout.GetStride()) * size;
 
 	Ref<VulkanBuffer> vertexBuffer = VulkanBuffer::Create(); 
 	m_BufferID = vertexBuffer->createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer, vk::MemoryPropertyFlagBits::eDeviceLocal);
 	
-	
+	SetData(nullptr, size);
 }
 
 VulkanVertexBuffer::VulkanVertexBuffer(float* vertices, uint32_t size)
@@ -30,7 +27,7 @@ VulkanVertexBuffer::VulkanVertexBuffer(float* vertices, uint32_t size)
 	VulkanFrameWork* framework = VulkanFrameWork::getFramework();
 
 	//get vertex buffer size
-	vk::DeviceSize bufferSize = sizeof(m_Layout.GetStride() * size);
+	vk::DeviceSize bufferSize = sizeof(m_Layout.GetStride()) * size;
 
 	Ref<VulkanBuffer> vertexBuffer = VulkanBuffer::Create();
 	m_BufferID = vertexBuffer->createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer, vk::MemoryPropertyFlagBits::eDeviceLocal);
@@ -41,8 +38,9 @@ VulkanVertexBuffer::VulkanVertexBuffer(float* vertices, uint32_t size)
 VulkanVertexBuffer::~VulkanVertexBuffer()
 {
 	PSIM_PROFILE_FUNCTION();
+	VulkanFrameWork* framework = VulkanFrameWork::getFramework();
 
-	VulkanBufferList::remove(m_BufferID);
+	framework->getBufferList()->remove(m_BufferID);
 }
 
 void VulkanVertexBuffer::Bind() const
@@ -62,18 +60,20 @@ void VulkanVertexBuffer::Unbind() const
 void VulkanVertexBuffer::SetData(const void* vertices, uint32_t size)
 {
 	VulkanFrameWork* framework = VulkanFrameWork::getFramework();
-	vk::DeviceSize bufferSize = sizeof(m_Layout.GetStride() * size);
+	vk::DeviceSize bufferSize = sizeof(m_Layout.GetStride()) * size;
 
 	//create buffer
-	VulkanBufferList::getBaseBuffer()->createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
+	framework->getBufferList()->getBaseBuffer()->createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
 
 	void* data;
-	framework->getDevice().mapMemory(VulkanBufferList::getBaseBuffer()->getBufferMemory(), vk::DeviceSize(), bufferSize, vk::MemoryMapFlags(), &data);
+	framework->getDevice().mapMemory(framework->getBufferList()->getBaseBuffer()->getBufferMemory(), vk::DeviceSize(), bufferSize, vk::MemoryMapFlags(), &data);
 	memcpy(data, vertices, (size_t)bufferSize);
-	framework->getDevice().unmapMemory(VulkanBufferList::getBaseBuffer()->getBufferMemory());
+	framework->getDevice().unmapMemory(framework->getBufferList()->getBaseBuffer()->getBufferMemory());
 
-	std::cout << VulkanBufferList::get(m_BufferID);
-	VulkanBufferList::get(m_BufferID)->copyBuffer(VulkanBufferList::getBaseBuffer()->getBuffer(), VulkanBufferList::get(m_BufferID)->getBuffer(), bufferSize);
+	std::cout << framework->getBufferList()->get(m_BufferID);
+	framework->getBufferList()->get(m_BufferID)->copyBuffer(framework->getBufferList()->getBaseBuffer()->getBuffer(), framework->getBufferList()->get(m_BufferID)->getBuffer(), bufferSize);
+
+	framework->getBufferList()->getBaseBuffer()->destroyBuffer();
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -90,25 +90,28 @@ VulkanIndexBuffer::VulkanIndexBuffer(uint32_t* indices, uint32_t count)
 	vk::DeviceSize bufferSize = sizeof(indices[0]) * count;
 
 	//create buffer
-	VulkanBufferList::getBaseBuffer()->createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
+	framework->getBufferList()->getBaseBuffer()->createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
 
 	//fill buffer
 	void* data;
-	framework->getDevice().mapMemory(VulkanBufferList::getBaseBuffer()->getBufferMemory(), vk::DeviceSize(), bufferSize, vk::MemoryMapFlags(), &data);
+	framework->getDevice().mapMemory(framework->getBufferList()->getBaseBuffer()->getBufferMemory(), vk::DeviceSize(), bufferSize, vk::MemoryMapFlags(), &data);
 	memcpy(data, indices, (size_t)bufferSize);
-	framework->getDevice().unmapMemory(VulkanBufferList::getBaseBuffer()->getBufferMemory());
+	framework->getDevice().unmapMemory(framework->getBufferList()->getBaseBuffer()->getBufferMemory());
 
 	Ref<VulkanBuffer> indexBuffer = VulkanBuffer::Create();
 	m_BufferID = indexBuffer->createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer, vk::MemoryPropertyFlagBits::eDeviceLocal);
 
-	indexBuffer->copyBuffer(VulkanBufferList::getBaseBuffer()->getBuffer(), indexBuffer->getBuffer(), bufferSize);
+	indexBuffer->copyBuffer(framework->getBufferList()->getBaseBuffer()->getBuffer(), indexBuffer->getBuffer(), bufferSize);
+
+	framework->getBufferList()->getBaseBuffer()->destroyBuffer();
 }
 
 VulkanIndexBuffer::~VulkanIndexBuffer()
 {
 	PSIM_PROFILE_FUNCTION();
+	VulkanFrameWork* framework = VulkanFrameWork::getFramework();
 
-	VulkanBufferList::remove(m_BufferID);
+	framework->getBufferList()->remove(m_BufferID);
 }
 
 void VulkanIndexBuffer::Bind() const
@@ -131,8 +134,10 @@ void VulkanIndexBuffer::Unbind() const
 
 Ref<VulkanBuffer> VulkanBuffer::VulkanBuffer::Create()
 {
+	VulkanFrameWork* framework = VulkanFrameWork::getFramework();
+
 	Ref<VulkanBuffer> buffer = CreateRef<VulkanBuffer>();
-	VulkanBufferList::add(buffer);
+	framework->getBufferList()->add(buffer);
 	return buffer;
 
 	PSIM_ASSERT(false, "Can't create VulkanBuffer");
@@ -141,13 +146,12 @@ Ref<VulkanBuffer> VulkanBuffer::VulkanBuffer::Create()
 
 VulkanBuffer::VulkanBuffer()
 {
-	RendererID ID;
-	m_RendererID = ID.getID();
+	VulkanFrameWork* framework = VulkanFrameWork::getFramework();
+	m_ID = framework->getBufferList()->getNextID();
 }
 
 VulkanBuffer::~VulkanBuffer()
 {
-	destroyBuffer();
 }
 
 uint32_t VulkanBuffer::createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties)
@@ -170,7 +174,7 @@ uint32_t VulkanBuffer::createBuffer(vk::DeviceSize size, vk::BufferUsageFlags us
 
 	framework->getDevice().bindBufferMemory(buffer, bufferMemory, 0);
 
-	return m_RendererID;
+	return m_ID;
 }
 
 void VulkanBuffer::copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size)
@@ -202,6 +206,8 @@ void VulkanBuffer::destroyBuffer()
 
 VulkanBufferList::VulkanBufferList()
 {
+	bufferList = {};
+	baseBufferID = 0;
 }
 
 VulkanBufferList::~VulkanBufferList()
@@ -211,7 +217,6 @@ VulkanBufferList::~VulkanBufferList()
 void VulkanBufferList::init()
 {
 	Ref<VulkanBuffer> buffer = VulkanBuffer::Create();
-	baseBufferID = buffer->createBuffer(1, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
 	add(buffer);
 }
 
@@ -239,25 +244,46 @@ Ref<VulkanBuffer> VulkanBufferList::get(uint32_t ID)
 		return bufferList[ID];
 	}
 	else {
-		PSIM_WARN("Buffer with ID {0} doesn't exists!", ID);
+		PSIM_WARN("Buffer with ID {0} doesn't exist!", ID);
 	}
+}
+
+uint32_t VulkanBufferList::getNextID()
+{
+	return bufferList.size();
 }
 
 void VulkanBufferList::remove(uint32_t ID)
 {
-	std::map<uint32_t, Ref<VulkanBuffer>>::iterator it;
-	it = bufferList.find(ID);
+	if (!bufferList.empty()) {
+		std::map<uint32_t, Ref<VulkanBuffer>>::iterator it;
+		it = bufferList.find(ID);
 
-	if (it != bufferList.end())
-	{
-		bufferList.erase(it);
+		if (it != bufferList.end())
+		{
+			bufferList[ID]->destroyBuffer();
+			bufferList.erase(it);
+		}
+		else {
+			PSIM_WARN("Buffer with ID {0} doesn't exist!", ID);
+		}
 	}
 	else {
-		PSIM_WARN("Buffer with ID {0} doesn't exists!", ID);
+		PSIM_WARN("Buffer with ID {0} doesn't exist!", ID);
 	}
 }
 
 Ref<VulkanBuffer> VulkanBufferList::getBaseBuffer()
 {
 	return (get(baseBufferID));
+}
+
+void VulkanBufferList::cleanup()
+{
+	if (!bufferList.empty()) {
+		for (int i = 0; i < bufferList.size(); i++) {
+			bufferList[i]->destroyBuffer();
+		}
+		bufferList.clear();
+	}
 }

@@ -1,5 +1,5 @@
 #pragma once
-
+/*
 #include <string>
 
 #include "PSIM/Core/Core.h"
@@ -7,6 +7,12 @@
 class Texture
 {
 public:
+	static Ref<Mesh> Create(const std::string& filepath, bool load_normals, bool load_texcoords, bool generate_tangent_space_vectors, bool unify);
+
+	Mesh(const std::string& filepath, bool load_normals, bool load_texcoords, bool generate_tangent_space_vectors, bool unify);
+	Mesh::~Mesh();
+
+	const std::string& GetName() const { return m_Name; }
 	virtual ~Texture() = default;
 
 	virtual uint32_t GetWidth() const = 0;
@@ -19,9 +25,18 @@ public:
 	virtual bool operator==(const Texture& other) const = 0;
 };
 
-class Texture2D : public Texture
-{
+class TextureLibrary {
 public:
-	static Ref<Texture2D> Create(uint32_t width, uint32_t height);
-	static Ref<Texture2D> Create(const std::string& path);
-};
+	void Add(const Ref<Texture>& mesh);
+	void Add(const std::string& name, const Ref<Texture>& mesh);
+
+	Ref<Texture> Load(const std::string& filepath, bool load_normals, bool load_texcoords, bool generate_tangent_space_vectors, bool unify);
+	Ref<Texture> Load(const std::string& name, const std::string& filepath, bool load_normals, bool load_texcoords, bool generate_tangent_space_vectors, bool unify);
+
+	Ref<Texture> Get(const std::string& name);
+
+	bool Exists(const std::string& name) const;
+
+private:
+	std::unordered_map<std::string, Ref<Texture>> m_Textures;
+};*/
