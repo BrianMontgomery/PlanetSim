@@ -534,6 +534,7 @@
     <ClInclude Include="src\PSIM\Core\Layers\LayerStack.h" />
     <ClInclude Include="src\PSIM\Core\Layers\Layers.h" />
     <ClInclude Include="src\PSIM\Core\Logging\Log.h" />
+    <ClInclude Include="src\PSIM\Core\PSIMAssetLibs.h" />
     <ClInclude Include="src\PSIM\Core\WindowPrototype.h" />
     <ClInclude Include="src\PSIM\Graphics\Asset\Model.h" />
     <ClInclude Include="src\PSIM\Graphics\Asset\Texture.h" />
@@ -549,6 +550,7 @@
     <ClInclude Include="src\PSIMPCH.h" />
     <ClInclude Include="src\PlanetSimEngine.h" />
     <ClInclude Include="src\Platform\Vk\Components\VulkanBuffer.h" />
+    <ClInclude Include="src\Platform\Vk\Components\VulkanTexture2D.h" />
     <ClInclude Include="src\Platform\Vk\Components\VulkanVertexArray.h" />
     <ClInclude Include="src\Platform\Vk\Context\VulkanContext.h" />
     <ClInclude Include="src\Platform\Vk\FrameWork\VulkanFrameWork.h" />
@@ -563,6 +565,7 @@
     <ClCompile Include="src\PSIM\Core\Layers\LayerStack.cpp" />
     <ClCompile Include="src\PSIM\Core\Layers\Layers.cpp" />
     <ClCompile Include="src\PSIM\Core\Logging\Log.cpp" />
+    <ClCompile Include="src\PSIM\Core\PSIMAssetLibs.cpp" />
     <ClCompile Include="src\PSIM\Graphics\Asset\Model.cpp" />
     <ClCompile Include="src\PSIM\Graphics\Asset\Texture.cpp" />
     <ClCompile Include="src\PSIM\Graphics\Camera\Camera.cpp" />
@@ -579,6 +582,7 @@
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\Platform\Vk\Components\VulkanBuffer.cpp" />
+    <ClCompile Include="src\Platform\Vk\Components\VulkanTexture2D.cpp" />
     <ClCompile Include="src\Platform\Vk\Components\VulkanVertexArray.cpp" />
     <ClCompile Include="src\Platform\Vk\Context\VulkanContext.cpp" />
     <ClCompile Include="src\Platform\Vk\FrameWork\VulkanFrameWork.cpp" />

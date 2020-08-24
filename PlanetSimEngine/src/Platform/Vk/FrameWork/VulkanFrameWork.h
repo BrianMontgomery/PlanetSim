@@ -14,6 +14,8 @@
 
 #include "PSIM/Graphics/Asset/Model.h"
 
+#include "PSIM/Core/PSIMAssetLibs.h"
+
 //non-core std-lib
 #include <array>
 #include <optional>
@@ -67,12 +69,16 @@ public:
 	void setMSAASamples(int sampleCount);
 
 	//public vulkan funcs
+	vk::ImageView createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags, uint32_t mipLevels);
 	uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
 	void commandBufferRecordBegin(int bufNum);
 	void commandBufferRecordEnd(int bufNum);
 	QueueFamilyIndices findQueueFamilies(vk::PhysicalDevice device);
 	vk::CommandBuffer beginSingleTimeCommands();
 	void endSingleTimeCommands(vk::CommandBuffer commandBuffer);
+	void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, vk::SampleCountFlagBits numSamples, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& imageMemory);
+	void transitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout, uint32_t mipLevels);
+	void copyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height);
 
 	//public vulkan getters
 	vk::Device getDevice() { return device; }
@@ -98,9 +104,8 @@ private:
 	glm::mat4 projMatrix;
 	glm::vec4 clearColor;
 
-	ModelLibrary m_StartingModelLibrary;
-
 	GLFWwindow* window;
+	PSIMAssetLibraries* assetLibs;
 	VulkanBufferList bufferList;
 
 	vk::Instance instance;
@@ -147,10 +152,6 @@ private:
 	vk::DeviceMemory depthImageMemory;
 	vk::ImageView depthImageView;
 
-	uint32_t mipLevels;
-	vk::Image textureImage;
-	vk::DeviceMemory textureImageMemory;
-	vk::ImageView textureImageView;
 	vk::Sampler textureSampler;
 
 	Ref<VertexArray> vertexArray;
@@ -218,7 +219,6 @@ private:
 	void cleanupSwapChain();
 
 	void createSwapchainImageViews();
-	vk::ImageView createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags, uint32_t mipLevels);
 
 	void createRenderPass();
 	void createGraphicsPipeline();
@@ -240,13 +240,7 @@ private:
 	vk::Format findDepthFormat();
 	bool hasStencilComponent(vk::Format format);
 
-	void createTextureImage();
-	void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, vk::SampleCountFlagBits numSamples, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& imageMemory);
-	void transitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout, uint32_t mipLevels);
-	void copyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height);
-	void createTextureImageView();
 	void createTextureSampler();
-	void generateMipmaps(vk::Image image, vk::Format imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
 	
 	void createDescriptorSetLayout();
 	void createUniformBuffers();

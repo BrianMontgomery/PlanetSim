@@ -22,10 +22,9 @@
 #include "PSIM/Graphics/RenderAPI/RendererCommands.h"
 		  
 #include "PSIM/Graphics/Components/Buffer.h"
-#include "PSIM//Graphics/Asset/Model.h"
+#include "PSIM/Core/PSIMAssetLibs.h"
 //#include "Graphics/Shader.h"
 //#include "Graphics/Framebuffer.h"
-//#include "Graphics/Texture.h"
 #include "PSIM/Graphics/Components/VertexArray.h"
 		  
 #include "PSIM/Graphics/Camera/Camera.h"

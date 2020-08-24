@@ -1,5 +1,5 @@
 #pragma once
-/*
+
 #include <string>
 
 #include "PSIM/Core/Core.h"
@@ -7,16 +7,14 @@
 class Texture
 {
 public:
-	static Ref<Mesh> Create(const std::string& filepath, bool load_normals, bool load_texcoords, bool generate_tangent_space_vectors, bool unify);
-
-	Mesh(const std::string& filepath, bool load_normals, bool load_texcoords, bool generate_tangent_space_vectors, bool unify);
-	Mesh::~Mesh();
-
-	const std::string& GetName() const { return m_Name; }
 	virtual ~Texture() = default;
 
+	virtual const std::string& GetName() const = 0;
 	virtual uint32_t GetWidth() const = 0;
 	virtual uint32_t GetHeight() const = 0;
+	virtual uint32_t GetRendererID() const = 0;
+	virtual uint32_t GetMipLevels() const = 0;
+	virtual void* GetImageView() const = 0;
 
 	virtual void SetData(void* data, uint32_t size) = 0;
 
@@ -25,18 +23,27 @@ public:
 	virtual bool operator==(const Texture& other) const = 0;
 };
 
+class Texture2D : public Texture
+{
+public:
+	static Ref<Texture2D> Create(const std::string& name, uint32_t width, uint32_t height);
+	static Ref<Texture2D> Create(const std::string& path);
+};
+
+//-------------------------------------------------------------------------------------------
+
 class TextureLibrary {
 public:
-	void Add(const Ref<Texture>& mesh);
-	void Add(const std::string& name, const Ref<Texture>& mesh);
+	void Add(const Ref<Texture2D>& texure);
+	void Add(const std::string& name, const Ref<Texture2D>& texture);
 
-	Ref<Texture> Load(const std::string& filepath, bool load_normals, bool load_texcoords, bool generate_tangent_space_vectors, bool unify);
-	Ref<Texture> Load(const std::string& name, const std::string& filepath, bool load_normals, bool load_texcoords, bool generate_tangent_space_vectors, bool unify);
+	Ref<Texture2D> Load(const std::string& name, uint32_t width, uint32_t height);
+	Ref<Texture2D> Load(const std::string& path);
 
-	Ref<Texture> Get(const std::string& name);
+	Ref<Texture2D> Get(const std::string& name);
 
 	bool Exists(const std::string& name) const;
 
 private:
-	std::unordered_map<std::string, Ref<Texture>> m_Textures;
-};*/
+	std::unordered_map<std::string, Ref<Texture2D>> m_Textures;
+};

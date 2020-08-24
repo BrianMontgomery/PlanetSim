@@ -28,7 +28,6 @@ CONFIGURABLE VARIABLES - WHERE TO FIND
 
 
 #include <glm/gtc/matrix_transform.hpp>
-#include <stb/stb_image.h>
 
 //non-core std-lib
 #include <chrono>
@@ -38,10 +37,6 @@ CONFIGURABLE VARIABLES - WHERE TO FIND
 
 VulkanFrameWork* VulkanFrameWork::m_framework = nullptr;
 VulkanFrameWorkDestroyer VulkanFrameWork::destroyer;
-
-//need full paths from solution for resources
-const std::string MODEL_PATH = "C:\\dev\\PlanetSim\\assets\\models\\chalet.obj";
-const char* TEXTURE_PATH = "C:\\dev\\PlanetSim\\assets\\textures\\chalet.jpg";
 
 PFN_vkCreateDebugUtilsMessengerEXT pfnVkCreateDebugUtilsMessengerEXT;
 PFN_vkDestroyDebugUtilsMessengerEXT pfnVkDestroyDebugUtilsMessengerEXT;
@@ -155,6 +150,8 @@ void VulkanFrameWork::init(GLFWwindow* window)
 void VulkanFrameWork::initVulkan()
 {
 	PSIM_PROFILE_FUNCTION();
+	assetLibs = PSIMAssetLibraries::getAssetLibraries();
+
 	//all of the functions necessary to create an initial vulkan context
 	glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 
@@ -185,14 +182,28 @@ void VulkanFrameWork::initVulkan()
 		};
 
 		std::cout << layout.GetStride() << std::endl;
-		m_StartingModelLibrary.Load("C:\\dev\\PlanetSim\\assets\\models\\chalet.obj", false, true, false, false);
+		assetLibs->PSIM_ModelLibrary.Load("C:\\dev\\PlanetSim\\assets\\models\\chalet.obj", false, true, false, false);
 
-		Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(static_cast<float*>(m_StartingModelLibrary.Get("chalet")->Data.data()), m_StartingModelLibrary.Get("chalet")->Data.size());
-		vertexBuffer->SetLayout(layout);
-		Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(m_StartingModelLibrary.Get("chalet")->indices.data(), m_StartingModelLibrary.Get("chalet")->indices.size());
+		//default vertexArray creation
+		{
+			Ref<VertexBuffer> vertexBuffer;
+			{
+				float* vertices = static_cast<float*>(assetLibs->PSIM_ModelLibrary.Get("chalet")->Data.data());
+				uint32_t modelSize = assetLibs->PSIM_ModelLibrary.Get("chalet")->Data.size();
+				vertexBuffer = VertexBuffer::Create(vertices, modelSize);
+			}
+			vertexBuffer->SetLayout(layout);
 
-		vertexArray->AddVertexBuffer(vertexBuffer);
-		vertexArray->SetIndexBuffer(indexBuffer);
+			Ref<IndexBuffer> indexBuffer;
+			{
+				uint32_t* indices = assetLibs->PSIM_ModelLibrary.Get("chalet")->indices.data();
+				uint32_t indexSize = assetLibs->PSIM_ModelLibrary.Get("chalet")->indices.size();
+				indexBuffer = IndexBuffer::Create(indices, indexSize);
+			}
+
+			vertexArray->AddVertexBuffer(vertexBuffer);
+			vertexArray->SetIndexBuffer(indexBuffer);
+		}
 	}
 
 	createPipelineCache();
@@ -201,9 +212,11 @@ void VulkanFrameWork::initVulkan()
 	createColorResources();
 	createDepthResources();
 	createFramebuffers();
-	createTextureImage();
-	createTextureImageView();
-	createTextureSampler();
+
+	{
+		assetLibs->PSIM_TextureLibrary.Load("C:\\dev\\PlanetSim\\assets\\textures\\chalet.jpg");
+		createTextureSampler();
+	}
 
 	createUniformBuffers();
 	createDescriptorPool();
@@ -224,13 +237,6 @@ void VulkanFrameWork::cleanUp()
 
 	device.destroySampler(textureSampler, nullptr);
 	PSIM_CORE_INFO("Texture sampler destroyed");
-
-	device.destroyImageView(textureImageView, nullptr);
-	PSIM_CORE_INFO("Texture image view destroyed");
-
-	device.destroyImage(textureImage, nullptr);
-	device.freeMemory(textureImageMemory, nullptr);
-	PSIM_CORE_INFO("Image destroyed");
 
 	device.destroyDescriptorSetLayout(descriptorSetLayout, nullptr);
 
@@ -1119,42 +1125,6 @@ bool VulkanFrameWork::hasStencilComponent(vk::Format format)
 
 //Texture funcs
 //--------------------------------------------------------------------------------------------------------------------------------
-void VulkanFrameWork::createTextureImage()
-{
-	PSIM_PROFILE_FUNCTION();
-	//load texture
-	int texWidth, texHeight, texChannels;
-	stbi_uc* pixels = stbi_load(TEXTURE_PATH, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-	vk::DeviceSize imageSize = texWidth * texHeight * 4;
-	mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
-
-	PSIM_ASSERT(pixels, "Failed to load texture image!");
-
-	//designate a buffer for the texture
-	bufferList.getBaseBuffer()->createBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
-
-	//transfer texture data to new buffer
-	void* data;
-	vkMapMemory(device, bufferList.getBaseBuffer()->getBufferMemory(), 0, imageSize, 0, &data);
-	memcpy(data, pixels, static_cast<size_t>(imageSize));
-	vkUnmapMemory(device, bufferList.getBaseBuffer()->getBufferMemory());
-
-	//unload image
-	stbi_image_free(pixels);
-
-	//create image
-	createImage(texWidth, texHeight, mipLevels, vk::SampleCountFlagBits::e1, vk::Format::eR8G8B8A8Srgb, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::MemoryPropertyFlagBits::eDeviceLocal, textureImage, textureImageMemory);
-
-	//transition data format to optimal
-	transitionImageLayout(textureImage, vk::Format::eR8G8B8A8Srgb, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, mipLevels);
-	copyBufferToImage(bufferList.getBaseBuffer()->getBuffer(), textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
-
-	//free unneeded resources
-	PSIM_CORE_INFO("Created texture");
-
-	generateMipmaps(textureImage, vk::Format::eR8G8B8A8Srgb, texWidth, texHeight, mipLevels);
-}
-
 void VulkanFrameWork::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, vk::SampleCountFlagBits numSamples, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& imageMemory)
 {
 	PSIM_PROFILE_FUNCTION();
@@ -1228,84 +1198,14 @@ void VulkanFrameWork::copyBufferToImage(vk::Buffer buffer, vk::Image image, uint
 	endSingleTimeCommands(commandBuffer);
 }
 
-void VulkanFrameWork::createTextureImageView()
-{
-	PSIM_PROFILE_FUNCTION();
-	//create tex image view
-	textureImageView = createImageView(textureImage, vk::Format::eR8G8B8A8Srgb, vk::ImageAspectFlagBits::eColor, mipLevels);
-	PSIM_CORE_INFO("Created Texture image view");
-}
-
 void VulkanFrameWork::createTextureSampler()
 {
 	PSIM_PROFILE_FUNCTION();
 	//define and create texture sampler
 	vk::SamplerCreateInfo samplerInfo = { {}, vk::Filter::eLinear, vk::Filter::eLinear, vk::SamplerMipmapMode::eLinear, vk::SamplerAddressMode::eRepeat, vk::SamplerAddressMode::eRepeat,
-	vk::SamplerAddressMode::eRepeat, 0.0f, true, 16, false, vk::CompareOp::eAlways, 0.0f, static_cast<float>(mipLevels), vk::BorderColor::eIntOpaqueBlack, false };
+	vk::SamplerAddressMode::eRepeat, 0.0f, true, 16, false, vk::CompareOp::eAlways, 0.0f, static_cast<float>(assetLibs->PSIM_TextureLibrary.Get("chalet")->GetMipLevels()), vk::BorderColor::eIntOpaqueBlack, false };
 
 	PSIM_ASSERT(device.createSampler(&samplerInfo, nullptr, &textureSampler) == vk::Result::eSuccess, "Failed to create texture sampler!");
-}
-
-void VulkanFrameWork::generateMipmaps(vk::Image image, vk::Format imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels)
-{
-	PSIM_PROFILE_FUNCTION();
-	// Check if image format supports linear blitting
-	vk::FormatProperties formatProperties;
-	physicalDevice.getFormatProperties(imageFormat, &formatProperties);
-
-	if (!(formatProperties.optimalTilingFeatures & vk::FormatFeatureFlagBits::eSampledImageFilterLinear)) {
-		throw std::runtime_error("texture image format does not support linear blitting!");
-	}
-
-	vk::CommandBuffer commandBuffer = beginSingleTimeCommands();
-
-	vk::ImageMemoryBarrier barrier = { {}, {}, {}, {}, VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED, image, vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1) };
-
-	int32_t mipWidth = texWidth;
-	int32_t mipHeight = texHeight;
-
-	for (uint32_t i = 1; i < mipLevels; i++) {
-		barrier.subresourceRange.baseMipLevel = i - 1;
-		barrier.oldLayout = vk::ImageLayout::eTransferDstOptimal;
-		barrier.newLayout = vk::ImageLayout::eTransferSrcOptimal;
-		barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
-		barrier.dstAccessMask = vk::AccessFlagBits::eTransferRead;
-
-		commandBuffer.pipelineBarrier(vk::PipelineStageFlags{ vk::PipelineStageFlagBits::eTransfer }, vk::PipelineStageFlags{ vk::PipelineStageFlagBits::eTransfer },
-			vk::DependencyFlags(), 0, nullptr, 0, nullptr, 1, &barrier);
-
-		vk::ImageBlit blit = { vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, i - 1, 0, 1),
-		{}, vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, i, 0, 1), {} };
-		blit.srcOffsets[0] = vk::Offset3D(0, 0, 0);
-		blit.srcOffsets[1] = vk::Offset3D(mipWidth, mipHeight, 1);
-		blit.dstOffsets[0] = vk::Offset3D(0, 0, 0);
-		blit.dstOffsets[1] = vk::Offset3D(mipWidth > 1 ? mipWidth / 2 : 1, mipHeight > 1 ? mipHeight / 2 : 1, 1);
-
-		commandBuffer.blitImage(image, vk::ImageLayout::eTransferSrcOptimal, image, vk::ImageLayout::eTransferDstOptimal, 1, &blit, vk::Filter::eLinear);
-
-		barrier.oldLayout = vk::ImageLayout::eTransferSrcOptimal;
-		barrier.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-		barrier.srcAccessMask = vk::AccessFlagBits::eTransferRead;
-		barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
-
-
-		commandBuffer.pipelineBarrier(vk::PipelineStageFlags{ vk::PipelineStageFlagBits::eTransfer }, vk::PipelineStageFlags{ vk::PipelineStageFlagBits::eFragmentShader },
-			vk::DependencyFlags(), 0, nullptr, 0, nullptr, 1, &barrier);
-
-		if (mipWidth > 1) mipWidth /= 2;
-		if (mipHeight > 1) mipHeight /= 2;
-	}
-
-	barrier.subresourceRange.baseMipLevel = mipLevels - 1;
-	barrier.oldLayout = vk::ImageLayout::eTransferDstOptimal;
-	barrier.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-	barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
-	barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
-
-	commandBuffer.pipelineBarrier(vk::PipelineStageFlags{ vk::PipelineStageFlagBits::eTransfer }, vk::PipelineStageFlags{ vk::PipelineStageFlagBits::eFragmentShader },
-		vk::DependencyFlags(), 0, nullptr, 0, nullptr, 1, &barrier);
-
-	endSingleTimeCommands(commandBuffer);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -1450,7 +1350,7 @@ void VulkanFrameWork::createDescriptorSets()
 		vk::DescriptorBufferInfo bufferInfo = { uniformBuffers[i].getBuffer(), 0, sizeof(UniformBufferObject) };
 
 		//get image info
-		vk::DescriptorImageInfo imageInfo = { textureSampler, textureImageView, vk::ImageLayout::eShaderReadOnlyOptimal };
+		vk::DescriptorImageInfo imageInfo = { textureSampler, *static_cast<vk::ImageView*>(assetLibs->PSIM_TextureLibrary.Get("chalet")->GetImageView()), vk::ImageLayout::eShaderReadOnlyOptimal };
 
 		//set descriptor settings
 		std::array<vk::WriteDescriptorSet, 2> descriptorWrites = {};

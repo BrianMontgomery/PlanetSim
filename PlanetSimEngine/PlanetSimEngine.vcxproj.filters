@@ -1290,6 +1290,9 @@
     <ClInclude Include="src\PSIM\Core\Logging\Log.h">
       <Filter>src\PSIM\Core\Logging</Filter>
     </ClInclude>
+    <ClInclude Include="src\PSIM\Core\PSIMAssetLibs.h">
+      <Filter>src\PSIM\Core</Filter>
+    </ClInclude>
     <ClInclude Include="src\PSIM\Core\WindowPrototype.h">
       <Filter>src\PSIM\Core</Filter>
     </ClInclude>
@@ -1335,6 +1338,9 @@
     <ClInclude Include="src\Platform\Vk\Components\VulkanBuffer.h">
       <Filter>src\Platform\Vk\Components</Filter>
     </ClInclude>
+    <ClInclude Include="src\Platform\Vk\Components\VulkanTexture2D.h">
+      <Filter>src\Platform\Vk\Components</Filter>
+    </ClInclude>
     <ClInclude Include="src\Platform\Vk\Components\VulkanVertexArray.h">
       <Filter>src\Platform\Vk\Components</Filter>
     </ClInclude>
@@ -1372,6 +1378,9 @@
     </ClCompile>
     <ClCompile Include="src\PSIM\Core\Logging\Log.cpp">
       <Filter>src\PSIM\Core\Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PSIM\Core\PSIMAssetLibs.cpp">
+      <Filter>src\PSIM\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\PSIM\Graphics\Asset\Model.cpp">
       <Filter>src\PSIM\Graphics\Asset</Filter>
@@ -1413,6 +1422,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Vk\Components\VulkanBuffer.cpp">
+      <Filter>src\Platform\Vk\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vk\Components\VulkanTexture2D.cpp">
       <Filter>src\Platform\Vk\Components</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Vk\Components\VulkanVertexArray.cpp">
