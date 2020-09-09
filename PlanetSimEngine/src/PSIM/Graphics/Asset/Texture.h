@@ -15,6 +15,9 @@ public:
 	virtual uint32_t GetRendererID() const = 0;
 	virtual uint32_t GetMipLevels() const = 0;
 	virtual void* GetImageView() const = 0;
+	virtual void* GetSampler() const = 0;
+	virtual uint32_t GetSlot() const = 0;
+	virtual void destroy() const = 0;
 
 	virtual void SetData(void* data, uint32_t size) = 0;
 
@@ -42,8 +45,16 @@ public:
 
 	Ref<Texture2D> Get(const std::string& name);
 
-	bool Exists(const std::string& name) const;
+	bool exists(const std::string& name) const;
+	void remove(const std::string& name);
+
+	std::vector<std::string>* getBoundTextures() { return &boundTextures; }
+	inline void bindTexture(std::string name) { if (exists(name)) { boundTextures.push_back(name); } }
+	void resetBoundTextures() { boundTextures.clear(); }
+
+	void cleanUp();
 
 private:
 	std::unordered_map<std::string, Ref<Texture2D>> m_Textures;
+	std::vector<std::string> boundTextures;
 };

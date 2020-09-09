@@ -32,8 +32,12 @@ Ref<Texture2D> Texture2D::Create(const std::string& path)
 
 void TextureLibrary::Add(const std::string& name, const Ref<Texture2D>& texture)
 {
-	PSIM_ASSERT(!Exists(name), "Shader already exists!");
-	m_Textures[name] = texture;
+	if (!exists(name)) {
+		m_Textures[name] = texture;
+		return;
+	}
+
+	PSIM_WARN("Shader {0} already exists!", name);
 }
 
 void TextureLibrary::Add(const Ref<Texture2D>& texture)
@@ -58,11 +62,43 @@ Ref<Texture2D> TextureLibrary::Load(const std::string& path)
 
 Ref<Texture2D> TextureLibrary::Get(const std::string& name)
 {
-	PSIM_ASSERT(Exists(name), "Shader not found!");
+	PSIM_ASSERT(exists(name), "Shader not found!");
 	return m_Textures[name];
 }
 
-bool TextureLibrary::Exists(const std::string& name) const
+bool TextureLibrary::exists(const std::string& name) const
 {
 	return m_Textures.find(name) != m_Textures.end();
+}
+
+void TextureLibrary::remove(const std::string& name)
+{
+	if (!m_Textures.empty()) {
+		std::unordered_map<std::string, Ref<Texture2D>>::iterator it;
+		it = m_Textures.find(name);
+
+		if (it != m_Textures.end())
+		{
+			m_Textures[name]->destroy();
+			m_Textures.erase(it);
+		}
+		else {
+			PSIM_WARN("Buffer with name {0} doesn't exist!", name);
+		}
+	}
+	else {
+		PSIM_WARN("Buffer with name {0} doesn't exist!", name);
+	}
+}
+
+void TextureLibrary::cleanUp()
+{
+	if (!m_Textures.empty()) {
+		std::unordered_map<std::string, Ref<Texture2D>>::iterator it = m_Textures.begin();
+		while (it != m_Textures.end()) {
+			it->second->destroy();
+			it++;
+		}
+		m_Textures.clear();
+	}
 }

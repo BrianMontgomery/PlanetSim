@@ -8,22 +8,42 @@
 PSIMAppLayer::PSIMAppLayer()
 	: Layers("PSIMAppLayer"), m_CameraController(1280.0f / 720.0f)
 {
-	/*m_VertexArray = VertexArray::Create();
+	m_AssetLibs = PSIMAssetLibraries::getAssetLibraries();
+
+	m_VertexArray = VertexArray::Create();
 
 	BufferLayout layout = {
 		{ ShaderDataType::Float3, "a_Position" },
-		{ ShaderDataType::Float3, "a_Color" },
-		{ ShaderDataType::Float2, "a_TexCoord" }
+		{ ShaderDataType::Float2, "a_TexCoord" },
+		{ ShaderDataType::Float3, "a_Color" }
 	};
 
-	m_ModelLibrary.Load("C:\\dev\\PlanetSim\\assets\\models\\chalet.obj", false, true, false, false, layout.GetStride());
+	std::cout << layout.GetStride() << std::endl;
+	m_AssetLibs->PSIM_ModelLibrary.Load("C:\\dev\\PlanetSim\\assets\\models\\chalet.obj", false, true, false, false);
 
-	Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(static_cast<float*>(m_ModelLibrary.Get("chalet")->Data.data()), m_ModelLibrary.Get("chalet")->Data.size());
-	vertexBuffer->SetLayout(layout);
-	Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(m_ModelLibrary.Get("chalet")->indices.data(), sizeof(m_ModelLibrary.Get("chalet")->indices.size()) / sizeof(uint32_t));
+	//default vertexArray creation
+	{
+		Ref<VertexBuffer> vertexBuffer;
+		{
+			float* vertices = static_cast<float*>(m_AssetLibs->PSIM_ModelLibrary.Get("chalet")->Data.data());
+			uint32_t modelSize = m_AssetLibs->PSIM_ModelLibrary.Get("chalet")->Data.size();
+			vertexBuffer = VertexBuffer::Create(vertices, modelSize);
+		}
+		vertexBuffer->SetLayout(layout);
 
-	m_VertexArray->AddVertexBuffer(vertexBuffer);
-	m_VertexArray->SetIndexBuffer(indexBuffer);*/
+		Ref<IndexBuffer> indexBuffer;
+		{
+			uint32_t* indices = m_AssetLibs->PSIM_ModelLibrary.Get("chalet")->indices.data();
+			uint32_t indexSize = m_AssetLibs->PSIM_ModelLibrary.Get("chalet")->indices.size();
+			indexBuffer = IndexBuffer::Create(indices, indexSize);
+		}
+
+		m_VertexArray->AddVertexBuffer(vertexBuffer);
+		m_VertexArray->SetIndexBuffer(indexBuffer);
+
+		m_AssetLibs->PSIM_TextureLibrary.Load("C:\\dev\\PlanetSim\\assets\\textures\\chalet.jpg");
+		m_AssetLibs->PSIM_TextureLibrary.bindTexture("chalet");
+	}
 
 	/*std::string vertexSrc = R"(
 			#version 330 core
@@ -139,10 +159,9 @@ void PSIMAppLayer::OnUpdate(Timestep ts)
 	//Hazel::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 	//m_ChernoLogoTexture->Bind();
 	//Hazel::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
-
-	// Triangle
-	// Hazel::Renderer::Submit(m_Shader, m_VertexArray);
 	*/
+	// Triangle
+	Renderer::Submit(m_VertexArray);
 
 	Renderer::EndScene();
 }

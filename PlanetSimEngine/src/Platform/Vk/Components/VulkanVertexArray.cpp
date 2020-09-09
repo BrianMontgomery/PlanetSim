@@ -16,8 +16,6 @@ VulkanVertexArray::~VulkanVertexArray()
 void VulkanVertexArray::Bind() const
 {
 	PSIM_PROFILE_FUNCTION();
-
-	//glBindVertexArray(m_RendererID);
 }
 
 void VulkanVertexArray::Unbind() const

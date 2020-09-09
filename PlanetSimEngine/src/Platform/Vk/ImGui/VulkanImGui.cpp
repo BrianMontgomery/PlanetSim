@@ -10,6 +10,10 @@ VulkanImGui::VulkanImGui()
 	isImGuiWindowCreated = false;
 }
 
+VulkanImGui::~VulkanImGui() 
+{
+}
+
 void VulkanImGui::ImGuiOnAttach()
 {
 	PSIM_PROFILE_FUNCTION();
@@ -65,6 +69,12 @@ void VulkanImGui::ImGuiOnAttach()
 	init_info.MSAASamples = (VkSampleCountFlagBits)framework->getMSAASamples();
 	ImGui_ImplVulkan_Init(&init_info, (VkRenderPass)framework->getRenderPass());
 
+	imGuiCommandPool = framework->createCommandPool({ vk::CommandPoolCreateFlagBits::eResetCommandBuffer });
+	imGuiCommandBuffers.resize(static_cast<uint32_t>(framework->getSwapChainImages()->size()));
+	for (int i = 0; i < static_cast<uint32_t>(framework->getSwapChainImages()->size()); i++) {
+		framework->createCommandBuffers(&imGuiCommandBuffers[i], &imGuiCommandPool, i);
+	}
+
 	vk::CommandBuffer commandBuffer = framework->beginSingleTimeCommands();
 	ImGui_ImplVulkan_CreateFontsTexture((VkCommandBuffer)commandBuffer);
 	framework->endSingleTimeCommands(commandBuffer);
@@ -76,6 +86,12 @@ void VulkanImGui::ImGuiOnDetach()
 	PSIM_PROFILE_FUNCTION();
 
 	framework->getDevice().waitIdle(); 
+
+	framework->getDevice().freeCommandBuffers(imGuiCommandPool, static_cast<uint32_t>(imGuiCommandBuffers.size()), imGuiCommandBuffers.data());
+	PSIM_CORE_INFO("Command Buffers freed");
+	framework->getDevice().destroyCommandPool(imGuiCommandPool, nullptr);
+	PSIM_CORE_INFO("Command Pool deleted");
+
 	ImGui_ImplVulkan_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
@@ -102,6 +118,12 @@ void VulkanImGui::ImGuiBegin()
 	ImGuiIO& io = ImGui::GetIO(); 
 	Application& app = Application::Get();
 	
+	if (framework->imGuiReset == true)
+	{
+		ImGuiResizeFlag = true;
+		framework->imGuiReset = false;
+	}
+
 	if (ImGuiResizeFlag)
 	{
 		reinitializeImGui();
@@ -126,24 +148,19 @@ void VulkanImGui::ImGuiEnd()
 
 	for (size_t i = 0; i < framework->getCommandBuffers()->size(); i++) {
 		
-		framework->commandBufferRecordBegin(i);
+		framework->commandBufferRecordBegin(&imGuiCommandBuffers[i], i);
 
 #ifdef PSIM_DEBUG
 		if (isImGuiWindowCreated)
 		{
-			ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), (VkCommandBuffer)(*framework->getCommandBuffers())[i]);
+			ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), (VkCommandBuffer)(imGuiCommandBuffers[i]));
 		}
 #endif
 
-		framework->commandBufferRecordEnd(i);
+		framework->commandBufferRecordEnd(&imGuiCommandBuffers[i]);
 	}
 
-	if (framework->framebufferResized == true)
-	{
-		ImGuiResizeFlag = true;
-	}
-
-	framework->drawFrame();
+	framework->setImGuiCommandBuffers(&imGuiCommandBuffers);
 
 	ImGuiIO& io = ImGui::GetIO();
 	Application& app = Application::Get();
@@ -207,6 +224,17 @@ void VulkanImGui::reinitializeImGui()
 	init_info.CheckVkResultFn = NULL;
 	init_info.MSAASamples = (VkSampleCountFlagBits)framework->getMSAASamples();
 	ImGui_ImplVulkan_Init(&init_info, (VkRenderPass)framework->getRenderPass());
+
+	framework->getDevice().freeCommandBuffers(imGuiCommandPool, static_cast<uint32_t>(imGuiCommandBuffers.size()), imGuiCommandBuffers.data());
+	PSIM_CORE_INFO("Command Buffers freed");
+	framework->getDevice().destroyCommandPool(imGuiCommandPool, nullptr);
+	PSIM_CORE_INFO("Command Pool deleted");
+
+	imGuiCommandPool = framework->createCommandPool({ vk::CommandPoolCreateFlagBits::eResetCommandBuffer });
+	imGuiCommandBuffers.resize(static_cast<uint32_t>(framework->getSwapChainImages()->size()));
+	for (int i = 0; i < static_cast<uint32_t>(framework->getSwapChainImages()->size()); i++) {
+		framework->createCommandBuffers(&imGuiCommandBuffers[i], &imGuiCommandPool, i);
+	}
 
 	vk::CommandBuffer commandBuffer = framework->beginSingleTimeCommands();
 	ImGui_ImplVulkan_CreateFontsTexture((VkCommandBuffer)commandBuffer);

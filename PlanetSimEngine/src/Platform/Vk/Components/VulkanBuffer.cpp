@@ -223,6 +223,7 @@ void VulkanBufferList::init()
 void VulkanBufferList::add(Ref<VulkanBuffer> buffer)
 {
 	std::map<uint32_t, Ref<VulkanBuffer>>::iterator it;
+
 	it = bufferList.find(buffer->getID());
 	
 	if (it == bufferList.end())

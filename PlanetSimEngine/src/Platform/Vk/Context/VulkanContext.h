@@ -11,7 +11,6 @@ public:
 	VulkanContext(GLFWwindow* windowHandle);
 
 	virtual void Init() override;
-	virtual void drawFrame() override;
 
 	virtual void SwapBuffers() override {};
 

@@ -78,7 +78,7 @@ static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
 	VulkanFrameWork* framework = VulkanFrameWork::getFramework();
 
 	//tell app resize has happened
-	framework->framebufferResized = true;
+	framework->frameBufferResized = true;
 }
 
 std::vector<char> VulkanFrameWork::readFileByteCode(const std::string& filename)
@@ -164,7 +164,7 @@ void VulkanFrameWork::initVulkan()
 	createSwapchainImageViews();
 	createRenderPass();
 	createDescriptorSetLayout();
-	commandPool = createCommandPool({});
+	commandPool = createCommandPool({ vk::CommandPoolCreateFlagBits::eResetCommandBuffer });
 
 	//init buffer list
 	{
@@ -182,24 +182,20 @@ void VulkanFrameWork::initVulkan()
 		};
 
 		std::cout << layout.GetStride() << std::endl;
-		assetLibs->PSIM_ModelLibrary.Load("C:\\dev\\PlanetSim\\assets\\models\\chalet.obj", false, true, false, false);
+
+		float vertices[3 * 7] = {
+			-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
+			 0.5f, -0.5f, 0.0f, 0.2f, 0.3f, 0.8f, 1.0f,
+			 0.0f,  0.5f, 0.0f, 0.8f, 0.8f, 0.2f, 1.0f
+		};
+		uint32_t indices[3] = { 0, 1, 2 };
 
 		//default vertexArray creation
 		{
-			Ref<VertexBuffer> vertexBuffer;
-			{
-				float* vertices = static_cast<float*>(assetLibs->PSIM_ModelLibrary.Get("chalet")->Data.data());
-				uint32_t modelSize = assetLibs->PSIM_ModelLibrary.Get("chalet")->Data.size();
-				vertexBuffer = VertexBuffer::Create(vertices, modelSize);
-			}
+			Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(vertices, sizeof(vertices) / sizeof(float));
 			vertexBuffer->SetLayout(layout);
 
-			Ref<IndexBuffer> indexBuffer;
-			{
-				uint32_t* indices = assetLibs->PSIM_ModelLibrary.Get("chalet")->indices.data();
-				uint32_t indexSize = assetLibs->PSIM_ModelLibrary.Get("chalet")->indices.size();
-				indexBuffer = IndexBuffer::Create(indices, indexSize);
-			}
+			Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
 
 			vertexArray->AddVertexBuffer(vertexBuffer);
 			vertexArray->SetIndexBuffer(indexBuffer);
@@ -215,13 +211,18 @@ void VulkanFrameWork::initVulkan()
 
 	{
 		assetLibs->PSIM_TextureLibrary.Load("C:\\dev\\PlanetSim\\assets\\textures\\chalet.jpg");
-		createTextureSampler();
+		assetLibs->PSIM_TextureLibrary.bindTexture("chalet");
 	}
 
 	createUniformBuffers();
 	createDescriptorPool();
 	createDescriptorSets();
-	createCommandBuffers();
+
+	commandBuffers.resize(swapChainFramebuffers.size());
+	for (int i = 0; i < swapChainFramebuffers.size(); i++) {
+		createCommandBuffers(&commandBuffers[i], &commandPool, i);
+	}
+
 	createSyncObjects();
 
 	PSIM_CORE_INFO("Vulkan Initialization Complete!");
@@ -235,8 +236,7 @@ void VulkanFrameWork::cleanUp()
 	//final cleanup of Vulkan resources
 	cleanupSwapChain();
 
-	device.destroySampler(textureSampler, nullptr);
-	PSIM_CORE_INFO("Texture sampler destroyed");
+	assetLibs->PSIM_TextureLibrary.cleanUp();
 
 	device.destroyDescriptorSetLayout(descriptorSetLayout, nullptr);
 
@@ -254,7 +254,6 @@ void VulkanFrameWork::cleanUp()
 	PSIM_CORE_INFO("Command Pool deleted");
 
 	vertexArray->cleanUp();
-
 	bufferList.cleanup();
 
 	device.destroy(nullptr);
@@ -740,9 +739,16 @@ void VulkanFrameWork::recreateSwapChain()
 	createUniformBuffers();
 	createDescriptorPool();
 	createDescriptorSets();
-	createCommandBuffers();
+
+	commandBuffers.resize(swapChainFramebuffers.size());
+	for (int i = 0; i < swapChainFramebuffers.size(); i++) {
+		createCommandBuffers(&commandBuffers[i], &commandPool, i);
+	}
 
 	PSIM_CORE_INFO("SwapChain recreated!");
+#ifdef PSIM_DEBUG
+	imGuiReset = true;
+#endif
 }
 
 void VulkanFrameWork::cleanupSwapChain()
@@ -860,8 +866,8 @@ void VulkanFrameWork::createRenderPass()
 void VulkanFrameWork::createGraphicsPipeline()
 {
 	PSIM_PROFILE_FUNCTION();
-	auto vertShaderCode = readFileByteCode("C:\\dev\\PlanetSim\\assets\\shaders\\TriangleShaderVert.spv");
-	auto fragShaderCode = readFileByteCode("C:\\dev\\PlanetSim\\assets\\shaders\\TriangleShaderFrag.spv");
+	auto vertShaderCode = readFileByteCode("C:\\dev\\PlanetSim\\assets\\shaders\\SPV\\TriangleShaderVert.spv");
+	auto fragShaderCode = readFileByteCode("C:\\dev\\PlanetSim\\assets\\shaders\\SPV\\TriangleShaderFrag.spv");
 
 	vk::ShaderModule vertShaderModule = createShaderModule(vertShaderCode);
 	vk::ShaderModule fragShaderModule = createShaderModule(fragShaderCode);
@@ -1003,7 +1009,7 @@ vk::CommandPool VulkanFrameWork::createCommandPool(vk::CommandPoolCreateFlags fl
 	QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);
 
 	//create a command pool
-	vk::CommandPoolCreateInfo poolInfo = { vk::CommandPoolCreateFlagBits::eResetCommandBuffer, queueFamilyIndices.graphicsFamily.value() };
+	vk::CommandPoolCreateInfo poolInfo = { flags, queueFamilyIndices.graphicsFamily.value() };
 
 	vk::CommandPool tempPool;
 	PSIM_ASSERT(device.createCommandPool(&poolInfo, nullptr, &tempPool) == vk::Result::eSuccess, "Failed to create command pool!");
@@ -1012,64 +1018,59 @@ vk::CommandPool VulkanFrameWork::createCommandPool(vk::CommandPoolCreateFlags fl
 	return tempPool;
 }
 
-void VulkanFrameWork::createCommandBuffers()
+void VulkanFrameWork::createCommandBuffers(vk::CommandBuffer* commandBuffer, vk::CommandPool* commandPool, int frameBufferNum)
 {
 	PSIM_PROFILE_FUNCTION();
-	//get number of framebuffers
-	commandBuffers.resize(swapChainFramebuffers.size());
-
 	//allocate command buffers
-	vk::CommandBufferAllocateInfo allocInfo = { commandPool, vk::CommandBufferLevel::ePrimary, (uint32_t)commandBuffers.size() };
+	vk::CommandBufferAllocateInfo allocInfo = { *commandPool, vk::CommandBufferLevel::ePrimary, 1 };
 
-	PSIM_ASSERT(device.allocateCommandBuffers(&allocInfo, commandBuffers.data()) == vk::Result::eSuccess, "Failed to allocate command buffers!");
+	PSIM_ASSERT(device.allocateCommandBuffers(&allocInfo, commandBuffer) == vk::Result::eSuccess, "Failed to allocate command buffers!");
 
 	//define and use command buffers
-	for (size_t i = 0; i < commandBuffers.size(); i++) {
-		//define buffers
-		vk::CommandBufferBeginInfo beginInfo = { vk::CommandBufferUsageFlags(), nullptr };
+	//define buffers
+	vk::CommandBufferBeginInfo beginInfo = { vk::CommandBufferUsageFlags(), nullptr };
 
-		PSIM_ASSERT(commandBuffers[i].begin(&beginInfo) == vk::Result::eSuccess, "Failed to begin recording command buffer!");
+	PSIM_ASSERT(commandBuffer->begin(&beginInfo) == vk::Result::eSuccess, "Failed to begin recording command buffer!");
 
-		clearValues[0].setColor(vk::ClearColorValue(std::array{ clearColor.r, clearColor.g, clearColor.b, clearColor.a }));
-		clearValues[1].setDepthStencil(vk::ClearDepthStencilValue({ 1.0f, 0 }));
+	clearValues[0].setColor(vk::ClearColorValue(std::array{ clearColor.r, clearColor.g, clearColor.b, clearColor.a }));
+	clearValues[1].setDepthStencil(vk::ClearDepthStencilValue({ 1.0f, 0 }));
 
-		vk::RenderPassBeginInfo renderPassInfo = { renderPass, swapChainFramebuffers[i], vk::Rect2D { { 0, 0 }, swapChainExtent }, static_cast<uint32_t>(clearValues.size()), clearValues.data() };
+	vk::RenderPassBeginInfo renderPassInfo = { renderPass, swapChainFramebuffers[frameBufferNum], vk::Rect2D { { 0, 0 }, swapChainExtent }, static_cast<uint32_t>(clearValues.size()), clearValues.data() };
 
-		//use command buffers
-		commandBuffers[i].beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
-		//bind pipeline
-		commandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, graphicsPipeline);
+	//use command buffers
+	commandBuffer->beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
+	//bind pipeline
+	commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, graphicsPipeline);
 
-		//get vertex Buffers
-		std::vector<vk::Buffer> vertexBuffers = *static_cast<std::vector<vk::Buffer>*>(vertexArray->getVertexBuffersBuffers());
-		vk::Buffer* bufferArray = new vk::Buffer[vertexBuffers.size()];
-		for (int i = 0; i < vertexBuffers.size(); i++)
-		{
-			bufferArray[i] = vertexBuffers[i];
-		}
-
-		vk::Buffer* indexBufferArray = new vk::Buffer[1];
-		indexBufferArray[0] = *static_cast<vk::Buffer*>(vertexArray->getIndexBufferBuffer());
-
-		vk::DeviceSize offsets[] = { 0 };
-
-		//bind buffers
-		commandBuffers[i].bindVertexBuffers((uint32_t)0, (uint32_t)(vertexBuffers.size()), &(*bufferArray), offsets);
-		commandBuffers[i].bindIndexBuffer(*indexBufferArray, 0, vk::IndexType::eUint32); 
-		commandBuffers[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout, 0, 1, &descriptorSets[i], 0, nullptr);
-
-		//draw from pipeline
-		commandBuffers[i].drawIndexed(static_cast<uint32_t>(vertexArray->GetIndexBuffer()->GetCount()), 1, 0, 0, 0);
-
-		commandBuffers[i].endRenderPass();
-
-		PSIM_ASSERT(commandBuffers[i].end() == vk::Result::eSuccess, "Failed to record command buffer!");
-
-		delete[] bufferArray;
-		delete[] indexBufferArray;
-
+	//get vertex Buffers
+	std::vector<vk::Buffer> vertexBuffers = *static_cast<std::vector<vk::Buffer>*>(vertexArray->getVertexBuffersBuffers());
+	vk::Buffer* bufferArray = new vk::Buffer[vertexBuffers.size()];
+	for (int i = 0; i < vertexBuffers.size(); i++)
+	{
+		bufferArray[i] = vertexBuffers[i];
 	}
-	PSIM_CORE_INFO("Command buffers created");
+
+	vk::Buffer* indexBufferArray = new vk::Buffer[1];
+	indexBufferArray[0] = *static_cast<vk::Buffer*>(vertexArray->getIndexBufferBuffer());
+
+	vk::DeviceSize offsets[] = { 0 };
+
+	//bind buffers
+	commandBuffer->bindVertexBuffers((uint32_t)0, (uint32_t)(vertexBuffers.size()), &(*bufferArray), offsets);
+	commandBuffer->bindIndexBuffer(*indexBufferArray, 0, vk::IndexType::eUint32);
+	commandBuffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout, 0, 1, &descriptorSets[frameBufferNum], 0, nullptr);
+
+	//draw from pipeline
+	commandBuffer->drawIndexed(static_cast<uint32_t>(vertexArray->GetIndexBuffer()->GetCount()), 1, 0, 0, 0);
+
+	commandBuffer->endRenderPass();
+
+	PSIM_ASSERT(commandBuffer->end() == vk::Result::eSuccess, "Failed to record command buffer!");
+
+	delete[] bufferArray;
+	delete[] indexBufferArray;
+
+	PSIM_CORE_INFO("Command buffer created");
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -1198,16 +1199,6 @@ void VulkanFrameWork::copyBufferToImage(vk::Buffer buffer, vk::Image image, uint
 	endSingleTimeCommands(commandBuffer);
 }
 
-void VulkanFrameWork::createTextureSampler()
-{
-	PSIM_PROFILE_FUNCTION();
-	//define and create texture sampler
-	vk::SamplerCreateInfo samplerInfo = { {}, vk::Filter::eLinear, vk::Filter::eLinear, vk::SamplerMipmapMode::eLinear, vk::SamplerAddressMode::eRepeat, vk::SamplerAddressMode::eRepeat,
-	vk::SamplerAddressMode::eRepeat, 0.0f, true, 16, false, vk::CompareOp::eAlways, 0.0f, static_cast<float>(assetLibs->PSIM_TextureLibrary.Get("chalet")->GetMipLevels()), vk::BorderColor::eIntOpaqueBlack, false };
-
-	PSIM_ASSERT(device.createSampler(&samplerInfo, nullptr, &textureSampler) == vk::Result::eSuccess, "Failed to create texture sampler!");
-}
-
 //--------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -1270,7 +1261,7 @@ void VulkanFrameWork::createDescriptorSetLayout()
 {
 	PSIM_PROFILE_FUNCTION();
 	//define the descriptor set layout
-	vk::DescriptorSetLayoutBinding uboLayoutBinding = { 0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eVertex };
+	vk::DescriptorSetLayoutBinding uboLayoutBinding = { 0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment };
 
 	vk::DescriptorSetLayoutBinding samplerLayoutBinding = { 1, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment };
 
@@ -1350,14 +1341,17 @@ void VulkanFrameWork::createDescriptorSets()
 		vk::DescriptorBufferInfo bufferInfo = { uniformBuffers[i].getBuffer(), 0, sizeof(UniformBufferObject) };
 
 		//get image info
-		vk::DescriptorImageInfo imageInfo = { textureSampler, *static_cast<vk::ImageView*>(assetLibs->PSIM_TextureLibrary.Get("chalet")->GetImageView()), vk::ImageLayout::eShaderReadOnlyOptimal };
-
+		std::vector<vk::DescriptorImageInfo> imageInfo = {};
+		for (int i = 0; i < assetLibs->PSIM_TextureLibrary.getBoundTextures()->size(); i++)
+		{
+			imageInfo.push_back({ *static_cast<vk::Sampler*>(assetLibs->PSIM_TextureLibrary.Get(assetLibs->PSIM_TextureLibrary.getBoundTextures()->at(i))->GetSampler()), *static_cast<vk::ImageView*>(assetLibs->PSIM_TextureLibrary.Get(assetLibs->PSIM_TextureLibrary.getBoundTextures()->at(i))->GetImageView()), vk::ImageLayout::eShaderReadOnlyOptimal });
+		}
 		//set descriptor settings
 		std::array<vk::WriteDescriptorSet, 2> descriptorWrites = {};
 
 		descriptorWrites[0] = { descriptorSets[i], 0, 0, 1, vk::DescriptorType::eUniformBuffer, nullptr, &bufferInfo };
 
-		descriptorWrites[1] = { descriptorSets[i], 1, 0, 1, vk::DescriptorType::eCombinedImageSampler, &imageInfo };
+		descriptorWrites[1] = { descriptorSets[i], 1, 0, 1, vk::DescriptorType::eCombinedImageSampler, imageInfo.data() };
 
 		device.updateDescriptorSets(static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 	}
@@ -1398,7 +1392,24 @@ void VulkanFrameWork::drawFrame()
 	vk::Semaphore waitSemaphores[] = { imageAvailableSemaphores[currentFrame] };
 	vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
 	vk::Semaphore signalSemaphores[] = { renderFinishedSemaphores[currentFrame] };
+
+#ifdef PSIM_DEBUG
+	vk::SubmitInfo submitInfo;
+	if (imGuiInitialized)
+	{
+		std::array<vk::CommandBuffer, 2> submitCommandBuffers = { commandBuffers[imageIndex], imGuiCommandBuffers[imageIndex] };
+		submitInfo = { 1, waitSemaphores, waitStages, static_cast<uint32_t>(submitCommandBuffers.size()), submitCommandBuffers.data(), 1, signalSemaphores };
+	
+	}
+	else
+	{
+		std::array<vk::CommandBuffer, 1> submitCommandBuffers = { commandBuffers[imageIndex] };
+		submitInfo = { 1, waitSemaphores, waitStages, static_cast<uint32_t>(submitCommandBuffers.size()), submitCommandBuffers.data(), 1, signalSemaphores };
+	}
+	
+#else
 	vk::SubmitInfo submitInfo = { 1, waitSemaphores, waitStages, 1, &commandBuffers[imageIndex], 1, signalSemaphores };
+#endif
 
 	//reset sync objects when complete
 	device.resetFences(1, &inFlightFences[currentFrame]);
@@ -1414,8 +1425,8 @@ void VulkanFrameWork::drawFrame()
 	result = presentQueue.presentKHR(&presentInfo);
 
 	//check if frame was presented
-	if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR || framebufferResized) {
-		framebufferResized = false;
+	if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR || frameBufferResized) {
+		frameBufferResized = false;
 		recreateSwapChain();
 	}
 	else {
@@ -1451,21 +1462,21 @@ void VulkanFrameWork::createSyncObjects()
 
 
 //these two must be called together, sometimes things go between
-void VulkanFrameWork::commandBufferRecordBegin(int bufNum)
+void VulkanFrameWork::commandBufferRecordBegin(vk::CommandBuffer* commandBuffer, int bufNum)
 {
 	//define buffers
 	vk::CommandBufferBeginInfo beginInfo = { vk::CommandBufferUsageFlagBits::eSimultaneousUse };
 
-	PSIM_ASSERT(commandBuffers[bufNum].begin(&beginInfo) == vk::Result::eSuccess, "Failed to begin recording command buffer!");
+	PSIM_ASSERT(commandBuffer->begin(&beginInfo) == vk::Result::eSuccess, "Failed to begin recording command buffer!");
 
 	clearValues[1].setDepthStencil(vk::ClearDepthStencilValue({ 1.0f, 0 }));
 
 	vk::RenderPassBeginInfo renderPassInfo = { renderPass, swapChainFramebuffers[bufNum], vk::Rect2D { { 0, 0 }, swapChainExtent }, static_cast<uint32_t>(clearValues.size()), clearValues.data() };
 
 	//use command buffers
-	commandBuffers[bufNum].beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
+	commandBuffer->beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
 	//bind pipeline
-	commandBuffers[bufNum].bindPipeline(vk::PipelineBindPoint::eGraphics, graphicsPipeline);
+	commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, graphicsPipeline);
 
 	//get vertex Buffers
 	std::vector<vk::Buffer> vertexBuffers = *static_cast<std::vector<vk::Buffer>*>(vertexArray->getVertexBuffersBuffers());
@@ -1481,22 +1492,22 @@ void VulkanFrameWork::commandBufferRecordBegin(int bufNum)
 	vk::DeviceSize offsets[] = { 0 };
 
 	//bind buffers
-	commandBuffers[bufNum].bindVertexBuffers((uint32_t)0, (uint32_t)(vertexBuffers.size()), vertexBufferArray, offsets);
-	commandBuffers[bufNum].bindIndexBuffer(*indexBufferArray, 0, vk::IndexType::eUint32);
-	commandBuffers[bufNum].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout, 0, 1, &descriptorSets[bufNum], 0, nullptr);
+	commandBuffer->bindVertexBuffers((uint32_t)0, (uint32_t)(vertexBuffers.size()), vertexBufferArray, offsets);
+	commandBuffer->bindIndexBuffer(*indexBufferArray, 0, vk::IndexType::eUint32);
+	commandBuffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout, 0, 1, &descriptorSets[bufNum], 0, nullptr);
 
 	//draw from pipeline
-	commandBuffers[bufNum].drawIndexed(static_cast<uint32_t>(vertexArray->GetIndexBuffer()->GetCount()), 1, 0, 0, 0);
+	commandBuffer->drawIndexed(static_cast<uint32_t>(vertexArray->GetIndexBuffer()->GetCount()), 1, 0, 0, 0);
 
 	delete[] vertexBufferArray;
 	delete[] indexBufferArray;
 }
 
-void VulkanFrameWork::commandBufferRecordEnd(int bufNum)
+void VulkanFrameWork::commandBufferRecordEnd(vk::CommandBuffer* commandBufferList)
 {
-	commandBuffers[bufNum].endRenderPass();
+	commandBufferList->endRenderPass();
 
-	PSIM_ASSERT(commandBuffers[bufNum].end() == vk::Result::eSuccess, "Failed to record command buffer!");
+	PSIM_ASSERT(commandBufferList->end() == vk::Result::eSuccess, "Failed to record command buffer!");
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------

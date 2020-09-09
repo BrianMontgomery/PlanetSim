@@ -58,10 +58,19 @@ void VulkanRendererAPI::Clear()
 }
 
 
-/*void VulkanRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray)
+void VulkanRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray)
 {
 	PSIM_PROFILE_FUNCTION();
+	VulkanFrameWork* framework = VulkanFrameWork::getFramework();
 
-	//glDrawElements(GL_TRIANGLES, vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
-	//glBindTexture(GL_TEXTURE_2D, 0);
-}*/
+	if (vertexArray != framework->getCurrentVertexArray()) {
+		framework->setVertexArray(vertexArray);
+	}
+
+	for (size_t i = 0; i < framework->getCommandBuffersSize(); i++) {
+		framework->commandBufferRecordBegin(&(framework->getCommandBuffers()->at(i)), i);
+		framework->commandBufferRecordEnd(&(framework->getCommandBuffers()->at(i)));
+	}
+
+	framework->drawFrame();
+}

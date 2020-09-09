@@ -10,7 +10,7 @@ class VulkanImGui : public ImGuiPlatformLayer
 {
 public:
 	VulkanImGui();
-	~VulkanImGui() {};
+	~VulkanImGui();
 	virtual void ImGuiOnAttach() override;
 	virtual void ImGuiOnDetach() override;
 	virtual void ImGuiOnUpdate(Timestep ts) override {};
@@ -31,5 +31,8 @@ private:
 	void ImGuiBody();
 
 	bool ImGuiResizeFlag = false;
+
+	vk::CommandPool imGuiCommandPool;
+	std::vector<vk::CommandBuffer> imGuiCommandBuffers;
 };
 

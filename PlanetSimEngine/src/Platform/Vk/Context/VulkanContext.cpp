@@ -20,14 +20,3 @@ void VulkanContext::Init()
 	//TODO: turn to preinit
 	framework->init(window);
 }
-
-void VulkanContext::drawFrame()
-{
-	PSIM_PROFILE_FUNCTION();
-
-	for (size_t i = 0; i < framework->getCommandBuffersSize(); i++) {
-		framework->commandBufferRecordBegin(i);
-		framework->commandBufferRecordEnd(i);
-	}
-	framework->drawFrame();
-}

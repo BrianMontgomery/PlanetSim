@@ -41,7 +41,7 @@ private:
 	//nonsinglton
 	//--------------------------------------------------------------------------------------------------------------------------------
 public:
-	bool framebufferResized = false;
+	bool frameBufferResized = false;
 
 
 	//public structs for vulkan
@@ -71,14 +71,16 @@ public:
 	//public vulkan funcs
 	vk::ImageView createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags, uint32_t mipLevels);
 	uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
-	void commandBufferRecordBegin(int bufNum);
-	void commandBufferRecordEnd(int bufNum);
+	void commandBufferRecordBegin(vk::CommandBuffer* commandBufferList, int bufNum);
+	void commandBufferRecordEnd(vk::CommandBuffer* commandBufferList);
 	QueueFamilyIndices findQueueFamilies(vk::PhysicalDevice device);
 	vk::CommandBuffer beginSingleTimeCommands();
 	void endSingleTimeCommands(vk::CommandBuffer commandBuffer);
 	void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, vk::SampleCountFlagBits numSamples, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& imageMemory);
 	void transitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout, uint32_t mipLevels);
 	void copyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height);
+	vk::CommandPool createCommandPool(vk::CommandPoolCreateFlags flags);
+	void VulkanFrameWork::createCommandBuffers(vk::CommandBuffer* commandBuffer, vk::CommandPool* commandPool, int frameBufferNum);
 
 	//public vulkan getters
 	vk::Device getDevice() { return device; }
@@ -94,6 +96,12 @@ public:
 	std::vector<vk::Image>* getSwapChainImages() { return &swapChainImages; }
 	vk::SampleCountFlagBits getMSAASamples() { return msaaSamples; }
 	vk::RenderPass getRenderPass() { return renderPass; }
+	Ref<VertexArray>  getCurrentVertexArray() { return vertexArray; }
+	void setVertexArray(Ref<VertexArray> newVertexArray) { vertexArray = newVertexArray; frameBufferResized = true; }
+#ifdef PSIM_DEBUG
+	void setImGuiCommandBuffers(std::vector<vk::CommandBuffer>* newImGuiCommandBuffers) { imGuiCommandBuffers = *newImGuiCommandBuffers; imGuiInitialized = true; }
+	bool imGuiReset = false;
+#endif
 
 	//--------------------------------------------------------------------------------------------------------------------------------
 
@@ -105,8 +113,13 @@ private:
 	glm::vec4 clearColor;
 
 	GLFWwindow* window;
+
 	PSIMAssetLibraries* assetLibs;
 	VulkanBufferList bufferList;
+#ifdef PSIM_DEBUG
+	std::vector<vk::CommandBuffer> imGuiCommandBuffers;
+	bool imGuiInitialized = false;
+#endif
 
 	vk::Instance instance;
 	vk::DebugUtilsMessengerEXT debugUtilsMessenger;
@@ -151,8 +164,6 @@ private:
 	vk::Image depthImage;
 	vk::DeviceMemory depthImageMemory;
 	vk::ImageView depthImageView;
-
-	vk::Sampler textureSampler;
 
 	Ref<VertexArray> vertexArray;
 
@@ -232,15 +243,10 @@ private:
 
 	void VulkanFrameWork::createColorResources();
 
-	vk::CommandPool createCommandPool(vk::CommandPoolCreateFlags flags);
-	void createCommandBuffers();
-
 	void createDepthResources();
 	vk::Format findSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features);
 	vk::Format findDepthFormat();
 	bool hasStencilComponent(vk::Format format);
-
-	void createTextureSampler();
 	
 	void createDescriptorSetLayout();
 	void createUniformBuffers();

@@ -17,6 +17,9 @@ public:
 	virtual uint32_t GetRendererID() const override { return m_RendererID; }
 	virtual uint32_t GetMipLevels() const override { return m_MipLevels; }
 	virtual void* GetImageView() const override { return (void*)&m_TextureImageView; }
+	virtual void* GetSampler() const override { return (void*)&m_TextureSampler; }
+	virtual uint32_t GetSlot() const override { return m_Slot; }
+	virtual void destroy() const override;
 
 	virtual void SetData(void* data, uint32_t imageSize) override;
 
@@ -36,7 +39,10 @@ private:
 	vk::Image m_TextureImage;
 	vk::DeviceMemory m_TextureImageMemory;
 	vk::ImageView m_TextureImageView;
+	vk::Sampler m_TextureSampler;
+	uint32_t m_Slot;
 
 	void createTextureImageView();
+	void createTextureSampler();
 	void generateMipmaps(vk::Image image, vk::Format imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
 };

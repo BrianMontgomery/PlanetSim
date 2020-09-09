@@ -57,14 +57,24 @@ VulkanTexture2D::VulkanTexture2D(const std::string& path)
 
 VulkanTexture2D::~VulkanTexture2D()
 {
+	
+}
+
+void VulkanTexture2D::destroy() const
+{
 	PSIM_PROFILE_FUNCTION();
 	VulkanFrameWork* framework = VulkanFrameWork::getFramework();
 
 	framework->getDevice().destroyImageView(m_TextureImageView, nullptr);
 	PSIM_CORE_INFO("Texture image view destroyed");
 
+	framework->getDevice().destroySampler(m_TextureSampler, nullptr);
+	PSIM_CORE_INFO("Texture sampler destroyed");
+
 	framework->getDevice().destroyImage(m_TextureImage, nullptr);
 	framework->getDevice().freeMemory(m_TextureImageMemory, nullptr);
+	PSIM_CORE_INFO("Texture memory destroyed");
+
 }
 
 void VulkanTexture2D::SetData(void* pixels, uint32_t imageSize)
@@ -96,12 +106,17 @@ void VulkanTexture2D::SetData(void* pixels, uint32_t imageSize)
 	generateMipmaps(m_TextureImage, m_Format, m_TexWidth, m_TexHeight, m_MipLevels);
 
 	createTextureImageView();
+	createTextureSampler();
 }
 
 void VulkanTexture2D::Bind(uint32_t slot) const
 {
 	PSIM_PROFILE_FUNCTION();
 
+	PSIMAssetLibraries* assetLibs = PSIMAssetLibraries::getAssetLibraries();
+
+	PSIM_ASSERT(assetLibs->PSIM_TextureLibrary.getBoundTextures()->at(slot) == "", "Texture name slot: {0} is already full!", slot);
+	assetLibs->PSIM_TextureLibrary.getBoundTextures()->at(slot) = m_Name;
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -114,6 +129,18 @@ void VulkanTexture2D::createTextureImageView()
 	//create tex image view
 	m_TextureImageView = framework->createImageView(m_TextureImage, m_Format, vk::ImageAspectFlagBits::eColor, m_MipLevels);
 	PSIM_CORE_INFO("Created Texture image view");
+}
+
+void VulkanTexture2D::createTextureSampler()
+{
+	PSIM_PROFILE_FUNCTION();
+	VulkanFrameWork* framework = VulkanFrameWork::getFramework();
+
+	//define and create texture sampler
+	vk::SamplerCreateInfo samplerInfo = { {}, vk::Filter::eLinear, vk::Filter::eLinear, vk::SamplerMipmapMode::eLinear, vk::SamplerAddressMode::eRepeat, vk::SamplerAddressMode::eRepeat,
+	vk::SamplerAddressMode::eRepeat, 0.0f, true, 16, false, vk::CompareOp::eAlways, 0.0f, static_cast<float>(m_MipLevels), vk::BorderColor::eIntOpaqueBlack, false };
+
+	PSIM_ASSERT(framework->getDevice().createSampler(&samplerInfo, nullptr, &m_TextureSampler) == vk::Result::eSuccess, "Failed to create texture sampler!");
 }
 
 void VulkanTexture2D::generateMipmaps(vk::Image image, vk::Format imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels)

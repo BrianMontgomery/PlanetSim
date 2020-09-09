@@ -41,11 +41,11 @@ public:
 		s_RendererAPI->Clear();
 	}
 
-/*	inline static void DrawIndexed(const Ref<VertexArray>& vertexArray)
+	inline static void DrawIndexed(const Ref<VertexArray>& vertexArray)
 	{
 		PSIM_PROFILE_FUNCTION();
 		s_RendererAPI->DrawIndexed(vertexArray);
-	}*/
+	}
 
 private:
 	static Scope<RendererAPI> s_RendererAPI;

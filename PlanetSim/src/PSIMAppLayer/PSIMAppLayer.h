@@ -18,12 +18,12 @@ private:
 	//ShaderLibrary m_ShaderLibrary;
 	//Ref<Shader> m_Shader;
 	Ref<VertexArray> m_VertexArray;
-	ModelLibrary m_ModelLibrary;
+	PSIMAssetLibraries* m_AssetLibs;
 
 	//Ref<Shader> m_FlatColorShader;
 	Ref<VertexArray> m_SquareVA;
 
-	//Ref<Texture2D> m_Texture, m_ChernoLogoTexture;
+	Ref<Texture2D> m_Texture, m_ChernoLogoTexture;
 
 	CameraController m_CameraController;
 	glm::vec3 m_SquareColor = { 0.2f, 0.3f, 0.8f };
