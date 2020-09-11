@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PSIM/WindowPrototype.h"
+#include "PSIM/Core/WindowPrototype.h"
 #include "PSIM/Graphics/Context/GraphicsContext.h"
 
 #include <GLFW/glfw3.h>
