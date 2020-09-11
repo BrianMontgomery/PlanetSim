@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="assets">
+      <UniqueIdentifier>{583885F2-44DA-AFC8-2D95-C31C19D63619}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assets\models">
+      <UniqueIdentifier>{2B0B5C10-97CB-D746-6006-21C4CC851C23}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assets\shaders">
+      <UniqueIdentifier>{51CD2FD9-3D9B-23DF-262F-9405129CFF43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assets\textures">
+      <UniqueIdentifier>{4B894D3B-B714-BBFF-C025-3EF42C301700}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
     </Filter>
@@ -10,14 +22,29 @@
     <Filter Include="src\PSIM\Application">
       <UniqueIdentifier>{587BA06B-440A-2A35-ED28-3E30D9963ADB}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\PSIM\Debug">
-      <UniqueIdentifier>{4B7E0E6D-374C-0273-20E0-72990C4DDED7}</UniqueIdentifier>
+    <Filter Include="src\PSIM\Core">
+      <UniqueIdentifier>{8DF183DC-F9B1-FF12-C2EC-48902E6C44EF}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\PSIM\Events">
-      <UniqueIdentifier>{599A6812-C525-D6D6-CE36-59CB3A4132D7}</UniqueIdentifier>
+    <Filter Include="src\PSIM\Core\Debug">
+      <UniqueIdentifier>{C331725E-2F93-4F6C-B800-961E2461862B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\PSIM\Core\Events">
+      <UniqueIdentifier>{D1BC4230-BD4B-CCF9-666A-E0F452D8DC9F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\PSIM\Core\Input">
+      <UniqueIdentifier>{4CD7D15E-B838-AF6C-41A6-F51EAD06E62B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\PSIM\Core\Layers">
+      <UniqueIdentifier>{ACA7253F-9836-AF08-4155-C3032DC3BFAE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\PSIM\Core\Logging">
+      <UniqueIdentifier>{230F3E43-8F7B-F93D-586F-919BC49A1BA6}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\PSIM\Graphics">
       <UniqueIdentifier>{F5275CEA-613E-5A80-AAB5-E5A1160B2B08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\PSIM\Graphics\Camera">
+      <UniqueIdentifier>{CD969E12-B9BB-ED92-E206-D322CE8AECB0}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\PSIM\Graphics\Context">
       <UniqueIdentifier>{89C73387-F589-6711-3E3A-F69DAA3B40EF}</UniqueIdentifier>
@@ -25,23 +52,17 @@
     <Filter Include="src\PSIM\Graphics\RenderAPI">
       <UniqueIdentifier>{5E79A596-CA86-D37C-536D-CF67BF799F33}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\PSIM\Input">
-      <UniqueIdentifier>{D4236E6D-C0F1-6173-A985-D29995F23DD8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\PSIM\Layers">
-      <UniqueIdentifier>{34854B21-A010-B9E5-A921-3CDA152C15E6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\PSIM\Logging">
-      <UniqueIdentifier>{AB9D1F6A-9796-3EBC-C0C8-2341AC201EC8}</UniqueIdentifier>
+    <Filter Include="src\PSIM\imgui">
+      <UniqueIdentifier>{3F81B06F-2B4F-A475-14E3-149C005080DA}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Platform">
       <UniqueIdentifier>{21CA02E5-0D2D-9289-B6B2-CA3FA2F45D0C}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\Platform\OpenGL">
-      <UniqueIdentifier>{35A49437-A105-7245-2A73-B8F796D3A804}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\Platform\Vk">
       <UniqueIdentifier>{F175994C-5D01-0711-6612-8A05D21C6311}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Platform\Vk\Camera">
+      <UniqueIdentifier>{49D1104C-35CB-399E-1E38-D0AE0AD19F0A}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Platform\Vk\Context">
       <UniqueIdentifier>{8551EDEE-F188-3586-FA92-99A966495C7F}</UniqueIdentifier>
@@ -49,8 +70,8 @@
     <Filter Include="src\Platform\Vk\FrameWork">
       <UniqueIdentifier>{8E47A788-FA09-DB12-43BA-699FAFBBB3F0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\Platform\Vk\Modules">
-      <UniqueIdentifier>{B963FFEF-259B-4787-2EA5-ABAA9A5B6E80}</UniqueIdentifier>
+    <Filter Include="src\Platform\Vk\ImGui">
+      <UniqueIdentifier>{DBDBB8E3-4748-74DE-103C-0C3C7C679646}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Platform\Vk\RenderAPI">
       <UniqueIdentifier>{5A72E9D2-C634-1D5D-0FE5-ABE97BE6F53A}</UniqueIdentifier>
@@ -60,18 +81,6 @@
     </Filter>
     <Filter Include="vendor">
       <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="vendor\glad">
-      <UniqueIdentifier>{9A8E79C1-0644-F2B6-8F38-EC8DFBECE8BA}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="vendor\glad\include">
-      <UniqueIdentifier>{0DB0903E-7911-6E4C-027F-B4FE6EDFA40B}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="vendor\glad\include\KHR">
-      <UniqueIdentifier>{01FD6E78-6D34-B70F-763E-1B33E2F4DD08}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="vendor\glad\include\glad">
-      <UniqueIdentifier>{34935E86-20B8-AD06-4903-93963587AC24}</UniqueIdentifier>
     </Filter>
     <Filter Include="vendor\glm">
       <UniqueIdentifier>{829FC5A8-6E57-07F6-D75E-E051C335A2E6}</UniqueIdentifier>
@@ -100,6 +109,12 @@
     <Filter Include="vendor\tinyObjLoader">
       <UniqueIdentifier>{F8379050-E4C6-191A-8DE5-2D1579532AC0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vendor\tinyObjLoader\experimental">
+      <UniqueIdentifier>{150665DA-8174-BA59-CA5D-7559360BB0F5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\tinyObjLoader\experimental\lfpAlloc">
+      <UniqueIdentifier>{F182B3B4-DDEA-7982-4656-8E9832DD906E}</UniqueIdentifier>
+    </Filter>
     <Filter Include="vendor\tinyObjLoader\tinyObjLoader">
       <UniqueIdentifier>{FD9066B1-E9CC-691B-52DF-81123E3A1236}</UniqueIdentifier>
     </Filter>
@@ -108,35 +123,56 @@
     <ClInclude Include="src\PSIM\Application\Application.h">
       <Filter>src\PSIM\Application</Filter>
     </ClInclude>
-    <ClInclude Include="src\PSIM\Core.h">
-      <Filter>src\PSIM</Filter>
+    <ClInclude Include="src\PSIM\Core\Core.h">
+      <Filter>src\PSIM\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\PSIM\Debug\Instrumentor.h">
-      <Filter>src\PSIM\Debug</Filter>
+    <ClInclude Include="src\PSIM\Core\Debug\Instrumentor.h">
+      <Filter>src\PSIM\Core\Debug</Filter>
     </ClInclude>
-    <ClInclude Include="src\PSIM\Events\ApplicationEvents.h">
-      <Filter>src\PSIM\Events</Filter>
+    <ClInclude Include="src\PSIM\Core\Debug\TimeStep.h">
+      <Filter>src\PSIM\Core\Debug</Filter>
     </ClInclude>
-    <ClInclude Include="src\PSIM\Events\Events.h">
-      <Filter>src\PSIM\Events</Filter>
+    <ClInclude Include="src\PSIM\Core\Events\ApplicationEvents.h">
+      <Filter>src\PSIM\Core\Events</Filter>
     </ClInclude>
-    <ClInclude Include="src\PSIM\Events\KeyEvents.h">
-      <Filter>src\PSIM\Events</Filter>
+    <ClInclude Include="src\PSIM\Core\Events\Events.h">
+      <Filter>src\PSIM\Core\Events</Filter>
     </ClInclude>
-    <ClInclude Include="src\PSIM\Events\MouseEvents.h">
-      <Filter>src\PSIM\Events</Filter>
+    <ClInclude Include="src\PSIM\Core\Events\KeyEvents.h">
+      <Filter>src\PSIM\Core\Events</Filter>
     </ClInclude>
-    <ClInclude Include="src\PSIM\Graphics\Buffer.h">
-      <Filter>src\PSIM\Graphics</Filter>
+    <ClInclude Include="src\PSIM\Core\Events\MouseEvents.h">
+      <Filter>src\PSIM\Core\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PSIM\Core\Input\Input.h">
+      <Filter>src\PSIM\Core\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PSIM\Core\Input\KeyCodes.h">
+      <Filter>src\PSIM\Core\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PSIM\Core\Input\MouseCodes.h">
+      <Filter>src\PSIM\Core\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PSIM\Core\Layers\LayerStack.h">
+      <Filter>src\PSIM\Core\Layers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PSIM\Core\Layers\Layers.h">
+      <Filter>src\PSIM\Core\Layers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PSIM\Core\Logging\Log.h">
+      <Filter>src\PSIM\Core\Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PSIM\Core\WindowPrototype.h">
+      <Filter>src\PSIM\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PSIM\Graphics\Camera\Camera.h">
+      <Filter>src\PSIM\Graphics\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PSIM\Graphics\Camera\CameraController.h">
+      <Filter>src\PSIM\Graphics\Camera</Filter>
     </ClInclude>
     <ClInclude Include="src\PSIM\Graphics\Context\GraphicsContext.h">
       <Filter>src\PSIM\Graphics\Context</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PSIM\Graphics\OrthographicCamera.h">
-      <Filter>src\PSIM\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PSIM\Graphics\OrthographicCameraController.h">
-      <Filter>src\PSIM\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\PSIM\Graphics\RenderAPI\RendererAPI.h">
       <Filter>src\PSIM\Graphics\RenderAPI</Filter>
@@ -147,62 +183,14 @@
     <ClInclude Include="src\PSIM\Graphics\Renderer.h">
       <Filter>src\PSIM\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\PSIM\Graphics\Renderer2D.h">
-      <Filter>src\PSIM\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PSIM\Graphics\Shader.h">
-      <Filter>src\PSIM\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PSIM\Graphics\Texture.h">
-      <Filter>src\PSIM\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PSIM\Graphics\VertexArray.h">
-      <Filter>src\PSIM\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PSIM\Input\Input.h">
-      <Filter>src\PSIM\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PSIM\Input\KeyCodes.h">
-      <Filter>src\PSIM\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PSIM\Input\MouseCodes.h">
-      <Filter>src\PSIM\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PSIM\Layers\Layer.h">
-      <Filter>src\PSIM\Layers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PSIM\Layers\LayerStack.h">
-      <Filter>src\PSIM\Layers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PSIM\Logging\Log.h">
-      <Filter>src\PSIM\Logging</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PSIM\TimeStep.h">
-      <Filter>src\PSIM</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PSIM\WindowPrototype.h">
-      <Filter>src\PSIM</Filter>
+    <ClInclude Include="src\PSIM\imgui\ImGuiLayer.h">
+      <Filter>src\PSIM\imgui</Filter>
     </ClInclude>
     <ClInclude Include="src\PSIMPCH.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.h">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\OpenGL\OpenGLShader.h">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\OpenGL\OpenGLTexture.h">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h">
-      <Filter>src\Platform\OpenGL</Filter>
+    <ClInclude Include="src\Platform\Vk\Camera\VulkanCamera.h">
+      <Filter>src\Platform\Vk\Camera</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Vk\Context\VulkanContext.h">
       <Filter>src\Platform\Vk\Context</Filter>
@@ -210,56 +198,8 @@
     <ClInclude Include="src\Platform\Vk\FrameWork\VulkanFrameWork.h">
       <Filter>src\Platform\Vk\FrameWork</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Vk\Modules\VulkanBuffer.h">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vk\Modules\VulkanCommandBuffer.h">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vk\Modules\VulkanDebugger.h">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vk\Modules\VulkanDepthBuffer.h">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vk\Modules\VulkanDescriptorSet.h">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vk\Modules\VulkanDevice.h">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vk\Modules\VulkanImage.h">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vk\Modules\VulkanInstance.h">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vk\Modules\VulkanMemory.h">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vk\Modules\VulkanModelLoad.h">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vk\Modules\VulkanPipeline.h">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vk\Modules\VulkanQueue.h">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vk\Modules\VulkanShader.h">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vk\Modules\VulkanSwapchain.h">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vk\Modules\VulkanSync.h">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vk\Modules\VulkanTexture.h">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vk\Modules\VulkanUniformBuffer.h">
-      <Filter>src\Platform\Vk\Modules</Filter>
+    <ClInclude Include="src\Platform\Vk\ImGui\VulkanImGui.h">
+      <Filter>src\Platform\Vk\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Vk\RenderAPI\VulkanRendererAPI.h">
       <Filter>src\Platform\Vk\RenderAPI</Filter>
@@ -269,12 +209,6 @@
     </ClInclude>
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h">
       <Filter>src\Platform\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="vendor\glad\include\KHR\khrplatform.h">
-      <Filter>vendor\glad\include\KHR</Filter>
-    </ClInclude>
-    <ClInclude Include="vendor\glad\include\glad\glad.h">
-      <Filter>vendor\glad\include\glad</Filter>
     </ClInclude>
     <ClInclude Include="vendor\glm\glm\common.hpp">
       <Filter>vendor\glm\glm</Filter>
@@ -1371,6 +1305,24 @@
     <ClInclude Include="vendor\stb\stb\stb_image.h">
       <Filter>vendor\stb\stb</Filter>
     </ClInclude>
+    <ClInclude Include="vendor\tinyObjLoader\experimental\lfpAlloc\Allocator.hpp">
+      <Filter>vendor\tinyObjLoader\experimental\lfpAlloc</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\tinyObjLoader\experimental\lfpAlloc\ChunkList.hpp">
+      <Filter>vendor\tinyObjLoader\experimental\lfpAlloc</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\tinyObjLoader\experimental\lfpAlloc\Pool.hpp">
+      <Filter>vendor\tinyObjLoader\experimental\lfpAlloc</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\tinyObjLoader\experimental\lfpAlloc\PoolDispatcher.hpp">
+      <Filter>vendor\tinyObjLoader\experimental\lfpAlloc</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\tinyObjLoader\experimental\lfpAlloc\Utils.hpp">
+      <Filter>vendor\tinyObjLoader\experimental\lfpAlloc</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\tinyObjLoader\experimental\tinyobj_loader_opt.h">
+      <Filter>vendor\tinyObjLoader\experimental</Filter>
+    </ClInclude>
     <ClInclude Include="vendor\tinyObjLoader\tinyObjLoader\tiny_obj_loader.h">
       <Filter>vendor\tinyObjLoader\tinyObjLoader</Filter>
     </ClInclude>
@@ -1379,17 +1331,26 @@
     <ClCompile Include="src\PSIM\Application\Application.cpp">
       <Filter>src\PSIM\Application</Filter>
     </ClCompile>
-    <ClCompile Include="src\PSIM\Graphics\Buffer.cpp">
-      <Filter>src\PSIM\Graphics</Filter>
+    <ClCompile Include="src\PSIM\Core\Input\Input.cpp">
+      <Filter>src\PSIM\Core\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PSIM\Core\Layers\LayerStack.cpp">
+      <Filter>src\PSIM\Core\Layers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PSIM\Core\Layers\Layers.cpp">
+      <Filter>src\PSIM\Core\Layers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PSIM\Core\Logging\Log.cpp">
+      <Filter>src\PSIM\Core\Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PSIM\Graphics\Camera\Camera.cpp">
+      <Filter>src\PSIM\Graphics\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PSIM\Graphics\Camera\CameraController.cpp">
+      <Filter>src\PSIM\Graphics\Camera</Filter>
     </ClCompile>
     <ClCompile Include="src\PSIM\Graphics\Context\GraphicsContext.cpp">
       <Filter>src\PSIM\Graphics\Context</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PSIM\Graphics\OrthographicCamera.cpp">
-      <Filter>src\PSIM\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PSIM\Graphics\OrthographicCameraController.cpp">
-      <Filter>src\PSIM\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\PSIM\Graphics\RenderAPI\RendererAPI.cpp">
       <Filter>src\PSIM\Graphics\RenderAPI</Filter>
@@ -1400,50 +1361,17 @@
     <ClCompile Include="src\PSIM\Graphics\Renderer.cpp">
       <Filter>src\PSIM\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="src\PSIM\Graphics\Renderer2D.cpp">
-      <Filter>src\PSIM\Graphics</Filter>
+    <ClCompile Include="src\PSIM\imgui\ImGuiBuild.cpp">
+      <Filter>src\PSIM\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="src\PSIM\Graphics\Shader.cpp">
-      <Filter>src\PSIM\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PSIM\Graphics\Texture.cpp">
-      <Filter>src\PSIM\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PSIM\Graphics\VertexArray.cpp">
-      <Filter>src\PSIM\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PSIM\Input\Input.cpp">
-      <Filter>src\PSIM\Input</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PSIM\Layers\Layer.cpp">
-      <Filter>src\PSIM\Layers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PSIM\Layers\LayerStack.cpp">
-      <Filter>src\PSIM\Layers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PSIM\Logging\Log.cpp">
-      <Filter>src\PSIM\Logging</Filter>
+    <ClCompile Include="src\PSIM\imgui\ImGuiLayer.cpp">
+      <Filter>src\PSIM\imgui</Filter>
     </ClCompile>
     <ClCompile Include="src\PSIMPCH.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGLTexture.cpp">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp">
-      <Filter>src\Platform\OpenGL</Filter>
+    <ClCompile Include="src\Platform\Vk\Camera\VulkanCamera.cpp">
+      <Filter>src\Platform\Vk\Camera</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Vk\Context\VulkanContext.cpp">
       <Filter>src\Platform\Vk\Context</Filter>
@@ -1451,56 +1379,8 @@
     <ClCompile Include="src\Platform\Vk\FrameWork\VulkanFrameWork.cpp">
       <Filter>src\Platform\Vk\FrameWork</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\Vk\Modules\VulkanBuffer.cpp">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vk\Modules\VulkanCommandBuffer.cpp">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vk\Modules\VulkanDebugger.cpp">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vk\Modules\VulkanDepthBuffer.cpp">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vk\Modules\VulkanDescriptorSet.cpp">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vk\Modules\VulkanDevice.cpp">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vk\Modules\VulkanImage.cpp">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vk\Modules\VulkanInstance.cpp">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vk\Modules\VulkanMemory.cpp">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vk\Modules\VulkanModelLoad.cpp">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vk\Modules\VulkanPipeline.cpp">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vk\Modules\VulkanQueue.cpp">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vk\Modules\VulkanShader.cpp">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vk\Modules\VulkanSwapchain.cpp">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vk\Modules\VulkanSync.cpp">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vk\Modules\VulkanTexture.cpp">
-      <Filter>src\Platform\Vk\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vk\Modules\VulkanUniformBuffer.cpp">
-      <Filter>src\Platform\Vk\Modules</Filter>
+    <ClCompile Include="src\Platform\Vk\ImGui\VulkanImGui.cpp">
+      <Filter>src\Platform\Vk\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Vk\RenderAPI\VulkanRendererAPI.cpp">
       <Filter>src\Platform\Vk\RenderAPI</Filter>
@@ -1514,5 +1394,31 @@
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\PlanetSimEngine.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\models\chalet.obj">
+      <Filter>assets\models</Filter>
+    </None>
+    <None Include="assets\shaders\ImGuiFrag.spv">
+      <Filter>assets\shaders</Filter>
+    </None>
+    <None Include="assets\shaders\ImGuiVert.spv">
+      <Filter>assets\shaders</Filter>
+    </None>
+    <None Include="assets\shaders\TriangleShaderFrag.spv">
+      <Filter>assets\shaders</Filter>
+    </None>
+    <None Include="assets\shaders\TriangleShaderVert.spv">
+      <Filter>assets\shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\textures\chalet.jpg">
+      <Filter>assets\textures</Filter>
+    </Image>
+    <Image Include="assets\textures\texture.jpg">
+      <Filter>assets\textures</Filter>
+    </Image>
   </ItemGroup>
 </Project>
