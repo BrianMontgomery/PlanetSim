@@ -143,10 +143,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\assets\models\chalet.obj" />
-    <None Include="..\assets\shaders\ImGuiFrag.spv" />
-    <None Include="..\assets\shaders\ImGuiVert.spv" />
-    <None Include="..\assets\shaders\TriangleShaderFrag.spv" />
-    <None Include="..\assets\shaders\TriangleShaderVert.spv" />
+    <None Include="..\assets\shaders\SPV\ImGuiFrag.spv" />
+    <None Include="..\assets\shaders\SPV\ImGuiVert.spv" />
+    <None Include="..\assets\shaders\SPV\TriangleShaderFrag.spv" />
+    <None Include="..\assets\shaders\SPV\TriangleShaderVert.spv" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\assets\textures\chalet.jpg" />

@@ -931,7 +931,7 @@ void VulkanFrameWork::createGraphicsPipeline()
 	PSIM_CORE_INFO("Created Graphics Pipeline");
 
 	//cleanup
-	vkDestroyShaderModule(device, fragShaderModule, nullptr);
+	
 	vkDestroyShaderModule(device, vertShaderModule, nullptr);
 }
 

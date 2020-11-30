@@ -10,6 +10,9 @@
     <Filter Include="assets\shaders">
       <UniqueIdentifier>{51CD2FD9-3D9B-23DF-262F-9405129CFF43}</UniqueIdentifier>
     </Filter>
+    <Filter Include="assets\shaders\SPV">
+      <UniqueIdentifier>{593F235C-4523-E4B1-AE83-DE049A86CE33}</UniqueIdentifier>
+    </Filter>
     <Filter Include="assets\textures">
       <UniqueIdentifier>{4B894D3B-B714-BBFF-C025-3EF42C301700}</UniqueIdentifier>
     </Filter>
@@ -37,17 +40,17 @@
     <None Include="..\assets\models\chalet.obj">
       <Filter>assets\models</Filter>
     </None>
-    <None Include="..\assets\shaders\ImGuiFrag.spv">
-      <Filter>assets\shaders</Filter>
+    <None Include="..\assets\shaders\SPV\ImGuiFrag.spv">
+      <Filter>assets\shaders\SPV</Filter>
     </None>
-    <None Include="..\assets\shaders\ImGuiVert.spv">
-      <Filter>assets\shaders</Filter>
+    <None Include="..\assets\shaders\SPV\ImGuiVert.spv">
+      <Filter>assets\shaders\SPV</Filter>
     </None>
-    <None Include="..\assets\shaders\TriangleShaderFrag.spv">
-      <Filter>assets\shaders</Filter>
+    <None Include="..\assets\shaders\SPV\TriangleShaderFrag.spv">
+      <Filter>assets\shaders\SPV</Filter>
     </None>
-    <None Include="..\assets\shaders\TriangleShaderVert.spv">
-      <Filter>assets\shaders</Filter>
+    <None Include="..\assets\shaders\SPV\TriangleShaderVert.spv">
+      <Filter>assets\shaders\SPV</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

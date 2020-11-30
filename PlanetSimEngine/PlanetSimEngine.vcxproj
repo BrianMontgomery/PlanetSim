@@ -537,6 +537,7 @@
     <ClInclude Include="src\PSIM\Core\PSIMAssetLibs.h" />
     <ClInclude Include="src\PSIM\Core\WindowPrototype.h" />
     <ClInclude Include="src\PSIM\Graphics\Asset\Model.h" />
+    <ClInclude Include="src\PSIM\Graphics\Asset\Shader.h" />
     <ClInclude Include="src\PSIM\Graphics\Asset\Texture.h" />
     <ClInclude Include="src\PSIM\Graphics\Camera\Camera.h" />
     <ClInclude Include="src\PSIM\Graphics\Camera\CameraController.h" />
@@ -550,6 +551,7 @@
     <ClInclude Include="src\PSIMPCH.h" />
     <ClInclude Include="src\PlanetSimEngine.h" />
     <ClInclude Include="src\Platform\Vk\Components\VulkanBuffer.h" />
+    <ClInclude Include="src\Platform\Vk\Components\VulkanShader.h" />
     <ClInclude Include="src\Platform\Vk\Components\VulkanTexture2D.h" />
     <ClInclude Include="src\Platform\Vk\Components\VulkanVertexArray.h" />
     <ClInclude Include="src\Platform\Vk\Context\VulkanContext.h" />
@@ -567,6 +569,7 @@
     <ClCompile Include="src\PSIM\Core\Logging\Log.cpp" />
     <ClCompile Include="src\PSIM\Core\PSIMAssetLibs.cpp" />
     <ClCompile Include="src\PSIM\Graphics\Asset\Model.cpp" />
+    <ClCompile Include="src\PSIM\Graphics\Asset\Shader.cpp" />
     <ClCompile Include="src\PSIM\Graphics\Asset\Texture.cpp" />
     <ClCompile Include="src\PSIM\Graphics\Camera\Camera.cpp" />
     <ClCompile Include="src\PSIM\Graphics\Camera\CameraController.cpp" />
@@ -582,6 +585,7 @@
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\Platform\Vk\Components\VulkanBuffer.cpp" />
+    <ClCompile Include="src\Platform\Vk\Components\VulkanShader.cpp" />
     <ClCompile Include="src\Platform\Vk\Components\VulkanTexture2D.cpp" />
     <ClCompile Include="src\Platform\Vk\Components\VulkanVertexArray.cpp" />
     <ClCompile Include="src\Platform\Vk\Context\VulkanContext.cpp" />
@@ -593,10 +597,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\assets\models\chalet.obj" />
-    <None Include="..\assets\shaders\ImGuiFrag.spv" />
-    <None Include="..\assets\shaders\ImGuiVert.spv" />
-    <None Include="..\assets\shaders\TriangleShaderFrag.spv" />
-    <None Include="..\assets\shaders\TriangleShaderVert.spv" />
+    <None Include="..\assets\shaders\SPV\ImGuiFrag.spv" />
+    <None Include="..\assets\shaders\SPV\ImGuiVert.spv" />
+    <None Include="..\assets\shaders\SPV\TriangleShaderFrag.spv" />
+    <None Include="..\assets\shaders\SPV\TriangleShaderVert.spv" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\assets\textures\chalet.jpg" />

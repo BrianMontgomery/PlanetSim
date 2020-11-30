@@ -13,6 +13,9 @@
     <Filter Include="..\assets\shaders">
       <UniqueIdentifier>{3CC4D5D2-A8DA-D368-F151-5F8A5DA7A4F0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="..\assets\shaders\SPV">
+      <UniqueIdentifier>{C4B37014-3020-2C0F-F913-C46C653F4E77}</UniqueIdentifier>
+    </Filter>
     <Filter Include="..\assets\textures">
       <UniqueIdentifier>{965DB269-8241-73BF-EBA1-6D12D7A45D41}</UniqueIdentifier>
     </Filter>
@@ -1299,6 +1302,9 @@
     <ClInclude Include="src\PSIM\Graphics\Asset\Model.h">
       <Filter>src\PSIM\Graphics\Asset</Filter>
     </ClInclude>
+    <ClInclude Include="src\PSIM\Graphics\Asset\Shader.h">
+      <Filter>src\PSIM\Graphics\Asset</Filter>
+    </ClInclude>
     <ClInclude Include="src\PSIM\Graphics\Asset\Texture.h">
       <Filter>src\PSIM\Graphics\Asset</Filter>
     </ClInclude>
@@ -1336,6 +1342,9 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Vk\Components\VulkanBuffer.h">
+      <Filter>src\Platform\Vk\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vk\Components\VulkanShader.h">
       <Filter>src\Platform\Vk\Components</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Vk\Components\VulkanTexture2D.h">
@@ -1385,6 +1394,9 @@
     <ClCompile Include="src\PSIM\Graphics\Asset\Model.cpp">
       <Filter>src\PSIM\Graphics\Asset</Filter>
     </ClCompile>
+    <ClCompile Include="src\PSIM\Graphics\Asset\Shader.cpp">
+      <Filter>src\PSIM\Graphics\Asset</Filter>
+    </ClCompile>
     <ClCompile Include="src\PSIM\Graphics\Asset\Texture.cpp">
       <Filter>src\PSIM\Graphics\Asset</Filter>
     </ClCompile>
@@ -1424,6 +1436,9 @@
     <ClCompile Include="src\Platform\Vk\Components\VulkanBuffer.cpp">
       <Filter>src\Platform\Vk\Components</Filter>
     </ClCompile>
+    <ClCompile Include="src\Platform\Vk\Components\VulkanShader.cpp">
+      <Filter>src\Platform\Vk\Components</Filter>
+    </ClCompile>
     <ClCompile Include="src\Platform\Vk\Components\VulkanTexture2D.cpp">
       <Filter>src\Platform\Vk\Components</Filter>
     </ClCompile>
@@ -1453,17 +1468,17 @@
     <None Include="..\assets\models\chalet.obj">
       <Filter>..\assets\models</Filter>
     </None>
-    <None Include="..\assets\shaders\ImGuiFrag.spv">
-      <Filter>..\assets\shaders</Filter>
+    <None Include="..\assets\shaders\SPV\ImGuiFrag.spv">
+      <Filter>..\assets\shaders\SPV</Filter>
     </None>
-    <None Include="..\assets\shaders\ImGuiVert.spv">
-      <Filter>..\assets\shaders</Filter>
+    <None Include="..\assets\shaders\SPV\ImGuiVert.spv">
+      <Filter>..\assets\shaders\SPV</Filter>
     </None>
-    <None Include="..\assets\shaders\TriangleShaderFrag.spv">
-      <Filter>..\assets\shaders</Filter>
+    <None Include="..\assets\shaders\SPV\TriangleShaderFrag.spv">
+      <Filter>..\assets\shaders\SPV</Filter>
     </None>
-    <None Include="..\assets\shaders\TriangleShaderVert.spv">
-      <Filter>..\assets\shaders</Filter>
+    <None Include="..\assets\shaders\SPV\TriangleShaderVert.spv">
+      <Filter>..\assets\shaders\SPV</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
