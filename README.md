@@ -1,7 +1,5 @@
 # PlanetSim
 
-Todo: ImGui cannot use docking until put on separate renderPass 
-	-requires separate command buffer,
-	-requires the ability to reset the command buffer on the fly,
-	-requires a new set of semaphores for imgui specifically
-	-new descriptor pool and command pool
+This project was an attempt to port the Hazel Game engine by The Cherno to use the Vulkan Graphics API. 
+
+Ran into issues with integrating ImGui at the time when I stopped committing to this repo. I believe ImGui was not yet stable in Vulkan at that time and I felt I had semi-successfully completed the port.
