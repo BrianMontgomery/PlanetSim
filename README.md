@@ -1,6 +1,6 @@
 # Vulkan Renderer
 
-This project was originally named PlanetSim, but it didn't quite get that far. I have renamed it to more accurately reflect the project's current function.
+A Vukan Model Renderer built in C++.
 
 So far it renders a house fully in Vulkan, has full camera controls, and rotates the house with vertex transformations. 
 ![image](https://github.com/brmontgomery/PlanetSim/assets/32968445/36ff6a8d-ac81-4ad3-8cb2-e98f7c46e3f8)
